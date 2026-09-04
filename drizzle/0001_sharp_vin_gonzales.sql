@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ADD COLUMN "service_type" text DEFAULT 'beide' NOT NULL;

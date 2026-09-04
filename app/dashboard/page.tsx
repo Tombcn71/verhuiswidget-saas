@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireCompany } from "@/lib/current-company";
+import { normalizeServiceType } from "@/lib/companies";
 import { getLeadStats, listLeadsForCompany } from "@/lib/leads";
 import { formatEuroCents, formatDateTime } from "@/lib/format";
 
@@ -13,6 +14,7 @@ export default async function DashboardOverviewPage() {
     listLeadsForCompany(company.id, 5),
   ]);
 
+  const serviceType = normalizeServiceType(company.serviceType);
   const cards = [
     { label: "Leads totaal", value: String(stats.total) },
     { label: "Laatste 30 dagen", value: String(stats.last30Days) },
@@ -36,6 +38,25 @@ export default async function DashboardOverviewPage() {
         ))}
       </div>
 
+      {serviceType === "beide" && (
+        <div className="flex flex-wrap gap-3 text-sm">
+          <Link
+            href="/dashboard/leads?type=verhuizing"
+            className="rounded-lg border border-slate-200 bg-white px-4 py-2 hover:border-brand-600"
+          >
+            <span className="font-semibold">{stats.verhuizingen}</span>{" "}
+            <span className="text-slate-500">verhuizingen</span>
+          </Link>
+          <Link
+            href="/dashboard/leads?type=ontruiming"
+            className="rounded-lg border border-slate-200 bg-white px-4 py-2 hover:border-brand-600"
+          >
+            <span className="font-semibold">{stats.ontruimingen}</span>{" "}
+            <span className="text-slate-500">ontruimingen</span>
+          </Link>
+        </div>
+      )}
+
       <div className="rounded-xl border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
           <h2 className="font-semibold">Recente leads</h2>
@@ -47,9 +68,9 @@ export default async function DashboardOverviewPage() {
           <p className="px-5 py-8 text-center text-sm text-slate-500">
             Nog geen leads. Plaats de{" "}
             <Link href="/dashboard/embed" className="text-brand-600 underline">
-              widget-code
+              widget-link
             </Link>{" "}
-            op je website om aanvragen te ontvangen.
+            achter een knop op je website om aanvragen te ontvangen.
           </p>
         ) : (
           <ul className="divide-y divide-slate-100">

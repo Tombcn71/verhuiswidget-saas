@@ -3,53 +3,70 @@ import Link from "next/link";
 import { requireCompany } from "@/lib/current-company";
 import { CopyBlock } from "./copy-block";
 
-export const metadata: Metadata = { title: "Widget-code" };
+export const metadata: Metadata = { title: "Widget-link" };
 
 export default async function EmbedPage() {
   const company = await requireCompany();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  const embedCode = `<script src="${appUrl}/embed.js" data-company-id="${company.id}" async></script>`;
-  const directLink = `${appUrl}/widget/${company.id}`;
+  const loaderScript = `<script src="${appUrl}/embed.js" async></script>`;
+  const popupLink = `${appUrl}/widget/${company.id}?popup`;
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-2xl space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Widget-code</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Widget op je website</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Plak deze code op je eigen website waar je de widget wilt tonen. De widget haalt
-          automatisch jouw tarieven en huisstijl op.
+          Twee stappen. Stap 1 doe je één keer, stap 2 zet je achter elke knop die je
+          wilt.
         </p>
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">1. Embed-code</h2>
+        <h2 className="font-semibold">Stap 1 — eenmalig: activeer de pop-up</h2>
         <p className="text-sm text-slate-600">
-          Plaats dit script in de HTML van je pagina. De widget verschijnt op de plek van het
-          script.
+          Plak deze regel in de <strong>algemene code</strong> van je site (het veld voor
+          &ldquo;header&rdquo; of &ldquo;footer / voettekst&rdquo; in je website-instellingen —
+          niet op een losse pagina). Bijna elke website-bouwer heeft dat:
         </p>
-        <CopyBlock code={embedCode} />
+        <CopyBlock code={loaderScript} />
+        <p className="text-xs text-slate-500">
+          WordPress: thema-instellingen → &ldquo;Aangepaste code / header&rdquo; · Wix:
+          Instellingen → Aangepaste code · Squarespace: Instellingen → Geavanceerd → Code
+          injectie · Shopify: thema <code>theme.liquid</code> vlak voor{" "}
+          <code>&lt;/head&gt;</code>.
+        </p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">2. Of een directe link</h2>
+        <h2 className="font-semibold">Stap 2 — zet deze link achter je knop</h2>
         <p className="text-sm text-slate-600">
-          Handig om te testen of te delen, bijvoorbeeld via e-mail of social media.
+          Heb je een knop op je site? Zet hier de link van die knop naartoe. Klik erop en de
+          widget opent in een pop-up over je site — geen code op de pagina zelf.
         </p>
-        <CopyBlock code={directLink} />
-        <Link
-          href={`/widget/${company.id}`}
-          target="_blank"
-          className="inline-block text-sm font-medium text-brand-600 underline"
-        >
-          Widget openen in nieuw tabblad →
-        </Link>
+        <CopyBlock code={popupLink} />
+        <p className="text-xs text-slate-500">
+          In je bouwer: knop selecteren → &ldquo;link toevoegen&rdquo; → deze link plakken.
+        </p>
       </section>
 
-      <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-        <strong>Let op:</strong> deel je <code>company-id</code> gerust — hiermee zijn alleen je
-        publieke tarieven en huisstijl zichtbaar, geen klant- of bedrijfsgegevens.
-      </section>
+      <div className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
+        Nog geen stap 1 gedaan? Dan opent dezelfde link gewoon als een aparte pagina (ook
+        prima). Met stap 1 wordt het de pop-up.
+      </div>
+
+      <Link
+        href={`/widget/${company.id}`}
+        target="_blank"
+        className="inline-block text-sm font-medium text-brand-600 underline"
+      >
+        Bekijk hoe de widget eruitziet →
+      </Link>
+
+      <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <strong>Veilig om te delen:</strong> hiermee zijn alleen je publieke tarieven en
+        huisstijl zichtbaar, geen klant- of bedrijfsgegevens.
+      </p>
     </div>
   );
 }

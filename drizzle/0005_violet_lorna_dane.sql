@@ -1,0 +1,2 @@
+ALTER TABLE "companies" ADD COLUMN "truck_access_surcharge_cents" integer DEFAULT 7500 NOT NULL;--> statement-breakpoint
+ALTER TABLE "companies" ADD COLUMN "weekday_discount_pct" integer DEFAULT 10 NOT NULL;

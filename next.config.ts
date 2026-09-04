@@ -7,8 +7,10 @@ const nextConfig: NextConfig = {
         // De publieke widget moet in een <iframe> op elke verhuizer-website kunnen draaien.
         source: "/widget/:path*",
         headers: [
+          // `frame-ancestors *` staat inbedden op elke site toe. Géén
+          // X-Frame-Options: die kent geen "sta alles toe"-waarde en een
+          // ongeldige waarde blokkeert de iframe juist in sommige browsers.
           { key: "Content-Security-Policy", value: "frame-ancestors *" },
-          { key: "X-Frame-Options", value: "ALLOWALL" },
         ],
       },
       {

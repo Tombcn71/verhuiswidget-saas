@@ -1,22 +1,61 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireCompany } from "@/lib/current-company";
+import { normalizeServiceType } from "@/lib/companies";
 import { listLeadsForCompany } from "@/lib/leads";
 import { formatEuroCents, formatDateTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Leads" };
 
-export default async function LeadsPage() {
+const FILTERS = [
+  { key: "", label: "Alles" },
+  { key: "verhuizing", label: "Verhuizingen" },
+  { key: "ontruiming", label: "Ontruimingen" },
+] as const;
+
+export default async function LeadsPage({
+  searchParams,
+}: PageProps<"/dashboard/leads">) {
   const company = await requireCompany();
-  const leads = await listLeadsForCompany(company.id);
+  const serviceType = normalizeServiceType(company.serviceType);
+
+  const { type } = await searchParams;
+  const active =
+    type === "verhuizing" || type === "ontruiming" ? type : undefined;
+
+  const leads = await listLeadsForCompany(company.id, 100, active);
+  const showFilter = serviceType === "beide";
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold tracking-tight">Leads</h1>
 
+      {showFilter && (
+        <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1 text-sm">
+          {FILTERS.map((f) => {
+            const isActive = (active ?? "") === f.key;
+            return (
+              <Link
+                key={f.key}
+                href={f.key ? `/dashboard/leads?type=${f.key}` : "/dashboard/leads"}
+                className={`rounded-md px-3 py-1.5 font-medium ${
+                  isActive
+                    ? "bg-brand-600 text-white"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                {f.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
       {leads.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-          Nog geen aanvragen ontvangen.
+          {active
+            ? "Geen aanvragen in deze categorie."
+            : "Nog geen aanvragen ontvangen."}
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">

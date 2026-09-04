@@ -11,11 +11,11 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: {
-    default: "VerhuisWidget — automatische offertes voor verhuisbedrijven",
-    template: "%s · VerhuisWidget",
+    default: "Move Ai — automatische offertes voor verhuizers en ontruimers",
+    template: "%s · Move Ai",
   },
   description:
-    "White-label verhuis- en ontruimingswidget met AI-foto-analyse. Plaats 'm op je eigen website en ontvang complete offerteaanvragen.",
+    "White-label AI-widget voor verhuis- en ontruimingsbedrijven. Klanten uploaden foto's, de AI berekent het volume en de prijs, jij ontvangt een complete offerteaanvraag.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

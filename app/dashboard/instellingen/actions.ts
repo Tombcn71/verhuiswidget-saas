@@ -5,20 +5,9 @@ import { z } from "zod";
 import { requireCompany } from "@/lib/current-company";
 import { updateCompanySettings } from "@/lib/companies";
 
-const euros = z
-  .string()
-  .trim()
-  .transform((v, ctx) => {
-    const n = Number(v.replace(",", "."));
-    if (!Number.isFinite(n) || n < 0 || n > 100000) {
-      ctx.addIssue({ code: "custom", message: "Ongeldig bedrag" });
-      return z.NEVER;
-    }
-    return n;
-  });
-
 const schema = z.object({
   name: z.string().trim().min(1, "Bedrijfsnaam is verplicht").max(120),
+  serviceType: z.enum(["verhuizen", "ontruimen", "beide"]),
   email: z.email("Ongeldig e-mailadres"),
   phone: z.string().trim().max(40).optional().or(z.literal("")),
   website: z.string().trim().max(200).optional().or(z.literal("")),
@@ -27,13 +16,6 @@ const schema = z.object({
     .string()
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/, "Gebruik een hex-kleur zoals #2563eb"),
-  baseFee: euros,
-  pricePerM3: euros,
-  pricePerKm: euros,
-  packingFee: euros,
-  assemblyFee: euros,
-  storagePerMonth: euros,
-  minPrice: euros,
 });
 
 export type SettingsFormState = {
@@ -42,7 +24,7 @@ export type SettingsFormState = {
   errors?: Record<string, string>;
 };
 
-export async function updateSettings(
+export async function updateCompany(
   _prev: SettingsFormState,
   formData: FormData,
 ): Promise<SettingsFormState> {
@@ -58,25 +40,18 @@ export async function updateSettings(
   }
 
   const d = parsed.data;
-  const toCents = (n: number) => Math.round(n * 100);
-
   await updateCompanySettings(company.id, {
     name: d.name,
+    serviceType: d.serviceType,
     email: d.email,
     phone: d.phone || null,
     website: d.website || null,
     logoUrl: d.logoUrl || null,
     primaryColor: d.primaryColor,
-    baseFeeCents: toCents(d.baseFee),
-    pricePerM3Cents: toCents(d.pricePerM3),
-    pricePerKmCents: toCents(d.pricePerKm),
-    packingFeeCents: toCents(d.packingFee),
-    assemblyFeeCents: toCents(d.assemblyFee),
-    storagePerMonthCents: toCents(d.storagePerMonth),
-    minPriceCents: toCents(d.minPrice),
   });
 
   revalidatePath("/dashboard/instellingen");
+  revalidatePath("/dashboard/tarieven");
   revalidatePath("/dashboard");
-  return { status: "success", message: "Instellingen opgeslagen." };
+  return { status: "success", message: "Bedrijfsgegevens opgeslagen." };
 }

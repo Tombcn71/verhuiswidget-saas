@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db, companies, type Company } from "@/lib/db";
+import { DEMO_CLERK_ID, DEMO_COMPANY_ID, DEMO_COMPANY_PUBLIC } from "@/lib/demo";
 
 export async function getCompanyByClerkId(clerkUserId: string): Promise<Company | null> {
   const [row] = await db
@@ -19,10 +20,21 @@ export async function getCompanyById(id: string): Promise<Company | null> {
  * Haalt de verhuizer op die bij dit Clerk-account hoort, of maakt 'm aan bij
  * eerste login (onboarding).
  */
+export type ServiceType = "verhuizen" | "ontruimen" | "beide";
+
+export function normalizeServiceType(value: unknown): ServiceType {
+  return value === "verhuizen" || value === "ontruimen" ? value : "beide";
+}
+
+/**
+ * Haalt het bedrijf op dat bij dit Clerk-account hoort, of maakt 'm aan bij
+ * eerste login (onboarding). `serviceType` wordt alleen bij het aanmaken gezet.
+ */
 export async function getOrCreateCompany(input: {
   clerkUserId: string;
   email: string;
   name?: string;
+  serviceType?: ServiceType;
 }): Promise<Company> {
   const existing = await getCompanyByClerkId(input.clerkUserId);
   if (existing) return existing;
@@ -32,7 +44,8 @@ export async function getOrCreateCompany(input: {
     .values({
       clerkUserId: input.clerkUserId,
       email: input.email,
-      name: input.name?.trim() || "Mijn verhuisbedrijf",
+      name: input.name?.trim() || "Mijn bedrijf",
+      serviceType: normalizeServiceType(input.serviceType),
     })
     .onConflictDoNothing({ target: companies.clerkUserId })
     .returning();
@@ -45,6 +58,38 @@ export async function getOrCreateCompany(input: {
   return row;
 }
 
+let demoCompany: Company | null = null;
+
+/**
+ * Maakt de demo-verhuizer aan bij eerste gebruik en geeft 'm terug.
+ * Gebruikt door de publieke demo-widget op de landing.
+ */
+export async function ensureDemoCompany(): Promise<Company> {
+  if (demoCompany) return demoCompany;
+
+  const existing = await getCompanyById(DEMO_COMPANY_ID);
+  if (existing) return (demoCompany = existing);
+
+  const [created] = await db
+    .insert(companies)
+    .values({
+      id: DEMO_COMPANY_ID,
+      clerkUserId: DEMO_CLERK_ID,
+      name: DEMO_COMPANY_PUBLIC.name,
+      email: "demo@move-ai.example",
+      primaryColor: DEMO_COMPANY_PUBLIC.primaryColor,
+      serviceType: "beide",
+    })
+    .onConflictDoNothing()
+    .returning();
+  if (created) return (demoCompany = created);
+
+  // Race: iemand anders maakte 'm net aan.
+  const row = await getCompanyById(DEMO_COMPANY_ID);
+  if (!row) throw new Error("Kon de demo-verhuizer niet aanmaken.");
+  return (demoCompany = row);
+}
+
 export type CompanySettingsInput = Partial<
   Pick<
     Company,
@@ -54,6 +99,10 @@ export type CompanySettingsInput = Partial<
     | "website"
     | "logoUrl"
     | "primaryColor"
+    | "serviceType"
+    | "ontruimenTariffs"
+    | "moveFloorSurchargeCents"
+    | "liftFeeCents"
     | "baseFeeCents"
     | "pricePerM3Cents"
     | "pricePerKmCents"

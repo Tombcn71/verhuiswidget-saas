@@ -4,8 +4,9 @@ import { getOrCreateCompany } from "@/lib/companies";
 import type { Company } from "@/lib/db";
 
 /**
- * Haalt de verhuizer op die bij de ingelogde gebruiker hoort.
+ * Haalt het bedrijf op dat bij de ingelogde gebruiker hoort.
  * Redirect naar /inloggen als er geen sessie is.
+ * De dienstkeuze uit een pricing-plan komt via /kies-plan binnen, niet hier.
  */
 export async function requireCompany(): Promise<Company> {
   const { userId } = await auth();

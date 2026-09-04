@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getCompanyById } from "@/lib/companies";
+import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
+import { isDemoCompany } from "@/lib/demo";
 import { createLead } from "@/lib/leads";
 import { analyzePhotos, type PhotoInput } from "@/lib/gemini";
 import { calculatePrice } from "@/lib/pricing";
 import { sendQuoteEmails } from "@/lib/email";
+import {
+  CORS,
+  checkDemoRateLimit,
+  clientIp,
+  jsonResponse as json,
+} from "@/lib/widget-request";
 import type { InventoryItem } from "@/lib/db/schema";
 
 export const runtime = "nodejs";
@@ -12,12 +19,6 @@ export const maxDuration = 60;
 
 const MAX_PHOTOS = 14;
 const MAX_PHOTO_BYTES = 6 * 1024 * 1024;
-
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
 
 export function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
@@ -47,10 +48,6 @@ const payloadSchema = z.object({
   photoRooms: z.array(z.string().trim().max(60)).max(MAX_PHOTOS),
 });
 
-function json(body: unknown, status = 200) {
-  return NextResponse.json(body, { status, headers: CORS });
-}
-
 export async function POST(request: Request) {
   let form: FormData;
   try {
@@ -73,7 +70,10 @@ export async function POST(request: Request) {
     return json({ error: message }, 400);
   }
 
-  const company = await getCompanyById(parsed.companyId);
+  const demo = isDemoCompany(parsed.companyId);
+  const company = demo
+    ? await ensureDemoCompany()
+    : await getCompanyById(parsed.companyId);
   if (!company) {
     return json({ error: "Onbekende verhuizer." }, 404);
   }
@@ -110,6 +110,12 @@ export async function POST(request: Request) {
   }
   const rooms = [...roomCounts.entries()].map(([name, photoCount]) => ({ name, photoCount }));
 
+  // Demo: rate-limiten vlak vóór de (betaalde) Gemini-call.
+  if (demo) {
+    const limitError = checkDemoRateLimit(clientIp(request));
+    if (limitError) return json({ error: limitError }, 429);
+  }
+
   // 1. Foto-analyse via Gemini
   let inventory: InventoryItem[];
   try {
@@ -134,6 +140,22 @@ export async function POST(request: Request) {
     distanceKm: parsed.move.distanceKm,
     options: parsed.options,
   });
+
+  // Demo: stop hier — geen lead opslaan, geen e-mails versturen.
+  if (demo) {
+    return json({
+      ok: true,
+      demo: true,
+      inventory,
+      rooms,
+      totalVolumeM3: price.totalVolumeM3,
+      breakdown: price.breakdown,
+      subtotalCents: price.subtotalCents,
+      vatCents: price.vatCents,
+      totalCents: price.totalCents,
+      emailSent: false,
+    });
+  }
 
   // 3. Lead opslaan
   const lead = await createLead({

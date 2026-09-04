@@ -6,11 +6,19 @@ export async function createLead(values: NewLead): Promise<Lead> {
   return row;
 }
 
-export async function listLeadsForCompany(companyId: string, limit = 100): Promise<Lead[]> {
+export async function listLeadsForCompany(
+  companyId: string,
+  limit = 100,
+  moveType?: "verhuizing" | "ontruiming",
+): Promise<Lead[]> {
   return db
     .select()
     .from(leads)
-    .where(eq(leads.companyId, companyId))
+    .where(
+      moveType
+        ? and(eq(leads.companyId, companyId), eq(leads.moveType, moveType))
+        : eq(leads.companyId, companyId),
+    )
     .orderBy(desc(leads.createdAt))
     .limit(limit);
 }
@@ -43,6 +51,8 @@ export type LeadStats = {
   last30Days: number;
   pipelineValueCents: number;
   wonValueCents: number;
+  verhuizingen: number;
+  ontruimingen: number;
 };
 
 export async function getLeadStats(companyId: string): Promise<LeadStats> {
@@ -56,9 +66,20 @@ export async function getLeadStats(companyId: string): Promise<LeadStats> {
       last30Days: sql<number>`count(*) filter (where ${leads.createdAt} >= ${cutoff})::int`,
       pipelineValueCents: sql<number>`coalesce(sum(${leads.totalCents}) filter (where ${leads.status} in ('nieuw','gecontacteerd')), 0)::int`,
       wonValueCents: sql<number>`coalesce(sum(${leads.totalCents}) filter (where ${leads.status} = 'gewonnen'), 0)::int`,
+      verhuizingen: sql<number>`count(*) filter (where ${leads.moveType} = 'verhuizing')::int`,
+      ontruimingen: sql<number>`count(*) filter (where ${leads.moveType} = 'ontruiming')::int`,
     })
     .from(leads)
     .where(eq(leads.companyId, companyId));
 
-  return row ?? { total: 0, last30Days: 0, pipelineValueCents: 0, wonValueCents: 0 };
+  return (
+    row ?? {
+      total: 0,
+      last30Days: 0,
+      pipelineValueCents: 0,
+      wonValueCents: 0,
+      verhuizingen: 0,
+      ontruimingen: 0,
+    }
+  );
 }

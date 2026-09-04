@@ -6,8 +6,9 @@ import { usePathname } from "next/navigation";
 const items = [
   { href: "/dashboard", label: "Overzicht" },
   { href: "/dashboard/leads", label: "Leads" },
-  { href: "/dashboard/instellingen", label: "Bedrijf & tarieven" },
-  { href: "/dashboard/embed", label: "Widget-code" },
+  { href: "/dashboard/tarieven", label: "Tarieven" },
+  { href: "/dashboard/instellingen", label: "Bedrijf" },
+  { href: "/dashboard/embed", label: "Widget-link" },
 ];
 
 export function DashboardNav() {
