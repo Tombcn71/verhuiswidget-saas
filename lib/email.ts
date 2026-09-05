@@ -172,7 +172,10 @@ function companyEmailHtml(d: QuoteData): string {
  * Verstuurt twee e-mails: één naar de klant, één naar het verhuisbedrijf.
  * Gooit geen fout als e-mail niet is geconfigureerd (lead wordt dan toch opgeslagen).
  */
-export async function sendQuoteEmails(d: QuoteData): Promise<{ sent: boolean; error?: string }> {
+export async function sendQuoteEmails(
+  d: QuoteData,
+  opts: { customerOnly?: boolean } = {},
+): Promise<{ sent: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.QUOTE_FROM_EMAIL;
   if (!apiKey || !from) {
@@ -182,15 +185,17 @@ export async function sendQuoteEmails(d: QuoteData): Promise<{ sent: boolean; er
   const resend = new Resend(apiKey);
   const fromHeader = `${d.company.name} <${from}>`;
 
-  try {
-    await Promise.all([
-      resend.emails.send({
-        from: fromHeader,
-        to: d.customer.email,
-        replyTo: d.company.email,
-        subject: `Je offerte-indicatie van ${d.company.name}`,
-        html: customerEmailHtml(d),
-      }),
+  const mails = [
+    resend.emails.send({
+      from: fromHeader,
+      to: d.customer.email,
+      replyTo: d.company.email,
+      subject: `Je offerte-indicatie van ${d.company.name}`,
+      html: customerEmailHtml(d),
+    }),
+  ];
+  if (!opts.customerOnly) {
+    mails.push(
       resend.emails.send({
         from: fromHeader,
         to: d.company.email,
@@ -198,7 +203,11 @@ export async function sendQuoteEmails(d: QuoteData): Promise<{ sent: boolean; er
         subject: `Nieuwe offerteaanvraag — ${d.customer.name} (${formatEuroCents(d.totalCents)})`,
         html: companyEmailHtml(d),
       }),
-    ]);
+    );
+  }
+
+  try {
+    await Promise.all(mails);
     return { sent: true };
   } catch (err) {
     return { sent: false, error: err instanceof Error ? err.message : "onbekende fout" };

@@ -27,6 +27,9 @@ const demoHits = new Map<string, number[]>();
 
 /** Geeft `null` als het mag, anders een foutmelding. */
 export function checkDemoRateLimit(ip: string): string | null {
+  // Tijdens lokale ontwikkeling niet limiteren.
+  if (process.env.NODE_ENV !== "production") return null;
+
   const now = Date.now();
   for (const [key, times] of demoHits) {
     const kept = times.filter((t) => now - t < DEMO_WINDOW_MS);

@@ -212,6 +212,11 @@ export type InventoryItem = {
   quantity: number;
   volumeM3: number;
   category: string;
+  /** Kamer waar het item is herkend (naam die de klant aan de foto gaf). */
+  room?: string;
+  /** Geschatte positie in de eerste foto van die kamer (fractie 0-1). */
+  x?: number;
+  y?: number;
   /** AI is onzeker over het formaat — widget vraagt de klant klein/normaal/groot. */
   needsInfo?: boolean;
 };

@@ -198,3 +198,47 @@ export function ImageIcon(props: IconProps) {
     </Svg>
   );
 }
+
+export function MapPin(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </Svg>
+  );
+}
+
+export function Home(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="m3 11 9-8 9 8" />
+      <path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" />
+    </Svg>
+  );
+}
+
+export function Building(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect width="14" height="18" x="5" y="3" rx="1" />
+      <path d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h1M14 16h1" />
+      <path d="M10 21v-3h4v3" />
+    </Svg>
+  );
+}
+
+export function Minus(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M5 12h14" />
+    </Svg>
+  );
+}
+
+export function Plus(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 5v14M5 12h14" />
+    </Svg>
+  );
+}

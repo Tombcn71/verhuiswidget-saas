@@ -30,7 +30,7 @@ export function DemoModal() {
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-stretch justify-center bg-slate-900/40 sm:items-center sm:p-4 sm:backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-stretch justify-center bg-slate-900/40 sm:backdrop-blur-sm"
           onClick={() => setOpen(false)}
           role="dialog"
           aria-modal="true"
@@ -47,8 +47,8 @@ export function DemoModal() {
             >
               ×
             </button>
-            {/* Mobiel: fullscreen, voelt als een app. Desktop: kaart in app-formaat. */}
-            <div className="h-dvh w-full overflow-y-auto bg-white sm:h-auto sm:max-h-[85vh] sm:rounded-2xl sm:shadow-xl">
+            {/* Altijd van boven tot onder (mobiel én desktop) — de demo-video is voor mobiel gemaakt. */}
+            <div className="h-dvh w-full overflow-y-auto bg-white sm:shadow-xl">
               <Widget company={DEMO_COMPANY_PUBLIC} demo />
             </div>
           </div>

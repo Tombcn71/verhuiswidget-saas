@@ -46,6 +46,20 @@ const payloadSchema = z.object({
     storageMonths: z.coerce.number().int().min(0).max(36).default(0),
   }),
   photoRooms: z.array(z.string().trim().max(60)).max(MAX_PHOTOS),
+  // Al door de klant nagekeken inventaris (uit /api/widget/analyze). Als dit
+  // meekomt slaat de submit de foto-analyse over.
+  inventory: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1).max(120),
+        quantity: z.coerce.number().int().min(1).max(99),
+        volumeM3: z.coerce.number().min(0).max(50),
+        category: z.string().trim().max(40).default("overig"),
+        room: z.string().trim().max(60).optional(),
+      }),
+    )
+    .max(200)
+    .optional(),
 });
 
 export async function POST(request: Request) {
@@ -78,8 +92,10 @@ export async function POST(request: Request) {
     return json({ error: "Onbekende verhuizer." }, 404);
   }
 
+  const preAnalyzed = parsed.inventory && parsed.inventory.length > 0;
+
   const files = form.getAll("photos").filter((f): f is File => f instanceof File);
-  if (files.length === 0) {
+  if (files.length === 0 && !preAnalyzed) {
     return json({ error: "Upload minstens één foto." }, 400);
   }
   if (files.length > MAX_PHOTOS) {
@@ -103,29 +119,39 @@ export async function POST(request: Request) {
     });
   }
 
-  // Kamers samenvatten
+  // Kamers samenvatten — uit de foto's, of anders uit de nagekeken inventaris.
   const roomCounts = new Map<string, number>();
-  for (const room of parsed.photoRooms.slice(0, photos.length)) {
+  for (const room of parsed.photoRooms.slice(0, Math.max(photos.length, parsed.photoRooms.length))) {
     roomCounts.set(room, (roomCounts.get(room) ?? 0) + 1);
   }
   const rooms = [...roomCounts.entries()].map(([name, photoCount]) => ({ name, photoCount }));
 
   // Demo: rate-limiten vlak vóór de (betaalde) Gemini-call.
-  if (demo) {
+  if (demo && !preAnalyzed) {
     const limitError = checkDemoRateLimit(clientIp(request));
     if (limitError) return json({ error: limitError }, 429);
   }
 
-  // 1. Foto-analyse via Gemini
+  // 1. Inventaris: nagekeken lijst van de klant, of anders alsnog een foto-analyse.
   let inventory: InventoryItem[];
-  try {
-    inventory = await analyzePhotos(photos);
-  } catch (err) {
-    console.error("Gemini-analyse mislukt:", err);
-    return json(
-      { error: "De foto-analyse is mislukt. Probeer het later opnieuw." },
-      502,
-    );
+  if (preAnalyzed) {
+    inventory = parsed.inventory!.map((it) => ({
+      name: it.name,
+      quantity: it.quantity,
+      volumeM3: it.volumeM3,
+      category: it.category,
+      room: it.room,
+    }));
+  } else {
+    try {
+      inventory = await analyzePhotos(photos);
+    } catch (err) {
+      console.error("Gemini-analyse mislukt:", err);
+      return json(
+        { error: "De foto-analyse is mislukt. Probeer het later opnieuw." },
+        502,
+      );
+    }
   }
   if (inventory.length === 0) {
     return json(
@@ -141,8 +167,27 @@ export async function POST(request: Request) {
     options: parsed.options,
   });
 
-  // Demo: stop hier — geen lead opslaan, geen e-mails versturen.
+  // Demo: geen lead opslaan, maar wél de offerte naar de klant mailen
+  // (behalve naar de niet-bestaande voorbeeld-adressen).
   if (demo) {
+    const fake = /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
+    const demoEmail = fake
+      ? { sent: false as const }
+      : await sendQuoteEmails(
+          {
+            company,
+            customer: parsed.customer,
+            move: { type: parsed.moveType, ...parsed.move },
+            inventory,
+            totalVolumeM3: price.totalVolumeM3,
+            breakdown: price.breakdown,
+            subtotalCents: price.subtotalCents,
+            vatCents: price.vatCents,
+            totalCents: price.totalCents,
+            leadId: "demo",
+          },
+          { customerOnly: true },
+        );
     return json({
       ok: true,
       demo: true,
@@ -153,7 +198,7 @@ export async function POST(request: Request) {
       subtotalCents: price.subtotalCents,
       vatCents: price.vatCents,
       totalCents: price.totalCents,
-      emailSent: false,
+      emailSent: demoEmail.sent,
     });
   }
 

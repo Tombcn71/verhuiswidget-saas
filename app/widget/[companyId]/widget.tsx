@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Sparkles } from "@/app/_components/icons";
 import { MoveFlow } from "./move-flow";
 import { ClearanceFlow } from "./clearance-flow";
 
@@ -40,6 +39,8 @@ export function Widget({
   const [moveType, setMoveType] = useState<"verhuizing" | "ontruiming">(
     forcedType ?? "verhuizing",
   );
+  const [step, setStep] = useState(0);
+  const [clearanceStep, setClearanceStep] = useState(0);
 
   useEffect(() => {
     const el = rootRef.current;
@@ -56,6 +57,75 @@ export function Widget({
     return () => ro.disconnect();
   }, [company.id, started, moveType]);
 
+  if (demo && !started) {
+    return (
+      <div
+        ref={rootRef}
+        className="flex h-full min-h-dvh flex-col bg-white px-5 py-8 text-center text-slate-900"
+      >
+        <h2 className="text-2xl font-bold tracking-tight">
+          Verhuizen,{" "}
+          <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+            opnieuw uitgevonden
+          </span>
+          .
+        </h2>
+
+        <div className="mx-auto mt-6 w-full flex-1 overflow-hidden rounded-xl shadow-lg">
+          <iframe
+            className="h-full w-full"
+            src="https://www.youtube.com/embed/eyoyGdp0Zpo?si=At4BHuvWhF0EIBfm"
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
+
+        <button
+          onClick={() => setStarted(true)}
+          className={`mx-auto mt-6 block rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg ${fillClass}`}
+          style={fillStyle}
+        >
+          Overslaan
+        </button>
+      </div>
+    );
+  }
+
+  if (demo && moveType !== "ontruiming") {
+    return (
+      <div ref={rootRef} className="bg-white text-slate-900">
+        <MoveFlow
+          company={company}
+          demo={demo}
+          showToggle={showToggle}
+          moveType={moveType}
+          setMoveType={setMoveType}
+          step={step}
+          setStep={setStep}
+          onBackToIntro={() => setStarted(false)}
+        />
+      </div>
+    );
+  }
+
+  if (demo && moveType === "ontruiming") {
+    return (
+      <div ref={rootRef} className="bg-white text-slate-900">
+        <ClearanceFlow
+          company={company}
+          demo={demo}
+          showToggle={showToggle}
+          moveType={moveType}
+          setMoveType={setMoveType}
+          step={clearanceStep}
+          setStep={setClearanceStep}
+        />
+      </div>
+    );
+  }
+
   return (
     <div ref={rootRef} className="mx-auto max-w-xl p-4 text-slate-900">
       {/* Header */}
@@ -69,37 +139,15 @@ export function Widget({
         <span className="text-sm text-slate-500">Offerte in 2 minuten</span>
       </div>
 
-      {demo && !started ? (
-        <div className="py-6 text-center">
-          <div
-            className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl text-white ${fillClass}`}
-            style={fillStyle}
-          >
-            <Sparkles className="h-7 w-7" />
-          </div>
-          <h2 className="mt-5 text-xl font-bold tracking-tight">
-            Direct een prijsindicatie met onze slimme{" "}
-            <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-              AI tool
-            </span>
-            .
-          </h2>
-          <p className="mx-auto mt-2 max-w-xs text-sm italic text-slate-500">
-            Even een paar vragen beantwoorden en wat foto&apos;s uploaden dat is alles
-          </p>
-          <button
-            onClick={() => setStarted(true)}
-            className={`mt-6 w-full rounded-lg px-6 py-3 text-sm font-semibold text-white shadow-md ${fillClass}`}
-            style={fillStyle}
-          >
-            Start de demo
-          </button>
-        </div>
-      ) : moveType === "ontruiming" ? (
+      {moveType === "ontruiming" ? (
         <ClearanceFlow
           company={company}
           demo={demo}
-          onBack={showToggle ? () => setMoveType("verhuizing") : undefined}
+          showToggle={showToggle}
+          moveType={moveType}
+          setMoveType={setMoveType}
+          step={clearanceStep}
+          setStep={setClearanceStep}
         />
       ) : (
         <MoveFlow
@@ -108,6 +156,8 @@ export function Widget({
           showToggle={showToggle}
           moveType={moveType}
           setMoveType={setMoveType}
+          step={step}
+          setStep={setStep}
         />
       )}
 

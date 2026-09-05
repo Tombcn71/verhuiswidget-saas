@@ -13,7 +13,9 @@ export type PhotoInput = {
   room: string;
 };
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+
+const clamp01 = (n: number) => (Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0.5);
 
 const PROMPT = `Je bent een ervaren verhuisopnemer. Je krijgt foto's van kamers die verhuisd of ontruimd moeten worden.
 
@@ -30,6 +32,8 @@ Regels:
   * koelkast ~0.6, wasmachine ~0.3, tv ~0.15
   * verhuisdoos ~0.08
 - category is één van: "woonkamer", "slaapkamer", "keuken", "badkamer", "kantoor", "berging", "overig".
+- Zet bij elk item de exacte kamernaam (room) waar je het zag, precies zoals aangegeven vlak boven de foto ("Foto uit kamer: ..."). Als een item op meerdere foto's uit verschillende kamers staat, kies de kamer waar het thuishoort.
+- Geef bij elk item de geschatte positie in de EERSTE foto van die kamer als x en y: het midden van het object, uitgedrukt als fractie van 0 tot 1 (x = links→rechts, y = boven→onder). Als je het niet kunt plaatsen, gebruik x=0.5 en y=0.5.
 - Gebruik Nederlandse namen.
 - Zet needsInfo op true als je het formaat/de inhoud van een object niet goed kunt inschatten van de foto (bijv. bank waarvan je het aantal zitplaatsen niet ziet, een kast waarvan je niet weet hoe vol die zit). De widget vraagt de klant dan om verduidelijking.
 - Wees compleet maar verzin geen objecten die niet op de foto's staan.`;
@@ -46,10 +50,13 @@ const responseSchema = {
           quantity: { type: Type.INTEGER },
           volumeM3: { type: Type.NUMBER },
           category: { type: Type.STRING },
+          room: { type: Type.STRING },
+          x: { type: Type.NUMBER },
+          y: { type: Type.NUMBER },
           needsInfo: { type: Type.BOOLEAN },
         },
-        required: ["name", "quantity", "volumeM3", "category", "needsInfo"],
-        propertyOrdering: ["name", "quantity", "volumeM3", "category", "needsInfo"],
+        required: ["name", "quantity", "volumeM3", "category", "room", "x", "y", "needsInfo"],
+        propertyOrdering: ["name", "quantity", "volumeM3", "category", "room", "x", "y", "needsInfo"],
       },
     },
   },
@@ -107,6 +114,10 @@ export async function analyzePhotos(photos: PhotoInput[]): Promise<InventoryItem
         quantity: Math.max(1, Math.round(Number(r.quantity) || 1)),
         volumeM3: Math.max(0, Number(r.volumeM3) || 0),
         category: String(r.category ?? "overig"),
+        room: r.room ? String(r.room) : undefined,
+        x: clamp01(Number(r.x)),
+        y: clamp01(Number(r.y)),
+        needsInfo: r.needsInfo === true ? true : undefined,
       };
     })
     .filter((item) => item.volumeM3 > 0);
