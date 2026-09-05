@@ -189,7 +189,7 @@ export default function HomePage() {
                 je verhuis- en ontruimingsoffertes versturen
               </h1>
               <p className="mt-6 text-lg text-slate-600">
-                Move Ai is de white-label widget die je met één regel code op je
+                moverAI is de white-label widget die je met één regel code op je
                 website zet. Je klant uploadt foto&apos;s, de AI berekent binnen
                 60 seconden de prijs op basis van jouw tarieven en stuurt direct
                 een offerte naar de klant én jou toe.
@@ -211,7 +211,7 @@ export default function HomePage() {
             <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl shadow-[0_30px_70px_-25px_rgba(79,70,229,0.45)] ring-1 ring-violet-500/15 lg:order-last">
               <Image
                 src={heroImage}
-                alt="Telefoon scant een woonkamer; Move Ai herkent de meubels en toont een offerte-indicatie."
+                alt="Telefoon scant een woonkamer; moverAI herkent de meubels en toont een offerte-indicatie."
                 fill
                 priority
                 placeholder="blur"
@@ -254,7 +254,7 @@ export default function HomePage() {
                 of PDF.
               </p>
               <p className="mt-4 text-slate-600">
-                Met Move Ai doet de klant het voorwerk via de foto&apos;s,
+                Met moverAI doet de klant het voorwerk via de foto&apos;s,
                 berekent de AI direct het volume en rolt er een kant-en-klare
                 aanvraag in je dashboard. Zo reduceer je dat hele
                 administratieve tijdrovende proces met maar liefst 80 procent.
@@ -377,7 +377,7 @@ export default function HomePage() {
       </main>
 
       <footer className="mx-auto w-full max-w-6xl px-6 py-8 text-sm text-slate-500">
-        © {new Date().getFullYear()} Move Ai · White-label AI-widget voor
+        © {new Date().getFullYear()} moverAI · White-label AI-widget voor
         verhuizers en ontruimers
       </footer>
     </div>

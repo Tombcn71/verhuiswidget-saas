@@ -11,8 +11,8 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: {
-    default: "Move Ai — automatische offertes voor verhuizers en ontruimers",
-    template: "%s · Move Ai",
+    default: "moverAI — automatische offertes voor verhuizers en ontruimers",
+    template: "%s · moverAI",
   },
   description:
     "White-label AI-widget voor verhuis- en ontruimingsbedrijven. Klanten uploaden foto's, de AI berekent het volume en de prijs, jij ontvangt een complete offerteaanvraag.",

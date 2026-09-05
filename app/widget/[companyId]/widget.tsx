@@ -162,7 +162,7 @@ export function Widget({
       )}
 
       <p className="mt-6 text-center text-[11px] text-slate-400">
-        Mogelijk gemaakt door Move Ai
+        Mogelijk gemaakt door moverAI
       </p>
     </div>
   );

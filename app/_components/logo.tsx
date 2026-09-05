@@ -6,7 +6,7 @@ export function Logo({ className = "text-lg" }: { className?: string }) {
     >
       <LogoMark className="h-[1.3em] w-[1.3em] shrink-0 text-brand-600" />
       <span>
-        Move<span className="text-brand-600">Ai</span>
+        mover<span className="text-brand-600">AI</span>
       </span>
     </span>
   );

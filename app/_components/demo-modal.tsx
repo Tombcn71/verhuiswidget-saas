@@ -34,7 +34,7 @@ export function DemoModal() {
           onClick={() => setOpen(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="Demo van Move Ai"
+          aria-label="Demo van moverAI"
         >
           <div
             className="relative w-full sm:max-w-md"

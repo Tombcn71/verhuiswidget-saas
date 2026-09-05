@@ -76,7 +76,7 @@ export async function ensureDemoCompany(): Promise<Company> {
       id: DEMO_COMPANY_ID,
       clerkUserId: DEMO_CLERK_ID,
       name: DEMO_COMPANY_PUBLIC.name,
-      email: "demo@move-ai.example",
+      email: "demo@moverai.example",
       primaryColor: DEMO_COMPANY_PUBLIC.primaryColor,
       serviceType: "beide",
     })
