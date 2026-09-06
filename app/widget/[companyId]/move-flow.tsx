@@ -17,6 +17,8 @@ import {
   Table,
   Utensils,
 } from "@/app/_components/icons";
+import { FLOOR_TYPES } from "@/lib/pricing";
+import { upload } from "@vercel/blob/client";
 import { Logo } from "@/app/_components/logo";
 
 export const ROOM_PRESETS: { label: string; Icon: typeof Sofa }[] = [
@@ -35,7 +37,7 @@ type CompanyPublic = {
   primaryColor: string;
 };
 
-type Photo = { id: string; file: Blob; url: string; room: string };
+type Photo = { id: string; file: Blob; url: string; room: string; blobUrl?: string };
 
 type PriceLine = { label: string; amountCents: number };
 type InventoryItem = {
@@ -99,6 +101,7 @@ export function MoveFlow({
   step,
   setStep,
   onBackToIntro,
+  preview = false,
 }: {
   company: CompanyPublic;
   demo: boolean;
@@ -108,6 +111,7 @@ export function MoveFlow({
   step: number;
   setStep: Dispatch<SetStateAction<number>>;
   onBackToIntro?: () => void;
+  preview?: boolean;
 }) {
   // Stap 1 — contact
   const [name, setName] = useState(demo ? "Demo Gebruiker" : "");
@@ -142,10 +146,24 @@ export function MoveFlow({
   const [newItemFor, setNewItemFor] = useState<string | null>(null);
   const [newItemName, setNewItemName] = useState("");
 
-  // Stap 3 — opties
+  // Stap 3 — opties (verhuizen)
   const [packing, setPacking] = useState(false);
   const [assembly, setAssembly] = useState(false);
   const [storageMonths, setStorageMonths] = useState("0");
+
+  // Stap 3 — extra werkzaamheden (ontruiming)
+  const [floorRemoval, setFloorRemoval] = useState(false);
+  const [floorType, setFloorType] = useState("laminaat");
+  const [floorRemovalM2, setFloorRemovalM2] = useState("");
+  const [wallpaper, setWallpaper] = useState(false);
+  const [wallpaperM2, setWallpaperM2] = useState("");
+  const [holesOn, setHolesOn] = useState(false);
+  const [holes, setHoles] = useState("");
+  const [painting, setPainting] = useState(false);
+  const [paintingM2, setPaintingM2] = useState("");
+  const [curtains, setCurtains] = useState(false);
+
+  const isClearance = moveType === "ontruiming";
 
   // Verzenden
   const [submitting, setSubmitting] = useState(false);
@@ -161,20 +179,32 @@ export function MoveFlow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onFiles = useCallback(async (room: string, list: FileList | null) => {
-    if (!list?.length) return;
-    const incoming: Photo[] = [];
-    for (const file of Array.from(list).slice(0, 14)) {
-      const blob = await downscale(file);
-      incoming.push({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        file: blob,
-        url: URL.createObjectURL(blob),
-        room,
-      });
-    }
-    setPhotos((p) => [...p, ...incoming].slice(0, 14));
-  }, []);
+  const onFiles = useCallback(
+    async (room: string, list: FileList | null) => {
+      if (!list?.length) return;
+      const incoming: Photo[] = [];
+      for (const file of Array.from(list).slice(0, 14)) {
+        const blob = await downscale(file);
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const photo: Photo = { id, file: blob, url: URL.createObjectURL(blob), room };
+        // Echte aanvraag: foto direct naar Vercel Blob (buiten de serverless-limiet om).
+        if (!demo && !preview) {
+          try {
+            const res = await upload(`widget/${company.id}/${id}.jpg`, blob, {
+              access: "public",
+              handleUploadUrl: "/api/widget/blob-upload",
+            });
+            photo.blobUrl = res.url;
+          } catch {
+            // geen blob-token / upload mislukt — ga door zonder opgeslagen foto
+          }
+        }
+        incoming.push(photo);
+      }
+      setPhotos((p) => [...p, ...incoming].slice(0, 14));
+    },
+    [demo, preview, company.id],
+  );
 
   const openRoomPicker = (room: string) => {
     pendingRoomRef.current = room;
@@ -210,8 +240,11 @@ export function MoveFlow({
     try {
       const fd = new FormData();
       fd.append("companyId", company.id);
+      if (preview) fd.append("preview", "1");
       photos.forEach((p, i) => {
-        fd.append("photos", p.file, `foto-${i + 1}.jpg`);
+        // Blob-URL als die er is (echte aanvraag), anders het bestand (demo/preview).
+        if (p.blobUrl) fd.append("photoUrls", p.blobUrl);
+        else fd.append("photos", p.file, `foto-${i + 1}.jpg`);
         fd.append("photoRooms", p.room);
       });
       const res = await fetch("/api/widget/analyze", { method: "POST", body: fd });
@@ -270,33 +303,71 @@ export function MoveFlow({
     setSubmitting(true);
     setError(null);
     try {
-      const payload = {
-        companyId: company.id,
-        moveType,
-        customer: { name, email, phone },
-        move: {
-          fromAddress,
-          toAddress,
-          fromFloor,
-          toFloor: "",
-          moveDate,
-          distanceKm: 0,
-        },
-        options: {
-          packing,
-          assembly,
-          storageMonths: Number(storageMonths) || 0,
-        },
-        photoRooms: (roomInventory ?? []).flatMap((r) =>
-          Array.from({ length: Math.max(1, r.photoCount) }, () => r.name),
-        ),
-        inventory: flatInventory,
+      const photoRooms = (roomInventory ?? []).flatMap((r) =>
+        Array.from({ length: Math.max(1, r.photoCount) }, () => r.name),
+      );
+      const photoUrls = photos.map((p) => p.blobUrl).filter((u): u is string => !!u);
+      const details = {
+        address: fromAddress,
+        propertyType,
+        floor: Number(fromFloor) || 0,
+        roomCount: Number(roomCount) || 0,
+        hasElevator,
+        streetAccessible,
+        moveDate,
       };
+
+      const payload = isClearance
+        ? {
+            companyId: company.id,
+            customer: { name, email, phone },
+            details,
+            works: {
+              floorRemoval: floorRemoval
+                ? { type: floorType, m2: Number(floorRemovalM2) || 0 }
+                : null,
+              wallpaperM2: wallpaper ? Number(wallpaperM2) || 0 : 0,
+              holes: holesOn ? Number(holes) || 0 : 0,
+              paintingM2: painting ? Number(paintingM2) || 0 : 0,
+              curtains,
+              packing,
+            },
+            photoRooms,
+            photoUrls,
+            inventory: flatInventory,
+          }
+        : {
+            companyId: company.id,
+            moveType,
+            customer: { name, email, phone },
+            move: {
+              fromAddress,
+              toAddress,
+              fromFloor,
+              toFloor: "",
+              propertyType,
+              roomCount: Number(roomCount) || 0,
+              hasElevator,
+              streetAccessible,
+              moveDate,
+              distanceKm: 0,
+            },
+            options: {
+              packing,
+              assembly,
+              storageMonths: Number(storageMonths) || 0,
+            },
+            photoRooms,
+            photoUrls,
+            inventory: flatInventory,
+          };
 
       const fd = new FormData();
       fd.append("payload", JSON.stringify(payload));
+      if (preview) fd.append("preview", "1");
 
-      const res = await fetch("/api/widget/submit", { method: "POST", body: fd });
+      const url = isClearance ? "/api/widget/clearance" : "/api/widget/submit";
+      const res = await fetch(url, { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Er ging iets mis.");
 
@@ -366,7 +437,7 @@ export function MoveFlow({
               <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
                 Scan
               </span>{" "}
-              je ruimtes
+              je {isClearance ? "woning" : "ruimtes"}
             </h2>
             <p className="mx-auto mt-1 max-w-xs text-sm text-slate-500">
               Maak foto&apos;s terwijl je door je huis loopt, of kies bestaande foto&apos;s uit je
@@ -749,7 +820,7 @@ export function MoveFlow({
                 .map((it, i) => (
                   <span
                     key={i}
-                    className="absolute -translate-x-1/2 -translate-y-full rounded-full bg-slate-900/90 px-2 py-0.5 text-[10px] font-semibold text-white shadow"
+                    className={`absolute -translate-x-1/2 -translate-y-full rounded-full px-2 py-0.5 text-[10px] font-semibold text-white shadow ${AI_GRADIENT}`}
                     style={{ left: `${(it.x ?? 0.5) * 100}%`, top: `${(it.y ?? 0.5) * 100}%` }}
                   >
                     {it.name}
@@ -849,19 +920,25 @@ export function MoveFlow({
       {demo && (
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight">
-            Waar ga je{" "}
+            {isClearance ? "Waar is de " : "Waar ga je "}
             <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-              naartoe
+              {isClearance ? "ontruiming" : "naartoe"}
             </span>
             ?
           </h2>
         </div>
       )}
       <div>
-        {!demo && <p className="text-sm font-semibold">Waar ga je naartoe verhuizen?</p>}
+        {!demo && (
+          <p className="text-sm font-semibold">
+            {isClearance ? "Wat is het ontruimadres?" : "Waar ga je naartoe verhuizen?"}
+          </p>
+        )}
         <div className={`space-y-3 ${demo ? "" : "mt-2"}`}>
           <label className="block">
-            <span className="text-xs font-medium text-slate-500">Ophaaladres</span>
+            <span className="text-xs font-medium text-slate-500">
+              {isClearance ? "Ontruimadres" : "Ophaaladres"}
+            </span>
             <div className="relative mt-1">
               <MapPin className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
@@ -872,18 +949,20 @@ export function MoveFlow({
               />
             </div>
           </label>
-          <label className="block">
-            <span className="text-xs font-medium text-slate-500">Bezorgadres</span>
-            <div className="relative mt-1">
-              <MapPin className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                className={`${inputCls} pl-11`}
-                value={toAddress}
-                onChange={(e) => setToAddress(e.target.value)}
-                placeholder="Straat, huisnummer, postcode, plaats"
-              />
-            </div>
-          </label>
+          {!isClearance && (
+            <label className="block">
+              <span className="text-xs font-medium text-slate-500">Bezorgadres</span>
+              <div className="relative mt-1">
+                <MapPin className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  className={`${inputCls} pl-11`}
+                  value={toAddress}
+                  onChange={(e) => setToAddress(e.target.value)}
+                  placeholder="Straat, huisnummer, postcode, plaats"
+                />
+              </div>
+            </label>
+          )}
         </div>
       </div>
 
@@ -912,7 +991,9 @@ export function MoveFlow({
       </div>
 
       <label className="block">
-        <span className="text-sm font-semibold">Wanneer ga je verhuizen?</span>
+        <span className="text-sm font-semibold">
+          {isClearance ? "Wanneer wil je de ontruiming?" : "Wanneer ga je verhuizen?"}
+        </span>
         <input className={`${inputCls} mt-2`} type="date" value={moveDate} onChange={(e) => setMoveDate(e.target.value)} />
       </label>
 
@@ -960,36 +1041,133 @@ export function MoveFlow({
           </h2>
         </div>
       )}
-      <label className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
-        <input type="checkbox" checked={packing} onChange={(e) => setPacking(e.target.checked)} className="mt-1" />
-        <span>
-          <span className="block text-sm font-medium">Inpakservice</span>
-          <span className="block text-xs text-slate-500">
-            Wij pakken je spullen in met verhuisdozen en inpakmateriaal.
-          </span>
-        </span>
-      </label>
-      <label className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
-        <input type="checkbox" checked={assembly} onChange={(e) => setAssembly(e.target.checked)} className="mt-1" />
-        <span>
-          <span className="block text-sm font-medium">Meubelmontage en -demontage</span>
-          <span className="block text-xs text-slate-500">
-            Bedden, kasten en tafels worden uit elkaar gehaald en weer opgebouwd.
-          </span>
-        </span>
-      </label>
-      <label className="block rounded-lg border border-slate-200 p-3">
-        <span className="block text-sm font-medium">Tijdelijke opslag</span>
-        <span className="mb-2 block text-xs text-slate-500">
-          Aantal maanden dat je spullen bij ons worden opgeslagen (0 = geen opslag).
-        </span>
-        <input
-          className={inputCls}
-          inputMode="numeric"
-          value={storageMonths}
-          onChange={(e) => setStorageMonths(e.target.value.replace(/[^0-9]/g, "") || "0")}
-        />
-      </label>
+
+      {isClearance ? (
+        <>
+          {/* Vloer verwijderen — met vloertype */}
+          <div className="rounded-lg border border-slate-200 p-3">
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={floorRemoval}
+                onChange={(e) => setFloorRemoval(e.target.checked)}
+              />
+              <span className="text-sm font-medium">Vloer verwijderen</span>
+            </label>
+            {floorRemoval && (
+              <div className="mt-3 space-y-2">
+                <label className="block">
+                  <span className="text-xs font-medium text-slate-500">Type vloer</span>
+                  <select
+                    className={`${inputCls} mt-1`}
+                    value={floorType}
+                    onChange={(e) => setFloorType(e.target.value)}
+                  >
+                    {FLOOR_TYPES.map((f) => (
+                      <option key={f.key} value={f.key}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-medium text-slate-500">Oppervlak</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-right text-sm outline-none focus:border-slate-900"
+                      inputMode="numeric"
+                      value={floorRemovalM2}
+                      onChange={(e) => setFloorRemovalM2(e.target.value.replace(/[^0-9]/g, ""))}
+                      placeholder="0"
+                    />
+                    <span className="w-8 text-xs text-slate-500">m²</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Overige werkzaamheden */}
+          {(
+            [
+              { label: "Behang verwijderen", unit: "m²", on: wallpaper, setOn: setWallpaper, value: wallpaperM2, set: setWallpaperM2 },
+              { label: "Gaatjes stoppen", unit: "stuks", on: holesOn, setOn: setHolesOn, value: holes, set: setHoles },
+              { label: "Schilderwerk", unit: "m²", on: painting, setOn: setPainting, value: paintingM2, set: setPaintingM2 },
+            ] as const
+          ).map(({ label, unit, on, setOn, value, set }) => (
+            <div key={label} className="rounded-lg border border-slate-200 p-3">
+              <label className="flex items-center gap-3">
+                <input type="checkbox" checked={on} onChange={(e) => setOn(e.target.checked)} />
+                <span className="text-sm font-medium">{label}</span>
+              </label>
+              {on && (
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <span className="text-xs font-medium text-slate-500">
+                    {unit === "stuks" ? "Aantal" : "Oppervlak"}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-right text-sm outline-none focus:border-slate-900"
+                      inputMode="numeric"
+                      value={value}
+                      onChange={(e) => set(e.target.value.replace(/[^0-9]/g, ""))}
+                      placeholder="0"
+                    />
+                    <span className="w-8 text-xs text-slate-500">{unit}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+
+          <label className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
+            <input type="checkbox" checked={curtains} onChange={(e) => setCurtains(e.target.checked)} />
+            <span className="text-sm font-medium">Gordijnen verwijderen</span>
+          </label>
+          <label className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
+            <input type="checkbox" checked={packing} onChange={(e) => setPacking(e.target.checked)} className="mt-1" />
+            <span>
+              <span className="block text-sm font-medium">Inpakservice</span>
+              <span className="block text-xs text-slate-500">
+                Wij pakken de losse spullen in met dozen en inpakmateriaal.
+              </span>
+            </span>
+          </label>
+        </>
+      ) : (
+        <>
+          <label className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
+            <input type="checkbox" checked={packing} onChange={(e) => setPacking(e.target.checked)} className="mt-1" />
+            <span>
+              <span className="block text-sm font-medium">Inpakservice</span>
+              <span className="block text-xs text-slate-500">
+                Wij pakken je spullen in met verhuisdozen en inpakmateriaal.
+              </span>
+            </span>
+          </label>
+          <label className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
+            <input type="checkbox" checked={assembly} onChange={(e) => setAssembly(e.target.checked)} className="mt-1" />
+            <span>
+              <span className="block text-sm font-medium">Meubelmontage en -demontage</span>
+              <span className="block text-xs text-slate-500">
+                Bedden, kasten en tafels worden uit elkaar gehaald en weer opgebouwd.
+              </span>
+            </span>
+          </label>
+          <label className="block rounded-lg border border-slate-200 p-3">
+            <span className="block text-sm font-medium">Tijdelijke opslag</span>
+            <span className="mb-2 block text-xs text-slate-500">
+              Aantal maanden dat je spullen bij ons worden opgeslagen (0 = geen opslag).
+            </span>
+            <input
+              className={inputCls}
+              inputMode="numeric"
+              value={storageMonths}
+              onChange={(e) => setStorageMonths(e.target.value.replace(/[^0-9]/g, "") || "0")}
+            />
+          </label>
+        </>
+      )}
     </div>
   );
 

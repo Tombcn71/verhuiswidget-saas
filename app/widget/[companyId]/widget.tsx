@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MoveFlow } from "./move-flow";
-import { ClearanceFlow } from "./clearance-flow";
 
 type CompanyPublic = {
   id: string;
@@ -18,14 +17,17 @@ const AI_GRADIENT = "bg-linear-to-br from-blue-600 via-indigo-600 to-violet-600"
 export function Widget({
   company,
   demo = false,
+  preview = false,
 }: {
   company: CompanyPublic;
   demo?: boolean;
+  preview?: boolean;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const accent = company.primaryColor;
-  const fillClass = demo ? AI_GRADIENT : "";
-  const fillStyle = demo ? undefined : { background: accent };
+  const demoUx = demo || preview;
+  const fillClass = demoUx ? AI_GRADIENT : "";
+  const fillStyle = demoUx ? undefined : { background: accent };
 
   const showToggle = company.serviceType === "beide";
   const forcedType: "verhuizing" | "ontruiming" | null =
@@ -35,12 +37,11 @@ export function Widget({
         ? "verhuizing"
         : null;
 
-  const [started, setStarted] = useState(!demo);
+  const [started, setStarted] = useState(preview ? true : !demoUx);
   const [moveType, setMoveType] = useState<"verhuizing" | "ontruiming">(
     forcedType ?? "verhuizing",
   );
   const [step, setStep] = useState(0);
-  const [clearanceStep, setClearanceStep] = useState(0);
 
   useEffect(() => {
     const el = rootRef.current;
@@ -57,7 +58,7 @@ export function Widget({
     return () => ro.disconnect();
   }, [company.id, started, moveType]);
 
-  if (demo && !started) {
+  if (demoUx && !started) {
     return (
       <div
         ref={rootRef}
@@ -93,34 +94,19 @@ export function Widget({
     );
   }
 
-  if (demo && moveType !== "ontruiming") {
+  if (demoUx) {
     return (
       <div ref={rootRef} className="bg-white text-slate-900">
         <MoveFlow
           company={company}
-          demo={demo}
+          demo={demoUx}
+          preview={preview}
           showToggle={showToggle}
           moveType={moveType}
           setMoveType={setMoveType}
           step={step}
           setStep={setStep}
           onBackToIntro={() => setStarted(false)}
-        />
-      </div>
-    );
-  }
-
-  if (demo && moveType === "ontruiming") {
-    return (
-      <div ref={rootRef} className="bg-white text-slate-900">
-        <ClearanceFlow
-          company={company}
-          demo={demo}
-          showToggle={showToggle}
-          moveType={moveType}
-          setMoveType={setMoveType}
-          step={clearanceStep}
-          setStep={setClearanceStep}
         />
       </div>
     );
@@ -139,27 +125,15 @@ export function Widget({
         <span className="text-sm text-slate-500">Offerte in 2 minuten</span>
       </div>
 
-      {moveType === "ontruiming" ? (
-        <ClearanceFlow
-          company={company}
-          demo={demo}
-          showToggle={showToggle}
-          moveType={moveType}
-          setMoveType={setMoveType}
-          step={clearanceStep}
-          setStep={setClearanceStep}
-        />
-      ) : (
-        <MoveFlow
-          company={company}
-          demo={demo}
-          showToggle={showToggle}
-          moveType={moveType}
-          setMoveType={setMoveType}
-          step={step}
-          setStep={setStep}
-        />
-      )}
+      <MoveFlow
+        company={company}
+        demo={demo}
+        showToggle={showToggle}
+        moveType={moveType}
+        setMoveType={setMoveType}
+        step={step}
+        setStep={setStep}
+      />
 
       <p className="mt-6 text-center text-[11px] text-slate-400">
         Mogelijk gemaakt door moverAI

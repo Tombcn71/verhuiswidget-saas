@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { requireCompany } from "@/lib/current-company";
 import { getLeadForCompany } from "@/lib/leads";
 import { formatEuroCents, formatDate, formatDateTime } from "@/lib/format";
-import { setLeadStatus } from "./actions";
+import { setLeadStatus, saveLeadNotes } from "./actions";
 
 export const metadata: Metadata = { title: "Lead" };
 
@@ -18,20 +18,41 @@ export default async function LeadDetailPage({
   const lead = await getLeadForCompany(company.id, id);
   if (!lead) notFound();
 
+  const isClearance = lead.moveType === "ontruiming";
+  const md = lead.move ?? {};
+  const cl = lead.clearance;
+  const propertyType = isClearance ? cl?.propertyType : md.propertyType;
+  const roomCount = isClearance ? cl?.roomCount : md.roomCount;
+  const hasElevator = isClearance ? cl?.hasElevator : md.hasElevator;
+  const streetAccessible = isClearance ? cl?.streetAccessible : md.streetAccessible;
+  const yesNo = (b: boolean | undefined) => (b === undefined ? "—" : b ? "Ja" : "Nee");
+
+  const billableVolume = Math.max(1, Math.ceil(Number(lead.totalVolumeM3)));
+  const estimatedTrips = Math.max(
+    1,
+    Math.ceil(billableVolume / (company.truckCapacityM3 || 20)),
+  );
+
   const rows: Array<[string, string]> = [
     ["E-mail", lead.customerEmail],
     ["Telefoon", lead.customerPhone ?? "—"],
     ["Type", lead.moveType],
-    ["Van", lead.fromAddress ?? "—"],
-    ["Naar", lead.toAddress ?? "—"],
-    ["Etage (van → naar)", `${lead.fromFloor ?? "—"} → ${lead.toFloor ?? "—"}`],
-    ["Verhuisdatum", formatDate(lead.moveDate)],
-    ["Afstand", `${Math.round(Number(lead.distanceKm))} km`],
+    [isClearance ? "Ontruimadres" : "Van", lead.fromAddress ?? "—"],
+    ...(isClearance ? [] : ([["Naar", lead.toAddress ?? "—"]] as Array<[string, string]>)),
+    ["Etage", isClearance ? (lead.fromFloor ?? "—") : `${lead.fromFloor ?? "—"} → ${lead.toFloor ?? "—"}`],
+    ...(propertyType ? ([["Woningtype", propertyType]] as Array<[string, string]>) : []),
+    ...(roomCount ? ([["Aantal kamers", String(roomCount)]] as Array<[string, string]>) : []),
+    ["Lift aanwezig", yesNo(hasElevator)],
+    ["Bereikbaar voor de wagen", yesNo(streetAccessible)],
+    [isClearance ? "Gewenste datum" : "Verhuisdatum", formatDate(lead.moveDate)],
+    ...(isClearance ? [] : ([["Afstand", `${Math.round(Number(lead.distanceKm))} km`]] as Array<[string, string]>)),
     ["Totaal volume", `${Number(lead.totalVolumeM3).toFixed(1)} m³`],
+    ["Geschat aantal ritten", `${estimatedTrips}× (wagen ${company.truckCapacityM3} m³)`],
     ["Aangevraagd op", formatDateTime(lead.createdAt)],
   ];
 
   const options = lead.options ?? {};
+  const works = cl?.works;
 
   return (
     <div className="space-y-8">
@@ -84,6 +105,23 @@ export default async function LeadDetailPage({
               </ul>
             </div>
           )}
+          {works && (
+            <div className="mt-4 border-t border-slate-100 pt-3 text-sm">
+              <div className="text-slate-500">Extra werkzaamheden</div>
+              <ul className="mt-1 list-inside list-disc">
+                {works.floorRemoval && (
+                  <li>
+                    Vloer verwijderen ({works.floorRemoval.type}) — {works.floorRemoval.m2} m²
+                  </li>
+                )}
+                {(works.wallpaperM2 ?? 0) > 0 && <li>Behang verwijderen — {works.wallpaperM2} m²</li>}
+                {(works.holes ?? 0) > 0 && <li>Gaatjes stoppen — {works.holes} stuks</li>}
+                {(works.paintingM2 ?? 0) > 0 && <li>Schilderwerk — {works.paintingM2} m²</li>}
+                {works.curtains && <li>Gordijnen verwijderen</li>}
+                {works.packing && <li>Inpakservice</li>}
+              </ul>
+            </div>
+          )}
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-6">
@@ -112,6 +150,47 @@ export default async function LeadDetailPage({
           </table>
         </section>
       </div>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="font-semibold">Notitie</h2>
+        <form action={saveLeadNotes} className="mt-3">
+          <input type="hidden" name="leadId" value={lead.id} />
+          <textarea
+            name="notes"
+            rows={3}
+            defaultValue={lead.notes ?? ""}
+            placeholder="Bijv. gebeld op 12/3, komt langs voor bezichtiging…"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-600"
+          />
+          <button
+            type="submit"
+            className="mt-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            Notitie opslaan
+          </button>
+        </form>
+      </section>
+
+      {(lead.photoUrls ?? []).length > 0 && (
+        <section className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="font-semibold">
+            Foto&apos;s van de klant{" "}
+            <span className="text-slate-400">({lead.photoUrls.length})</span>
+          </h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {lead.photoUrls.map((url, i) => (
+              <a key={i} href={url} target="_blank" rel="noreferrer">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt={`Foto ${i + 1}`}
+                  className="h-28 w-28 rounded-lg object-cover ring-1 ring-slate-200"
+                />
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="rounded-xl border border-slate-200 bg-white p-6">
         <h2 className="font-semibold">

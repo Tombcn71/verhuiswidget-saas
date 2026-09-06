@@ -3,8 +3,7 @@ import { z } from "zod";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { isDemoCompany } from "@/lib/demo";
 import { createLead } from "@/lib/leads";
-import { analyzeClearance, type PhotoInput } from "@/lib/gemini";
-import { calculateClearancePrice, clearanceTariffs } from "@/lib/pricing";
+import { calculatePrice, clearanceTariffs, floorTypeRate, isRushDate } from "@/lib/pricing";
 import { sendQuoteEmails } from "@/lib/email";
 import {
   CORS,
@@ -12,12 +11,10 @@ import {
   clientIp,
   jsonResponse as json,
 } from "@/lib/widget-request";
+import type { InventoryItem, PriceLine } from "@/lib/db/schema";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-const MAX_PHOTOS = 10;
-const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 
 export function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
@@ -30,18 +27,43 @@ const payloadSchema = z.object({
     email: z.email(),
     phone: z.string().trim().max(40).optional().or(z.literal("")),
   }),
-  postcode: z.string().trim().max(12).optional().or(z.literal("")),
-  propertyType: z.string().trim().max(60).optional().or(z.literal("")),
-  areaM2: z.coerce.number().min(1).max(10000),
-  floor: z.coerce.number().int().min(0).max(50).default(0),
-  hasLift: z.boolean().default(false),
-  works: z.object({
-    floorRemoval: z.boolean().default(false),
-    wallpaper: z.boolean().default(false),
-    holes: z.boolean().default(false),
-    painting: z.boolean().default(false),
-    curtains: z.boolean().default(false),
+  details: z.object({
+    address: z.string().trim().max(200).optional().or(z.literal("")),
+    propertyType: z.string().trim().max(60).optional().or(z.literal("")),
+    floor: z.coerce.number().int().min(0).max(50).default(0),
+    roomCount: z.coerce.number().int().min(0).max(50).default(0),
+    hasElevator: z.boolean().default(false),
+    streetAccessible: z.boolean().default(true),
+    moveDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
   }),
+  works: z.object({
+    floorRemoval: z
+      .object({
+        type: z.string().trim().max(40),
+        m2: z.coerce.number().min(0).max(100000),
+      })
+      .nullable()
+      .default(null),
+    wallpaperM2: z.coerce.number().min(0).max(100000).default(0),
+    holes: z.coerce.number().int().min(0).max(100000).default(0),
+    paintingM2: z.coerce.number().min(0).max(100000).default(0),
+    curtains: z.boolean().default(false),
+    packing: z.boolean().default(false),
+  }),
+  photoRooms: z.array(z.string().trim().max(60)).max(60).default([]),
+  photoUrls: z.array(z.url().max(500)).max(20).default([]),
+  inventory: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1).max(120),
+        quantity: z.coerce.number().int().min(1).max(99),
+        volumeM3: z.coerce.number().min(0).max(50),
+        category: z.string().trim().max(40).default("overig"),
+        room: z.string().trim().max(60).optional(),
+      }),
+    )
+    .min(1)
+    .max(200),
 });
 
 export async function POST(request: Request) {
@@ -68,8 +90,10 @@ export async function POST(request: Request) {
     return json({ error: message }, 400);
   }
 
-  const demo = isDemoCompany(parsed.companyId);
-  const company = demo
+  const preview = form.get("preview") === "1";
+  const isDemo = isDemoCompany(parsed.companyId);
+  const demo = isDemo || preview;
+  const company = isDemo
     ? await ensureDemoCompany()
     : await getCompanyById(parsed.companyId);
   if (!company) return json({ error: "Onbekende verhuizer." }, 404);
@@ -77,82 +101,133 @@ export async function POST(request: Request) {
     return json({ error: "Dit bedrijf doet geen ontruimingen." }, 400);
   }
 
-  const files = form.getAll("photos").filter((f): f is File => f instanceof File);
-  if (files.length === 0) return json({ error: "Upload minstens één foto." }, 400);
-  if (files.length > MAX_PHOTOS) {
-    return json({ error: `Maximaal ${MAX_PHOTOS} foto's.` }, 400);
-  }
-
-  const photos: PhotoInput[] = [];
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    if (file.size > MAX_PHOTO_BYTES) {
-      return json({ error: `Foto ${i + 1} is te groot.` }, 400);
-    }
-    if (!file.type.startsWith("image/")) {
-      return json({ error: `Bestand ${i + 1} is geen afbeelding.` }, 400);
-    }
-    const buffer = Buffer.from(await file.arrayBuffer());
-    photos.push({
-      data: buffer.toString("base64"),
-      mimeType: file.type,
-      room: "woning",
-    });
-  }
-
   if (demo) {
     const limitError = checkDemoRateLimit(clientIp(request));
     if (limitError) return json({ error: limitError }, 429);
   }
 
-  let analysis;
-  try {
-    analysis = await analyzeClearance(photos);
-  } catch (err) {
-    console.error("Ontruimings-analyse mislukt:", err);
-    return json(
-      { error: "De foto-analyse is mislukt. Probeer het later opnieuw." },
-      502,
-    );
-  }
+  const inventory: InventoryItem[] = parsed.inventory.map((it) => ({
+    name: it.name,
+    quantity: it.quantity,
+    volumeM3: it.volumeM3,
+    category: it.category,
+    room: it.room,
+  }));
 
-  const price = calculateClearancePrice(clearanceTariffs(company), {
-    areaM2: parsed.areaM2,
-    floor: parsed.floor,
-    hasLift: parsed.hasLift,
-    fillLevel: analysis.fillLevel,
-    works: parsed.works,
-    vatRate: company.vatRate,
+  const w = parsed.works;
+
+  // Basisprijs: net als verhuizen — inboedelvolume (m³) + verdieping + inpakken.
+  // Met een gebouwlift vervalt de verdieping-toeslag.
+  const base = calculatePrice(company, {
+    inventory,
+    distanceKm: 0,
+    options: { packing: w.packing, assembly: false, storageMonths: 0 },
+    fromFloor: parsed.details.floor,
+    hasElevator: parsed.details.hasElevator,
+    streetAccessible: parsed.details.streetAccessible,
+    rush: isRushDate(parsed.details.moveDate),
   });
 
-  const clearancePayload = {
-    postcode: parsed.postcode || "",
-    propertyType: parsed.propertyType || "",
-    areaM2: parsed.areaM2,
-    floor: parsed.floor,
-    hasLift: parsed.hasLift,
-    works: parsed.works,
-    fillLevel: analysis.fillLevel,
-    items: analysis.items,
-    estimatedBoxes: analysis.estimatedBoxes,
-    specialItems: analysis.specialItems,
-  };
+  // Extra werkzaamheden op m²/aantal.
+  const t = clearanceTariffs(company);
+  const extraLines: PriceLine[] = [];
+
+  // Afvoer & transport: rit(ten) naar de milieustraat incl. stortkosten.
+  if (t.haulPerTripCents > 0)
+    extraLines.push({
+      label:
+        base.trips > 1
+          ? `Afvoer & transport (${base.trips} ritten)`
+          : "Afvoer & transport",
+      amountCents: base.trips * t.haulPerTripCents,
+    });
+
+  if (w.floorRemoval && w.floorRemoval.m2 > 0)
+    extraLines.push({
+      label: `Vloer verwijderen (${w.floorRemoval.m2} m²)`,
+      amountCents: Math.round(w.floorRemoval.m2 * floorTypeRate(t, w.floorRemoval.type)),
+    });
+  if (w.wallpaperM2 > 0)
+    extraLines.push({
+      label: `Behang verwijderen (${w.wallpaperM2} m²)`,
+      amountCents: Math.round(w.wallpaperM2 * t.wallpaperPerM2Cents),
+    });
+  if (w.holes > 0)
+    extraLines.push({
+      label: `Gaatjes stoppen (${w.holes}×)`,
+      amountCents: Math.round(w.holes * t.holesPerUnitCents),
+    });
+  if (w.paintingM2 > 0)
+    extraLines.push({
+      label: `Schilderwerk (${w.paintingM2} m²)`,
+      amountCents: Math.round(w.paintingM2 * t.paintPerM2Cents),
+    });
+  if (w.curtains)
+    extraLines.push({ label: "Gordijnen verwijderen", amountCents: t.curtainsCents });
+
+  const breakdown = [
+    ...base.breakdown.filter((l) => l.label !== "Btw"),
+    ...extraLines,
+  ];
+  const subtotalCents = breakdown.reduce((s, l) => s + l.amountCents, 0);
+  const vatCents = Math.round(subtotalCents * Number(company.vatRate));
+  const totalCents = subtotalCents + vatCents;
+
+  const rooms = [...new Set(parsed.photoRooms)].map((name) => ({
+    name,
+    photoCount: parsed.photoRooms.filter((r) => r === name).length,
+  }));
 
   const responseBody = {
     ok: true,
     demo,
-    fillLevel: analysis.fillLevel,
-    items: analysis.items,
-    estimatedBoxes: analysis.estimatedBoxes,
-    specialItems: analysis.specialItems,
-    breakdown: price.breakdown,
-    subtotalCents: price.subtotalCents,
-    vatCents: price.vatCents,
-    totalCents: price.totalCents,
+    inventory,
+    rooms,
+    totalVolumeM3: base.totalVolumeM3,
+    breakdown,
+    subtotalCents,
+    vatCents,
+    totalCents,
     emailSent: false,
   };
 
-  if (demo) return json(responseBody);
+  const worksLines: string[] = [];
+  if (w.floorRemoval) worksLines.push(`Vloer verwijderen (${w.floorRemoval.type}) — ${w.floorRemoval.m2} m²`);
+  if (w.wallpaperM2 > 0) worksLines.push(`Behang — ${w.wallpaperM2} m²`);
+  if (w.holes > 0) worksLines.push(`Gaatjes — ${w.holes} stuks`);
+  if (w.paintingM2 > 0) worksLines.push(`Schilderwerk — ${w.paintingM2} m²`);
+  if (w.curtains) worksLines.push("Gordijnen verwijderen");
+  if (w.packing) worksLines.push("Inpakservice");
+
+  const emailData = {
+    company,
+    customer: parsed.customer,
+    move: { type: "ontruiming" as const, fromAddress: parsed.details.address, distanceKm: 0 },
+    inventory,
+    photoUrls: parsed.photoUrls,
+    details: {
+      Woningtype: parsed.details.propertyType || "",
+      "Aantal kamers": parsed.details.roomCount ? String(parsed.details.roomCount) : "",
+      Etage: String(parsed.details.floor),
+      "Lift aanwezig": parsed.details.hasElevator ? "Ja" : "Nee",
+      "Bereikbaar voor de wagen": parsed.details.streetAccessible ? "Ja" : "Nee",
+      "Geschat aantal ritten": String(base.trips),
+      Werkzaamheden: worksLines.join(" · "),
+    },
+    totalVolumeM3: base.totalVolumeM3,
+    breakdown,
+    subtotalCents,
+    vatCents,
+    totalCents,
+    leadId: "demo",
+  };
+
+  if (demo) {
+    const fake =
+      preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
+    const sent = fake ? { sent: false as const } : await sendQuoteEmails(emailData, { customerOnly: true });
+    return json({ ...responseBody, emailSent: sent.sent });
+  }
 
   const lead = await createLead({
     companyId: company.id,
@@ -160,43 +235,27 @@ export async function POST(request: Request) {
     customerEmail: parsed.customer.email,
     customerPhone: parsed.customer.phone || null,
     moveType: "ontruiming",
-    fromAddress: parsed.postcode || null,
-    inventory: analysis.items.map((i) => ({
-      name: i.name,
-      quantity: i.quantity,
-      volumeM3: 0,
-      category: i.size,
-    })),
-    totalVolumeM3: "0",
-    clearance: clearancePayload,
-    priceBreakdown: price.breakdown,
-    subtotalCents: price.subtotalCents,
-    vatCents: price.vatCents,
-    totalCents: price.totalCents,
+    fromAddress: parsed.details.address || null,
+    fromFloor: String(parsed.details.floor),
+    moveDate: parsed.details.moveDate || null,
+    rooms,
+    inventory,
+    photoUrls: parsed.photoUrls,
+    totalVolumeM3: String(base.totalVolumeM3),
+    clearance: {
+      propertyType: parsed.details.propertyType || "",
+      roomCount: parsed.details.roomCount,
+      hasElevator: parsed.details.hasElevator,
+      streetAccessible: parsed.details.streetAccessible,
+      works: parsed.works,
+    },
+    priceBreakdown: breakdown,
+    subtotalCents,
+    vatCents,
+    totalCents,
   });
 
-  const emailResult = await sendQuoteEmails({
-    company,
-    customer: parsed.customer,
-    move: { type: "ontruiming", distanceKm: 0 },
-    inventory: [],
-    totalVolumeM3: 0,
-    breakdown: price.breakdown,
-    subtotalCents: price.subtotalCents,
-    vatCents: price.vatCents,
-    totalCents: price.totalCents,
-    leadId: lead.id,
-    clearance: {
-      postcode: clearancePayload.postcode,
-      propertyType: clearancePayload.propertyType,
-      areaM2: clearancePayload.areaM2,
-      floor: clearancePayload.floor,
-      fillLevel: analysis.fillLevel,
-      estimatedBoxes: analysis.estimatedBoxes,
-      specialItems: analysis.specialItems,
-      items: analysis.items,
-    },
-  });
+  const emailResult = await sendQuoteEmails({ ...emailData, leadId: lead.id });
 
   return json({ ...responseBody, emailSent: emailResult.sent });
 }

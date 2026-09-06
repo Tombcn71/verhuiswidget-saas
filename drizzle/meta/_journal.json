@@ -43,6 +43,34 @@
       "when": 1788523288020,
       "tag": "0005_violet_lorna_dane",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788680111100,
+      "tag": "0006_tearful_paibok",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788680755629,
+      "tag": "0007_perpetual_radioactive_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788682790129,
+      "tag": "0008_wild_amphibian",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788685461678,
+      "tag": "0009_military_paibok",
+      "breakpoints": true
     }
   ]
 }

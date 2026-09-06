@@ -46,6 +46,17 @@ export async function updateLeadStatus(
     .where(and(eq(leads.companyId, companyId), eq(leads.id, leadId)));
 }
 
+export async function updateLeadNotes(
+  companyId: string,
+  leadId: string,
+  notes: string,
+): Promise<void> {
+  await db
+    .update(leads)
+    .set({ notes: notes || null })
+    .where(and(eq(leads.companyId, companyId), eq(leads.id, leadId)));
+}
+
 export type LeadStats = {
   total: number;
   last30Days: number;

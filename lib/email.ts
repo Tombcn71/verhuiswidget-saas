@@ -19,17 +19,11 @@ type QuoteData = {
   vatCents: number;
   totalCents: number;
   leadId: string;
-  /** Alleen bij een ontruiming — vervangt de m³-inboedel in de e-mail. */
-  clearance?: {
-    postcode: string;
-    propertyType: string;
-    areaM2: number;
-    floor: number;
-    fillLevel: string;
-    estimatedBoxes: number;
-    specialItems: string[];
-    items: { name: string; quantity: number; size: string }[];
-  };
+  photoUrls?: string[];
+  /** Extra antwoorden van de klant, voor in de bedrijfsmail. */
+  details?: Record<string, string>;
+  /** Legacy — niet meer gebruikt. */
+  clearance?: undefined;
 };
 
 function esc(s: string): string {
@@ -73,23 +67,13 @@ function baseLayout(company: Company, inner: string): string {
 }
 
 function moveSummary(d: QuoteData): string {
-  if (d.clearance) {
-    const c = d.clearance;
-    return `<table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0">
-      <tr><td style="padding:2px 0;color:#64748b">Type</td><td>Woningontruiming</td></tr>
-      ${c.postcode ? `<tr><td style="padding:2px 0;color:#64748b">Postcode</td><td>${esc(c.postcode)}</td></tr>` : ""}
-      ${c.propertyType ? `<tr><td style="padding:2px 0;color:#64748b">Woningtype</td><td>${esc(c.propertyType)}</td></tr>` : ""}
-      <tr><td style="padding:2px 0;color:#64748b">Oppervlak</td><td>${Math.round(c.areaM2)} m²</td></tr>
-      <tr><td style="padding:2px 0;color:#64748b">Verdieping</td><td>${c.floor === 0 ? "begane grond" : `${c.floor}e`}</td></tr>
-      <tr><td style="padding:2px 0;color:#64748b">Inschatting</td><td>${esc(c.fillLevel)}</td></tr>
-    </table>`;
-  }
+  const isClearance = d.move.type === "ontruiming";
   return `<table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0">
     <tr><td style="padding:2px 0;color:#64748b">Type</td><td>${esc(d.move.type)}</td></tr>
-    ${d.move.fromAddress ? `<tr><td style="padding:2px 0;color:#64748b">Van</td><td>${esc(d.move.fromAddress)}</td></tr>` : ""}
+    ${d.move.fromAddress ? `<tr><td style="padding:2px 0;color:#64748b">${isClearance ? "Adres" : "Van"}</td><td>${esc(d.move.fromAddress)}</td></tr>` : ""}
     ${d.move.toAddress ? `<tr><td style="padding:2px 0;color:#64748b">Naar</td><td>${esc(d.move.toAddress)}</td></tr>` : ""}
     ${d.move.moveDate ? `<tr><td style="padding:2px 0;color:#64748b">Datum</td><td>${formatDate(d.move.moveDate)}</td></tr>` : ""}
-    <tr><td style="padding:2px 0;color:#64748b">Afstand</td><td>${Math.round(d.move.distanceKm)} km</td></tr>
+    ${!isClearance ? `<tr><td style="padding:2px 0;color:#64748b">Afstand</td><td>${Math.round(d.move.distanceKm)} km</td></tr>` : ""}
     <tr><td style="padding:2px 0;color:#64748b">Volume</td><td>${d.totalVolumeM3.toFixed(1)} m³</td></tr>
   </table>`;
 }
@@ -104,27 +88,6 @@ function priceBlock(d: QuoteData): string {
 }
 
 function inventoryBlock(d: QuoteData): string {
-  if (d.clearance) {
-    const c = d.clearance;
-    const rows = c.items
-      .map(
-        (i) =>
-          `<tr><td style="padding:4px 8px;border-bottom:1px solid #eee">${esc(i.name)}</td>` +
-          `<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">${i.quantity}×</td>` +
-          `<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">${esc(i.size)}</td></tr>`,
-      )
-      .join("");
-    return `<table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0">
-      <thead><tr>
-        <th style="padding:4px 8px;text-align:left;border-bottom:2px solid #0f172a">Object</th>
-        <th style="padding:4px 8px;text-align:right;border-bottom:2px solid #0f172a">Aantal</th>
-        <th style="padding:4px 8px;text-align:right;border-bottom:2px solid #0f172a">Formaat</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <p style="font-size:13px;margin:8px 0">Geschat aantal dozen/tassen: <strong>${c.estimatedBoxes}</strong></p>
-    ${c.specialItems.length ? `<p style="font-size:13px;margin:8px 0">Bijzondere items: ${esc(c.specialItems.join(", "))}</p>` : ""}`;
-  }
   return `<table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0">
     <thead><tr>
       <th style="padding:4px 8px;text-align:left;border-bottom:2px solid #0f172a">Object</th>
@@ -150,6 +113,29 @@ function customerEmailHtml(d: QuoteData): string {
   );
 }
 
+function detailRows(details: Record<string, string> | undefined): string {
+  if (!details) return "";
+  const rows = Object.entries(details)
+    .filter(([, v]) => v)
+    .map(
+      ([k, v]) =>
+        `<tr><td style="padding:2px 0;color:#64748b">${esc(k)}</td><td>${esc(v)}</td></tr>`,
+    )
+    .join("");
+  return rows ? `<table style="width:100%;border-collapse:collapse;font-size:14px;margin:8px 0">${rows}</table>` : "";
+}
+
+function photoBlock(urls: string[] | undefined): string {
+  if (!urls?.length) return "";
+  const imgs = urls
+    .map(
+      (u) =>
+        `<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" alt="foto" style="width:120px;height:120px;object-fit:cover;border-radius:8px;margin:0 6px 6px 0"></a>`,
+    )
+    .join("");
+  return `<h3 style="font-size:16px">Foto's van de klant (${urls.length})</h3><div>${imgs}</div>`;
+}
+
 function companyEmailHtml(d: QuoteData): string {
   return baseLayout(
     d.company,
@@ -160,8 +146,10 @@ function companyEmailHtml(d: QuoteData): string {
        ${d.customer.phone ? `<tr><td style="padding:2px 0;color:#64748b">Telefoon</td><td>${esc(d.customer.phone)}</td></tr>` : ""}
      </table>
      ${moveSummary(d)}
+     ${detailRows(d.details)}
      <h3 style="font-size:16px">Berekende prijs</h3>
      ${priceBlock(d)}
+     ${photoBlock(d.photoUrls)}
      <h3 style="font-size:16px">Volledige inventarislijst</h3>
      ${inventoryBlock(d)}
      <p style="font-size:12px;color:#64748b">Lead-id: ${esc(d.leadId)}</p>`,

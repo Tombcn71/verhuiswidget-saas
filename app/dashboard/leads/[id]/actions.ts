@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireCompany } from "@/lib/current-company";
-import { updateLeadStatus } from "@/lib/leads";
+import { updateLeadStatus, updateLeadNotes } from "@/lib/leads";
 
 const ALLOWED = ["nieuw", "gecontacteerd", "gewonnen", "verloren"];
 
@@ -16,4 +16,14 @@ export async function setLeadStatus(formData: FormData) {
   revalidatePath(`/dashboard/leads/${leadId}`);
   revalidatePath("/dashboard/leads");
   revalidatePath("/dashboard");
+}
+
+export async function saveLeadNotes(formData: FormData) {
+  const company = await requireCompany();
+  const leadId = String(formData.get("leadId") ?? "");
+  const notes = String(formData.get("notes") ?? "").slice(0, 4000);
+  if (!leadId) return;
+
+  await updateLeadNotes(company.id, leadId, notes);
+  revalidatePath(`/dashboard/leads/${leadId}`);
 }

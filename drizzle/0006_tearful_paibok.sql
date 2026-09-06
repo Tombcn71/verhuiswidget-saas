@@ -1,0 +1,2 @@
+ALTER TABLE "companies" ADD COLUMN "hourly_rate_per_mover_cents" integer DEFAULT 4500 NOT NULL;--> statement-breakpoint
+ALTER TABLE "companies" ADD COLUMN "m3_per_hour_per_mover" numeric(4, 1) DEFAULT '1.8' NOT NULL;

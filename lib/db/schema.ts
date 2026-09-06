@@ -11,60 +11,47 @@ import {
 } from "drizzle-orm/pg-core";
 
 /**
- * Ontruimings-tarieven (eurocenten, excl. btw). Opgeslagen in jsonb
- * `companies.ontruimen_tariffs`. Vulgraad-factoren zijn percentages (100 = ×1.0).
+ * Ontruimings-extra's (eurocenten, excl. btw). Opgeslagen in jsonb
+ * `companies.ontruimen_tariffs`. De basisprijs (inboedelvolume m³, verdieping,
+ * lift, inpakservice) deelt de ontruiming met de verhuistarieven.
  */
 export type ClearanceTariffs = {
-  pricePerM2Cents: number; // basisprijs per m²
-  fillFactorMinimaal: number; // %
-  fillFactorNormaal: number; // %
-  fillFactorVol: number; // %
-  fillFactorOvervol: number; // %
-  floorSurchargeCents: number; // toeslag per verdieping
-  noLiftSurchargeCents: number; // extra als er geen lift is
-  transportCents: number; // transport & verwerking (vast)
-  minPriceCents: number;
   wallpaperPerM2Cents: number; // behang verwijderen
-  holesPerM2Cents: number; // gaatjes stoppen
+  holesPerUnitCents: number; // gaatjes stoppen (per stuk)
   paintPerM2Cents: number; // schilderwerk
-  floorRemovalPerM2Cents: number; // vloer verwijderen
   curtainsCents: number; // gordijnen verwijderen (vast)
+  haulPerTripCents: number; // afvoer & transport per rit naar de milieustraat (incl. stortkosten)
+  // Vloer verwijderen: prijs per m² per vloertype
+  floorLaminaatCents: number;
+  floorTapijtCents: number;
+  floorPvcClickCents: number;
+  floorKurkCents: number;
+  floorPvcGelijmdCents: number;
+  floorParketGelijmdCents: number;
+  floorTegelvloerCents: number;
 };
 
 export const CLEARANCE_TARIFF_DEFAULTS: ClearanceTariffs = {
-  pricePerM2Cents: 550,
-  fillFactorMinimaal: 70,
-  fillFactorNormaal: 100,
-  fillFactorVol: 140,
-  fillFactorOvervol: 180,
-  floorSurchargeCents: 5000,
-  noLiftSurchargeCents: 7500,
-  transportCents: 10000,
-  minPriceCents: 25000,
   wallpaperPerM2Cents: 400,
-  holesPerM2Cents: 150,
+  holesPerUnitCents: 150,
   paintPerM2Cents: 1500,
-  floorRemovalPerM2Cents: 800,
   curtainsCents: 4000,
+  haulPerTripCents: 9500,
+  floorLaminaatCents: 250,
+  floorTapijtCents: 300,
+  floorPvcClickCents: 400,
+  floorKurkCents: 400,
+  floorPvcGelijmdCents: 1000,
+  floorParketGelijmdCents: 1000,
+  floorTegelvloerCents: 1000,
 };
 
-export type MoveAddress = {
-  country: string;
-  postcode: string;
-  houseNumber: string;
-  addition: string;
-  street: string;
-  city: string;
-  floor: number; // 0 = begane grond, -1 = souterrain
-  hasLift: boolean;
-  needsLiftService: boolean; // verhuislift op dit adres
-  notes: string;
-};
-
+/** Extra antwoorden bij een verhuis-lead (jsonb `leads.move`). */
 export type MoveDetails = {
-  from: MoveAddress;
-  to: MoveAddress;
-  distanceKm: number;
+  propertyType?: string; // "huis" | "appartement"
+  roomCount?: number;
+  hasElevator?: boolean;
+  streetAccessible?: boolean;
 };
 
 /**
@@ -98,6 +85,15 @@ export const companies = pgTable("companies", {
   minPriceCents: integer("min_price_cents").notNull().default(15000),
   vatRate: numeric("vat_rate", { precision: 4, scale: 3 }).notNull().default("0.210"),
 
+  // Verhuizen: arbeid & reistijd
+  hourlyRatePerMoverCents: integer("hourly_rate_per_mover_cents")
+    .notNull()
+    .default(4500), // uurtarief per verhuizer
+  m3PerHourPerMover: numeric("m3_per_hour_per_mover", { precision: 4, scale: 1 })
+    .notNull()
+    .default("1.8"), // laadsnelheid: m³ per verhuizer per uur
+  truckCapacityM3: integer("truck_capacity_m3").notNull().default(20), // laadvermogen wagen; bepaalt aantal ritten
+
   // Verhuizen: extra toeslagen
   moveFloorSurchargeCents: integer("move_floor_surcharge_cents")
     .notNull()
@@ -106,6 +102,7 @@ export const companies = pgTable("companies", {
   truckAccessSurchargeCents: integer("truck_access_surcharge_cents")
     .notNull()
     .default(7500), // wagen kan niet voor de deur
+  rushSurchargeCents: integer("rush_surcharge_cents").notNull().default(10000), // gewenste datum binnen 48 uur
   weekdayDiscountPct: integer("weekday_discount_pct").notNull().default(10), // ongebruikt
   moveDiscounts: jsonb("move_discounts"), // legacy, ongebruikt
 
@@ -144,6 +141,7 @@ export const leads = pgTable(
     // Analyse (Gemini)
     rooms: jsonb("rooms").notNull().$type<RoomInput[]>().default([]),
     inventory: jsonb("inventory").notNull().$type<InventoryItem[]>().default([]),
+    photoUrls: jsonb("photo_urls").notNull().$type<string[]>().default([]),
     totalVolumeM3: numeric("total_volume_m3", { precision: 8, scale: 2 })
       .notNull()
       .default("0"),
@@ -164,6 +162,7 @@ export const leads = pgTable(
     vatCents: integer("vat_cents").notNull().default(0),
     totalCents: integer("total_cents").notNull().default(0),
 
+    notes: text("notes"), // interne notitie van het bedrijf
     status: text("status").notNull().default("nieuw"), // nieuw | gecontacteerd | gewonnen | verloren
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -186,25 +185,21 @@ export type ClearanceItem = {
 };
 
 export type ClearanceWorks = {
-  floorRemoval?: boolean;
-  wallpaper?: boolean;
-  holes?: boolean;
-  painting?: boolean;
+  floorRemoval?: { type: string; m2: number } | null;
+  wallpaperM2?: number;
+  holes?: number;
+  paintingM2?: number;
   curtains?: boolean;
+  packing?: boolean;
 };
 
 /** Ontruimings-detail op een lead. */
 export type ClearanceLead = {
-  postcode: string;
   propertyType: string;
-  areaM2: number;
-  floor: number;
-  hasLift: boolean;
+  roomCount: number;
+  hasElevator: boolean;
+  streetAccessible: boolean;
   works: ClearanceWorks;
-  fillLevel: ClearanceFill;
-  items: ClearanceItem[];
-  estimatedBoxes: number;
-  specialItems: string[];
 };
 
 export type InventoryItem = {

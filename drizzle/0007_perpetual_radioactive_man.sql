@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ADD COLUMN "rush_surcharge_cents" integer DEFAULT 10000 NOT NULL;

@@ -37,11 +37,15 @@ export async function POST(request: Request) {
   if (!company) return json({ error: "Onbekende verhuizer." }, 404);
 
   const files = form.getAll("photos").filter((f): f is File => f instanceof File);
+  const urls = form.getAll("photoUrls").map((u) => String(u));
   const rooms = form.getAll("photoRooms").map((r) => String(r));
-  if (files.length === 0) return json({ error: "Upload minstens één foto." }, 400);
-  if (files.length > MAX_PHOTOS) return json({ error: `Maximaal ${MAX_PHOTOS} foto's.` }, 400);
+  const count = files.length + urls.length;
+  if (count === 0) return json({ error: "Upload minstens één foto." }, 400);
+  if (count > MAX_PHOTOS) return json({ error: `Maximaal ${MAX_PHOTOS} foto's.` }, 400);
 
   const photos: PhotoInput[] = [];
+
+  // Bestanden (demo/preview) — direct in de request.
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     if (file.size > MAX_PHOTO_BYTES) return json({ error: `Foto ${i + 1} is te groot.` }, 400);
@@ -54,6 +58,25 @@ export async function POST(request: Request) {
     });
   }
 
+  // Blob-URL's (echte aanvraag) — server-side ophalen voor Gemini.
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      const r = await fetch(urls[i], { signal: AbortSignal.timeout(8000) });
+      if (!r.ok) continue;
+      const buffer = Buffer.from(await r.arrayBuffer());
+      if (buffer.byteLength > MAX_PHOTO_BYTES) continue;
+      photos.push({
+        data: buffer.toString("base64"),
+        mimeType: r.headers.get("content-type") ?? "image/jpeg",
+        room: rooms[files.length + i] ?? "Onbekende kamer",
+      });
+    } catch {
+      // foto niet op te halen — overslaan
+    }
+  }
+
+  if (photos.length === 0) return json({ error: "Geen foto's ontvangen." }, 400);
+
   if (demo) {
     const limitError = checkDemoRateLimit(clientIp(request));
     if (limitError) return json({ error: limitError }, 429);
@@ -65,6 +88,12 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("Gemini-analyse mislukt:", err);
     return json({ error: "De foto-analyse is mislukt. Probeer het later opnieuw." }, 502);
+  }
+
+  // Gemini overschat regelmatig het aantal verhuisdozen — begrens per regel.
+  const BOX_RE = /verhuisdo|dozen|\bdoos\b|verhuisdoos/i;
+  for (const item of inventory) {
+    if (BOX_RE.test(item.name)) item.quantity = Math.min(item.quantity, 10);
   }
 
   if (inventory.length === 0) {

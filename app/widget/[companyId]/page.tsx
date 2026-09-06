@@ -9,12 +9,13 @@ export default async function WidgetPage({
   searchParams,
 }: PageProps<"/widget/[companyId]">) {
   const { companyId } = await params;
-  const { embed } = await searchParams;
+  const { embed, preview } = await searchParams;
   const company = await getCompanyById(companyId);
   if (!company) notFound();
 
   const widget = (
     <Widget
+      preview={preview !== undefined}
       company={{
         id: company.id,
         name: company.name,

@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ADD COLUMN "truck_capacity_m3" integer DEFAULT 20 NOT NULL;

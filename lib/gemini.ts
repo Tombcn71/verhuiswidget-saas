@@ -23,7 +23,8 @@ Analyseer ALLE foto's samen en maak één gecombineerde inventarislijst van de m
 
 Regels:
 - Tel identieke objecten op tot één regel met een aantal (quantity).
-- Negeer kleine losse spullen (boeken, servies, decoratie); die gaan in verhuisdozen. Voeg wél een geschatte regel "Verhuisdozen" toe op basis van de hoeveelheid spullen die je ziet.
+- Neem ook wandobjecten mee die los ingepakt en vervoerd moeten worden: schilderijen, ingelijste posters/fotolijsten (groter dan A4), spiegels, wandklokken, wandlampen. Tel ze als aparte regels. Een schilderij/spiegel is ~0.05 m³ per stuk, groot schilderij ~0.15.
+- Negeer kleine losse spullen (boeken, servies, decoratie); die gaan in verhuisdozen. Voeg per kamer HOOGUIT ÉÉN regel "Verhuisdozen" toe met een REALISTISCHE, terughoudende schatting: reken grofweg 3 tot 6 dozen voor een normaal ingerichte kamer, 1 tot 2 voor een kale/lege kamer, 0 als er nauwelijks losse spullen zijn. Nooit meer dan 10 dozen per kamer. Verzin geen hoge aantallen.
 - Geef per regel een realistische inschatting van het volume in m³ PER STUK (volumeM3), gebaseerd op standaard verhuisvolumes:
   * 2-zitsbank ~1.0, 3-zitsbank ~1.5, fauteuil ~0.6
   * tweepersoonsbed + matras ~1.4, eenpersoonsbed ~0.9

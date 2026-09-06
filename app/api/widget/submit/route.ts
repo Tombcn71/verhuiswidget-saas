@@ -4,7 +4,8 @@ import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { isDemoCompany } from "@/lib/demo";
 import { createLead } from "@/lib/leads";
 import { analyzePhotos, type PhotoInput } from "@/lib/gemini";
-import { calculatePrice } from "@/lib/pricing";
+import { calculatePrice, isRushDate } from "@/lib/pricing";
+import { estimateDistanceKm } from "@/lib/geo";
 import { sendQuoteEmails } from "@/lib/email";
 import {
   CORS,
@@ -37,6 +38,10 @@ const payloadSchema = z.object({
     toAddress: z.string().trim().max(200).optional().or(z.literal("")),
     fromFloor: z.string().trim().max(40).optional().or(z.literal("")),
     toFloor: z.string().trim().max(40).optional().or(z.literal("")),
+    propertyType: z.string().trim().max(40).optional().or(z.literal("")),
+    roomCount: z.coerce.number().int().min(0).max(50).default(0),
+    hasElevator: z.boolean().default(false),
+    streetAccessible: z.boolean().default(true),
     moveDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
     distanceKm: z.coerce.number().min(0).max(5000).default(0),
   }),
@@ -46,6 +51,7 @@ const payloadSchema = z.object({
     storageMonths: z.coerce.number().int().min(0).max(36).default(0),
   }),
   photoRooms: z.array(z.string().trim().max(60)).max(MAX_PHOTOS),
+  photoUrls: z.array(z.url().max(500)).max(MAX_PHOTOS).default([]),
   // Al door de klant nagekeken inventaris (uit /api/widget/analyze). Als dit
   // meekomt slaat de submit de foto-analyse over.
   inventory: z
@@ -84,8 +90,10 @@ export async function POST(request: Request) {
     return json({ error: message }, 400);
   }
 
-  const demo = isDemoCompany(parsed.companyId);
-  const company = demo
+  const preview = form.get("preview") === "1";
+  const isDemo = isDemoCompany(parsed.companyId);
+  const demo = isDemo || preview; // demo én preview: geen lead, geen bedrijfsmail
+  const company = isDemo
     ? await ensureDemoCompany()
     : await getCompanyById(parsed.companyId);
   if (!company) {
@@ -160,17 +168,29 @@ export async function POST(request: Request) {
     );
   }
 
-  // 2. Prijsberekening met de tarieven van deze verhuizer
+  // 2. Afstand: gebruik de opgegeven schatting, of geocodeer de adressen.
+  let distanceKm = parsed.move.distanceKm;
+  if (distanceKm === 0 && parsed.move.fromAddress && parsed.move.toAddress) {
+    distanceKm = (await estimateDistanceKm(parsed.move.fromAddress, parsed.move.toAddress)) ?? 0;
+  }
+
+  // 3. Prijsberekening met de tarieven van deze verhuizer
   const price = calculatePrice(company, {
     inventory,
-    distanceKm: parsed.move.distanceKm,
+    distanceKm,
     options: parsed.options,
+    fromFloor: Number(parsed.move.fromFloor) || 0,
+    toFloor: Number(parsed.move.toFloor) || 0,
+    hasElevator: parsed.move.hasElevator,
+    streetAccessible: parsed.move.streetAccessible,
+    rush: isRushDate(parsed.move.moveDate),
   });
 
   // Demo: geen lead opslaan, maar wél de offerte naar de klant mailen
   // (behalve naar de niet-bestaande voorbeeld-adressen).
   if (demo) {
-    const fake = /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
+    const fake =
+      preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
     const demoEmail = fake
       ? { sent: false as const }
       : await sendQuoteEmails(
@@ -214,11 +234,18 @@ export async function POST(request: Request) {
     fromFloor: parsed.move.fromFloor || null,
     toFloor: parsed.move.toFloor || null,
     moveDate: parsed.move.moveDate || null,
-    distanceKm: String(parsed.move.distanceKm),
+    distanceKm: String(distanceKm),
     rooms,
     inventory,
+    photoUrls: parsed.photoUrls,
     totalVolumeM3: String(price.totalVolumeM3),
     options: parsed.options,
+    move: {
+      propertyType: parsed.move.propertyType || undefined,
+      roomCount: parsed.move.roomCount || undefined,
+      hasElevator: parsed.move.hasElevator,
+      streetAccessible: parsed.move.streetAccessible,
+    },
     priceBreakdown: price.breakdown,
     subtotalCents: price.subtotalCents,
     vatCents: price.vatCents,
@@ -229,8 +256,17 @@ export async function POST(request: Request) {
   const emailResult = await sendQuoteEmails({
     company,
     customer: parsed.customer,
-    move: { type: parsed.moveType, ...parsed.move },
+    move: { type: parsed.moveType, ...parsed.move, distanceKm },
     inventory,
+    photoUrls: parsed.photoUrls,
+    details: {
+      Woningtype: parsed.move.propertyType || "",
+      "Aantal kamers": parsed.move.roomCount ? String(parsed.move.roomCount) : "",
+      Etage: parsed.move.fromFloor || "",
+      "Lift aanwezig": parsed.move.hasElevator ? "Ja" : "Nee",
+      "Bereikbaar voor de wagen": parsed.move.streetAccessible ? "Ja" : "Nee",
+      "Geschat aantal ritten": String(price.trips),
+    },
     totalVolumeM3: price.totalVolumeM3,
     breakdown: price.breakdown,
     subtotalCents: price.subtotalCents,

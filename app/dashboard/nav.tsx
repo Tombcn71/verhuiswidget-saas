@@ -7,6 +7,7 @@ const items = [
   { href: "/dashboard", label: "Overzicht" },
   { href: "/dashboard/leads", label: "Leads" },
   { href: "/dashboard/tarieven", label: "Tarieven" },
+  { href: "/dashboard/preview", label: "Preview" },
   { href: "/dashboard/instellingen", label: "Bedrijf" },
   { href: "/dashboard/embed", label: "Widget-link" },
 ];

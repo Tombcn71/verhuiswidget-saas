@@ -1,63 +1,36 @@
 /**
- * Adres-lookup en afstandsberekening.
- *
- * NL: PDOK Locatieserver (gratis, geen key). Andere landen: alleen handmatige
- * invoer, afstand wordt dan door de klant zelf ingevuld / later gecorrigeerd.
+ * Geocodeert een vrij ingevoerd adres via de PDOK Locatieserver (gratis, NL)
+ * en schat de rij-afstand tussen twee adressen.
  */
 
-export type GeoAddress = {
-  street: string;
-  city: string;
-  lat: number;
-  lon: number;
-};
+type LatLon = { lat: number; lon: number };
 
 const PDOK =
-  "https://api.pdok.nl/bzk/locatieserver/search/v3_1/free";
+  "https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?fl=centroide_ll&rows=1&q=";
 
-function normalizePostcode(pc: string): string {
-  return pc.replace(/\s+/g, "").toUpperCase();
-}
-
-/** Zoekt straat, plaats en coördinaten bij een NL postcode + huisnummer. */
-export async function lookupDutchAddress(
-  postcode: string,
-  houseNumber: string,
-): Promise<GeoAddress | null> {
-  const pc = normalizePostcode(postcode);
-  if (!/^\d{4}[A-Z]{2}$/.test(pc) || !houseNumber.trim()) return null;
-
-  const q = `${pc} ${houseNumber.trim()}`;
-  const url = `${PDOK}?q=${encodeURIComponent(q)}&fq=type:adres&rows=1&fl=straatnaam,woonplaatsnaam,centroide_ll`;
-
+export async function geocode(address: string): Promise<LatLon | null> {
+  const q = address.trim();
+  if (q.length < 4) return null;
   try {
-    const res = await fetch(url, {
+    const res = await fetch(PDOK + encodeURIComponent(q), {
       headers: { Accept: "application/json" },
-      // Adres verandert zelden — laat Next 'm cachen.
-      next: { revalidate: 60 * 60 * 24 },
+      signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return null;
-    const data = await res.json();
-    const doc = data?.response?.docs?.[0];
-    if (!doc) return null;
-
-    // centroide_ll = "POINT(lon lat)"
-    const m = /POINT\(([-\d.]+) ([-\d.]+)\)/.exec(doc.centroide_ll ?? "");
-    return {
-      street: String(doc.straatnaam ?? ""),
-      city: String(doc.woonplaatsnaam ?? ""),
-      lon: m ? Number(m[1]) : NaN,
-      lat: m ? Number(m[2]) : NaN,
+    const data = (await res.json()) as {
+      response?: { docs?: { centroide_ll?: string }[] };
     };
+    const point = data.response?.docs?.[0]?.centroide_ll;
+    // formaat: "POINT(5.12143 52.09074)" -> lon lat
+    const m = point?.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+    if (!m) return null;
+    return { lon: Number(m[1]), lat: Number(m[2]) };
   } catch {
     return null;
   }
 }
 
-function haversineKm(
-  a: { lat: number; lon: number },
-  b: { lat: number; lon: number },
-): number {
+function haversineKm(a: LatLon, b: LatLon): number {
   const R = 6371;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;
   const dLon = ((b.lon - a.lon) * Math.PI) / 180;
@@ -69,20 +42,15 @@ function haversineKm(
   return 2 * R * Math.asin(Math.sqrt(s));
 }
 
-/** Geschatte wegafstand: hemelsbrede afstand × 1.3, afgerond op hele km. */
-export function estimateRoadDistanceKm(
-  a: { lat: number; lon: number } | null,
-  b: { lat: number; lon: number } | null,
-): number | null {
-  if (
-    !a ||
-    !b ||
-    !Number.isFinite(a.lat) ||
-    !Number.isFinite(a.lon) ||
-    !Number.isFinite(b.lat) ||
-    !Number.isFinite(b.lon)
-  ) {
-    return null;
-  }
-  return Math.max(1, Math.round(haversineKm(a, b) * 1.3));
+/**
+ * Geeft de geschatte rij-afstand in km tussen twee adressen (hemelsbreed × 1.3
+ * als wegfactor), of `null` als één van beide niet te geocoderen is.
+ */
+export async function estimateDistanceKm(
+  fromAddress: string,
+  toAddress: string,
+): Promise<number | null> {
+  const [a, b] = await Promise.all([geocode(fromAddress), geocode(toAddress)]);
+  if (!a || !b) return null;
+  return Math.round(haversineKm(a, b) * 1.3);
 }
