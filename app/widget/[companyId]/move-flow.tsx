@@ -7,6 +7,7 @@ import {
   Briefcase,
   Building,
   Camera,
+  CircleArrowLeft,
   DoorOpen,
   Home,
   ImageIcon,
@@ -14,6 +15,7 @@ import {
   Minus,
   Plus,
   Sofa,
+  Sparkles,
   Table,
   Utensils,
 } from "@/app/_components/icons";
@@ -1247,7 +1249,13 @@ export function MoveFlow({
   );
 
   const nextLabel =
-    step === 0 ? "Volgende" : step === 1 ? "Bevestigen" : step === LAST_INPUT_STEP ? "Ontvang je offerte" : "Volgende";
+    step === 0
+      ? "Start AI-analyse"
+      : step === 1
+        ? "Bevestigen"
+        : step === LAST_INPUT_STEP
+          ? "Ontvang je offerte"
+          : "Volgende";
 
   const onNext = () => {
     if (step === 0) return void analyzeAndContinue();
@@ -1280,11 +1288,15 @@ export function MoveFlow({
         {/* Topbalk */}
         <div className="flex items-center justify-between">
           <button
-            onClick={step === 0 ? onBackToIntro : () => setStep((s) => Math.max(0, s - 1))}
+            onClick={
+              step > 0
+                ? () => setStep((s) => Math.max(0, s - 1))
+                : (onBackToIntro ?? (() => window.history.back()))
+            }
             aria-label="Terug"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-700"
+            className="text-slate-700 hover:text-slate-900"
           >
-            ←
+            <CircleArrowLeft className="h-9 w-9" />
           </button>
           <Logo className="text-base" />
           <span className="h-9 w-9" />
@@ -1325,10 +1337,11 @@ export function MoveFlow({
           <button
             onClick={onNext}
             disabled={!stepValid || submitting}
-            className={`rounded-full px-6 py-3 text-sm font-semibold text-white shadow-md disabled:opacity-40 ${AI_GRADIENT} ${
+            className={`flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-md disabled:opacity-40 ${AI_GRADIENT} ${
               submitting ? "animate-pulse" : ""
             }`}
           >
+            {step === 0 && !submitting && <Sparkles className="h-4 w-4" />}
             {submitting ? "Offerte wordt berekend…" : nextLabel}
           </button>
         )}
@@ -1397,11 +1410,12 @@ export function MoveFlow({
           <button
             onClick={onNext}
             disabled={!stepValid || submitting}
-            className={`rounded-lg px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50 ${fillClass} ${
+            className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50 ${fillClass} ${
               submitting ? "animate-pulse" : ""
             }`}
             style={fillStyle}
           >
+            {step === 0 && !submitting && <Sparkles className="h-4 w-4" />}
             {submitting ? "Offerte wordt berekend…" : nextLabel}
           </button>
         </div>

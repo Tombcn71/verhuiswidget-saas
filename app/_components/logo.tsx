@@ -2,9 +2,9 @@
 export function Logo({ className = "text-lg" }: { className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-bold tracking-tight ${className}`}
+      className={`inline-flex items-center gap-1 font-bold tracking-tight ${className}`}
     >
-      <LogoMark className="h-[1.3em] w-[1.3em] shrink-0 text-brand-600" />
+      <LogoMark className="mt-[-0.12em] h-[1.3em] w-[1.3em] shrink-0 text-brand-600" />
       <span>
         mover<span className="text-brand-600">AI</span>
       </span>

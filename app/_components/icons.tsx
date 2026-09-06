@@ -242,3 +242,13 @@ export function Plus(props: IconProps) {
     </Svg>
   );
 }
+
+export function CircleArrowLeft(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m12 8-4 4 4 4" />
+      <path d="M16 12H8" />
+    </Svg>
+  );
+}
