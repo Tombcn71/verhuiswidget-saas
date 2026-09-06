@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { requireCompany } from "@/lib/current-company";
+import { appUrl } from "@/lib/app-url";
 
 export const metadata: Metadata = { title: "Preview" };
 
 export default async function PreviewPage() {
   const company = await requireCompany();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const src = `${appUrl}/widget/${company.id}?preview`;
+  const src = `${appUrl()}/widget/${company.id}?preview`;
 
   return (
     <div className="max-w-3xl space-y-6">

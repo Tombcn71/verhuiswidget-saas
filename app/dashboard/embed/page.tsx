@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { requireCompany } from "@/lib/current-company";
+import { appUrl } from "@/lib/app-url";
 import { CopyBlock } from "./copy-block";
 
 export const metadata: Metadata = { title: "Widget-link" };
 
 export default async function EmbedPage() {
   const company = await requireCompany();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const base = appUrl();
 
-  const loaderScript = `<script src="${appUrl}/embed.js" async></script>`;
-  const popupLink = `${appUrl}/widget/${company.id}?popup`;
+  const loaderScript = `<script src="${base}/embed.js" async></script>`;
+  const popupLink = `${base}/widget/${company.id}?popup`;
+  const directLink = `${base}/widget/${company.id}`;
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -55,18 +56,19 @@ export default async function EmbedPage() {
         prima). Met stap 1 wordt het de pop-up.
       </div>
 
-      <Link
-        href={`/widget/${company.id}`}
-        target="_blank"
-        className="inline-block text-sm font-medium text-brand-600 underline"
-      >
-        Bekijk hoe de widget eruitziet →
-      </Link>
-
-      <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-        <strong>Veilig om te delen:</strong> hiermee zijn alleen je publieke tarieven en
-        huisstijl zichtbaar, geen klant- of bedrijfsgegevens.
-      </p>
+      <section className="space-y-3">
+        <h2 className="font-semibold">Of: deel als directe link</h2>
+        <p className="text-sm text-slate-600">
+          Geen website nodig. Zet deze link in je Instagram-bio, een Facebook-post, een
+          Google-bedrijfsprofiel, een e-mailhandtekening of stuur &apos;m via WhatsApp. Wie
+          erop klikt, krijgt de widget als eigen pagina.
+        </p>
+        <CopyBlock code={directLink} />
+        <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <strong>Veilig om te delen:</strong> hiermee zijn alleen je publieke tarieven en
+          huisstijl zichtbaar, geen klant- of bedrijfsgegevens.
+        </p>
+      </section>
     </div>
   );
 }

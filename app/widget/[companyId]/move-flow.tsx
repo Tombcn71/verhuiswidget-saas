@@ -102,6 +102,7 @@ export function MoveFlow({
   setStep,
   onBackToIntro,
   preview = false,
+  appChrome = false,
 }: {
   company: CompanyPublic;
   demo: boolean;
@@ -112,7 +113,10 @@ export function MoveFlow({
   setStep: Dispatch<SetStateAction<number>>;
   onBackToIntro?: () => void;
   preview?: boolean;
+  /** Volledig-scherm app-weergave (demo, preview én de directe deel-link). */
+  appChrome?: boolean;
 }) {
+  const chrome = demo || appChrome;
   // Stap 1 — contact
   const [name, setName] = useState(demo ? "Demo Gebruiker" : "");
   const [email, setEmail] = useState(demo ? "demo@voorbeeld.nl" : "");
@@ -171,8 +175,8 @@ export function MoveFlow({
   const [result, setResult] = useState<Result | null>(null);
 
   const accent = company.primaryColor;
-  const fillClass = demo ? AI_GRADIENT : "";
-  const fillStyle = demo ? undefined : { background: accent };
+  const fillClass = chrome ? AI_GRADIENT : "";
+  const fillStyle = chrome ? undefined : { background: accent };
 
   useEffect(() => {
     return () => photos.forEach((p) => URL.revokeObjectURL(p.url));
@@ -594,12 +598,12 @@ export function MoveFlow({
                 key={t}
                 onClick={() => setMoveType(t)}
                 className={`rounded-lg border px-3 py-2 text-sm capitalize ${
-                  moveType === t && demo ? `${AI_GRADIENT} border-transparent text-white` : ""
+                  moveType === t && chrome ? `${AI_GRADIENT} border-transparent text-white` : ""
                 }`}
                 style={{
-                  borderColor: moveType === t ? (demo ? undefined : accent) : "#cbd5e1",
-                  background: moveType === t ? (demo ? undefined : accent) : "white",
-                  color: moveType === t ? (demo ? undefined : "white") : "#0f172a",
+                  borderColor: moveType === t ? (chrome ? undefined : accent) : "#cbd5e1",
+                  background: moveType === t ? (chrome ? undefined : accent) : "white",
+                  color: moveType === t ? (chrome ? undefined : "white") : "#0f172a",
                 }}
               >
                 {t}
@@ -742,7 +746,7 @@ export function MoveFlow({
   // --- Stap 1: contact ---
   const contactBody = (
     <div className="space-y-4">
-      {demo && (
+      {chrome && (
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight">
             Jouw{" "}
@@ -917,7 +921,7 @@ export function MoveFlow({
   // --- Stap 2: adressen ---
   const adressenBody = (
     <div className="space-y-5">
-      {demo && (
+      {chrome && (
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight">
             {isClearance ? "Waar is de " : "Waar ga je "}
@@ -929,12 +933,12 @@ export function MoveFlow({
         </div>
       )}
       <div>
-        {!demo && (
+        {!chrome && (
           <p className="text-sm font-semibold">
             {isClearance ? "Wat is het ontruimadres?" : "Waar ga je naartoe verhuizen?"}
           </p>
         )}
-        <div className={`space-y-3 ${demo ? "" : "mt-2"}`}>
+        <div className={`space-y-3 ${chrome ? "" : "mt-2"}`}>
           <label className="block">
             <span className="text-xs font-medium text-slate-500">
               {isClearance ? "Ontruimadres" : "Ophaaladres"}
@@ -1030,7 +1034,7 @@ export function MoveFlow({
   // --- Stap 3: opties ---
   const optiesBody = (
     <div className="space-y-3">
-      {demo && (
+      {chrome && (
         <div className="mb-2 text-center">
           <h2 className="text-3xl font-bold tracking-tight">
             Nog wat{" "}
@@ -1251,7 +1255,7 @@ export function MoveFlow({
     setStep((s) => s + 1);
   };
 
-  if (demo) {
+  if (chrome) {
     if (analyzing) {
       return (
         <div className="flex h-dvh flex-col items-center justify-center gap-4 bg-white px-5 text-center text-slate-900">

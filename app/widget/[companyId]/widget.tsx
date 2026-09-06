@@ -24,10 +24,6 @@ export function Widget({
   preview?: boolean;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const accent = company.primaryColor;
-  const demoUx = demo || preview;
-  const fillClass = demoUx ? AI_GRADIENT : "";
-  const fillStyle = demoUx ? undefined : { background: accent };
 
   const showToggle = company.serviceType === "beide";
   const forcedType: "verhuizing" | "ontruiming" | null =
@@ -37,7 +33,8 @@ export function Widget({
         ? "verhuizing"
         : null;
 
-  const [started, setStarted] = useState(preview ? true : !demoUx);
+  // De video-intro tonen we alleen in de losse marketing-demo.
+  const [started, setStarted] = useState(!demo);
   const [moveType, setMoveType] = useState<"verhuizing" | "ontruiming">(
     forcedType ?? "verhuizing",
   );
@@ -58,7 +55,7 @@ export function Widget({
     return () => ro.disconnect();
   }, [company.id, started, moveType]);
 
-  if (demoUx && !started) {
+  if (demo && !started) {
     return (
       <div
         ref={rootRef}
@@ -85,8 +82,7 @@ export function Widget({
 
         <button
           onClick={() => setStarted(true)}
-          className={`mx-auto mt-6 block rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg ${fillClass}`}
-          style={fillStyle}
+          className={`mx-auto mt-6 block rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg ${AI_GRADIENT}`}
         >
           Overslaan
         </button>
@@ -94,50 +90,20 @@ export function Widget({
     );
   }
 
-  if (demoUx) {
-    return (
-      <div ref={rootRef} className="bg-white text-slate-900">
-        <MoveFlow
-          company={company}
-          demo={demoUx}
-          preview={preview}
-          showToggle={showToggle}
-          moveType={moveType}
-          setMoveType={setMoveType}
-          step={step}
-          setStep={setStep}
-          onBackToIntro={() => setStarted(false)}
-        />
-      </div>
-    );
-  }
-
   return (
-    <div ref={rootRef} className="mx-auto max-w-xl p-4 text-slate-900">
-      {/* Header */}
-      <div className="mb-4 flex items-center gap-3">
-        {company.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={company.logoUrl} alt={company.name} className="h-8 w-auto" />
-        ) : (
-          <span className="font-bold">{company.name}</span>
-        )}
-        <span className="text-sm text-slate-500">Offerte in 2 minuten</span>
-      </div>
-
+    <div ref={rootRef} className="bg-white text-slate-900">
       <MoveFlow
         company={company}
         demo={demo}
+        preview={preview}
+        appChrome
         showToggle={showToggle}
         moveType={moveType}
         setMoveType={setMoveType}
         step={step}
         setStep={setStep}
+        onBackToIntro={demo ? () => setStarted(false) : undefined}
       />
-
-      <p className="mt-6 text-center text-[11px] text-slate-400">
-        Mogelijk gemaakt door moverAI
-      </p>
     </div>
   );
 }

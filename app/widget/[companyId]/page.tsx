@@ -30,12 +30,11 @@ export default async function WidgetPage({
   // In een <iframe> (embed.js): kale widget, de host regelt de omlijsting.
   if (embed !== undefined) return widget;
 
-  // Directe link: op mobiel fullscreen (voelt als een app), op desktop een kaart in app-formaat.
+  // Directe link: exact dezelfde weergave als de demo — fullscreen, van boven tot onder.
+  // Gecentreerde app-kolom; op telefoons is dat de volle breedte.
   return (
-    <div className="flex min-h-dvh justify-center bg-white sm:min-h-screen sm:bg-slate-50 sm:px-4 sm:py-12">
-      <div className="w-full sm:h-fit sm:max-w-md sm:rounded-2xl sm:bg-white sm:shadow-sm sm:ring-1 sm:ring-slate-200">
-        {widget}
-      </div>
+    <div className="mx-auto w-full max-w-md bg-white sm:shadow-xl sm:ring-1 sm:ring-slate-200">
+      {widget}
     </div>
   );
 }
