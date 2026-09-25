@@ -73,8 +73,11 @@ export const companies = pgTable("companies", {
   trialEndsAt: timestamp("trial_ends_at", { withTimezone: true })
     .notNull()
     .default(sql`now() + interval '14 days'`),
-  subscriptionStatus: text("subscription_status").notNull().default("trialing"), // "trialing" | "active"
+  // "trialing" (proef, nog niet betaald) | "active" | "past_due" | "canceled" — bijgewerkt door de Stripe-webhook.
+  subscriptionStatus: text("subscription_status").notNull().default("trialing"),
   extraSeats: integer("extra_seats").notNull().default(0), // alleen Premium
+  stripeCustomerId: text("stripe_customer_id").unique(),
+  stripeSubscriptionId: text("stripe_subscription_id"),
 
   // Bedrijfsgegevens / white-label
   name: text("name").notNull().default("Mijn verhuisbedrijf"),

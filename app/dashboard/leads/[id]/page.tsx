@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { requireCompany } from "@/lib/current-company";
 import { LEAD_SOURCE_LABEL, getLeadForCompany, normalizeLeadSource } from "@/lib/leads";
 import { formatEuroCents, formatDate, formatDateTime } from "@/lib/format";
+import { isLeadLocked } from "@/lib/plans";
 import { setLeadStatus, saveLeadNotes } from "./actions";
 
 export const metadata: Metadata = { title: "Lead" };
@@ -17,6 +18,25 @@ export default async function LeadDetailPage({
   const company = await requireCompany();
   const lead = await getLeadForCompany(company.id, id);
   if (!lead) notFound();
+
+  if (isLeadLocked(company, lead)) {
+    return (
+      <div className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center">
+        <div className="text-3xl">🔒</div>
+        <h1 className="mt-3 text-xl font-bold">Nieuwe aanvraag</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Binnengekomen op {formatDateTime(lead.createdAt)}. Je proefperiode is afgelopen;
+          activeer een plan om de klantgegevens en offerte te bekijken.
+        </p>
+        <Link
+          href="/dashboard/abonnement"
+          className="mt-5 inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+        >
+          Bekijk plannen
+        </Link>
+      </div>
+    );
+  }
 
   const isClearance = lead.moveType === "ontruiming";
   const md = lead.move ?? {};

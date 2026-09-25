@@ -92,6 +92,13 @@
       "when": 1790329195647,
       "tag": "0012_third_strong_guy",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790333065057,
+      "tag": "0013_first_gamora",
+      "breakpoints": true
     }
   ]
 }

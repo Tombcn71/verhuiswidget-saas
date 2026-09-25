@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
+import { hasAccess } from "@/lib/plans";
 import { isDemoCompany } from "@/lib/demo";
 import { createLead } from "@/lib/leads";
 import { calculatePrice, clearanceTariffs, floorTypeRate, isRushDate } from "@/lib/pricing";
@@ -258,7 +259,12 @@ export async function POST(request: Request) {
     totalCents,
   });
 
-  const emailResult = await sendQuoteEmails({ ...emailData, leadId: lead.id });
+  // Proef verlopen zonder betaling: de klant krijgt z'n offerte, het bedrijf
+  // krijgt de lead pas te zien na het activeren van een plan.
+  const emailResult = await sendQuoteEmails(
+    { ...emailData, leadId: lead.id },
+    { customerOnly: !hasAccess(company) },
+  );
 
   return json({ ...responseBody, emailSent: emailResult.sent });
 }

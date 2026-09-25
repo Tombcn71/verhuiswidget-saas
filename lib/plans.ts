@@ -78,13 +78,29 @@ export type TrialState =
 
 /**
  * Proefperiode (14 dagen, zonder betaalkaart; default van `companies.trial_ends_at`)
- * zolang er geen betaald abonnement is. Stripe volgt in fase 4.
+ * zolang er geen betaald abonnement is. Een mislukte betaling (`past_due`) houdt
+ * toegang; Stripe probeert het zelf opnieuw en de melding vraagt om actie.
  */
 export function trialState(company: Company, now = new Date()): TrialState {
-  if (company.subscriptionStatus === "active") return { kind: "active" };
+  if (company.subscriptionStatus === "active" || company.subscriptionStatus === "past_due") {
+    return { kind: "active" };
+  }
   const msLeft = company.trialEndsAt.getTime() - now.getTime();
   if (msLeft <= 0) return { kind: "expired" };
   return { kind: "trial", daysLeft: Math.ceil(msLeft / (24 * 60 * 60 * 1000)) };
+}
+
+/** Of het bedrijf het dashboard volledig mag gebruiken (proef of betaald). */
+export function hasAccess(company: Company): boolean {
+  return trialState(company).kind !== "expired";
+}
+
+/**
+ * Na een verlopen proef zonder betaling blijft de widget werken, maar zijn leads
+ * van ná de proef afgeschermd tot er betaald is. Oudere leads blijven zichtbaar.
+ */
+export function isLeadLocked(company: Company, lead: { createdAt: Date }): boolean {
+  return !hasAccess(company) && lead.createdAt > company.trialEndsAt;
 }
 
 export type ScanUsage = {

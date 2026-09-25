@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
+import { hasAccess } from "@/lib/plans";
 import { isDemoCompany } from "@/lib/demo";
 import { createLead } from "@/lib/leads";
 import { analyzePhotos, type PhotoInput } from "@/lib/gemini";
@@ -255,28 +256,32 @@ export async function POST(request: Request) {
     totalCents: price.totalCents,
   });
 
-  // 4. Offerte-e-mails versturen (niet fataal)
-  const emailResult = await sendQuoteEmails({
-    company,
-    customer: parsed.customer,
-    move: { type: parsed.moveType, ...parsed.move, distanceKm },
-    inventory,
-    photoUrls: parsed.photoUrls,
-    details: {
-      Woningtype: parsed.move.propertyType || "",
-      "Aantal kamers": parsed.move.roomCount ? String(parsed.move.roomCount) : "",
-      Etage: parsed.move.fromFloor || "",
-      "Lift aanwezig": parsed.move.hasElevator ? "Ja" : "Nee",
-      "Bereikbaar voor de wagen": parsed.move.streetAccessible ? "Ja" : "Nee",
-      "Geschat aantal ritten": String(price.trips),
+  // 4. Offerte-e-mails versturen (niet fataal). Proef verlopen zonder betaling:
+  // alleen de klant krijgt z'n offerte; het bedrijf ziet de lead na activeren.
+  const emailResult = await sendQuoteEmails(
+    {
+      company,
+      customer: parsed.customer,
+      move: { type: parsed.moveType, ...parsed.move, distanceKm },
+      inventory,
+      photoUrls: parsed.photoUrls,
+      details: {
+        Woningtype: parsed.move.propertyType || "",
+        "Aantal kamers": parsed.move.roomCount ? String(parsed.move.roomCount) : "",
+        Etage: parsed.move.fromFloor || "",
+        "Lift aanwezig": parsed.move.hasElevator ? "Ja" : "Nee",
+        "Bereikbaar voor de wagen": parsed.move.streetAccessible ? "Ja" : "Nee",
+        "Geschat aantal ritten": String(price.trips),
+      },
+      totalVolumeM3: price.totalVolumeM3,
+      breakdown: price.breakdown,
+      subtotalCents: price.subtotalCents,
+      vatCents: price.vatCents,
+      totalCents: price.totalCents,
+      leadId: lead.id,
     },
-    totalVolumeM3: price.totalVolumeM3,
-    breakdown: price.breakdown,
-    subtotalCents: price.subtotalCents,
-    vatCents: price.vatCents,
-    totalCents: price.totalCents,
-    leadId: lead.id,
-  });
+    { customerOnly: !hasAccess(company) },
+  );
 
   return json({
     ok: true,

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { requireCompany } from "@/lib/current-company";
+import { hasAccess } from "@/lib/plans";
 import { normalizeServiceType } from "@/lib/companies";
 import { Widget } from "@/app/widget/[companyId]/widget";
 
@@ -12,6 +14,7 @@ export const metadata: Metadata = { title: "Scannen" };
  */
 export default async function ScanPage() {
   const company = await requireCompany();
+  if (!hasAccess(company)) redirect("/dashboard/abonnement");
 
   return (
     <div className="space-y-6">

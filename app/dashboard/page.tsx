@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requireCompany } from "@/lib/current-company";
 import { normalizeServiceType } from "@/lib/companies";
 import { countLeadsThisMonth, getLeadStats, listLeadsForCompany } from "@/lib/leads";
-import { planFor, scanUsage } from "@/lib/plans";
+import { isLeadLocked, planFor, scanUsage } from "@/lib/plans";
 import { UsageBar } from "./usage-bar";
 import { formatEuroCents, formatDateTime } from "@/lib/format";
 
@@ -85,27 +85,35 @@ export default async function DashboardOverviewPage() {
           </p>
         ) : (
           <ul className="divide-y divide-slate-100">
-            {leads.map((lead) => (
+            {leads.map((lead) => {
+              // Afgeschermd na een verlopen proef: de detailpagina toont dan de uitleg.
+              const locked = isLeadLocked(company, lead);
+              return (
               <li key={lead.id}>
                 <Link
                   href={`/dashboard/leads/${lead.id}`}
                   className="flex items-center justify-between px-5 py-3 hover:bg-slate-50"
                 >
                   <div>
-                    <div className="font-medium">{lead.customerName}</div>
+                    <div className="font-medium">
+                      {locked ? "🔒 Nieuwe aanvraag" : lead.customerName}
+                    </div>
                     <div className="text-sm text-slate-500">
                       {formatDateTime(lead.createdAt)} · {Number(lead.totalVolumeM3).toFixed(1)} m³
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold">{formatEuroCents(lead.totalCents)}</div>
+                    <div className="font-semibold">
+                      {locked ? "—" : formatEuroCents(lead.totalCents)}
+                    </div>
                     <div className="text-xs uppercase tracking-wide text-slate-400">
                       {lead.status}
                     </div>
                   </div>
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </div>

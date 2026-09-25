@@ -23,7 +23,10 @@ export default async function DashboardLayout({
   const [admin, used] = await Promise.all([isOrgAdmin(), countLeadsThisMonth(company.id)]);
   const plan = planFor(company);
   const trial = trialState(company);
-  const notice = planNotice(plan, scanUsage(company, used), trial);
+  const notice =
+    company.subscriptionStatus === "past_due"
+      ? "Je laatste betaling is mislukt. Werk je betaalmethode bij om moverAI te blijven gebruiken."
+      : planNotice(plan, scanUsage(company, used), trial);
 
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
@@ -80,7 +83,7 @@ export default async function DashboardLayout({
  */
 function planNotice(plan: Plan, usage: ScanUsage, trial: TrialState): string | null {
   if (trial.kind === "expired") {
-    return "Je proefperiode is afgelopen. Kies een plan om moverAI te blijven gebruiken.";
+    return "Je proefperiode is afgelopen. Nieuwe aanvragen komen nog binnen, maar je ziet ze pas als je een plan activeert.";
   }
   const upgrade = nextPlan(plan);
   if (usage.over && upgrade) {

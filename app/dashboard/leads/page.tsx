@@ -4,6 +4,7 @@ import { requireCompany } from "@/lib/current-company";
 import { normalizeServiceType } from "@/lib/companies";
 import { LEAD_SOURCE_LABEL, listLeadsForCompany, normalizeLeadSource } from "@/lib/leads";
 import { formatEuroCents, formatDateTime } from "@/lib/format";
+import { isLeadLocked } from "@/lib/plans";
 
 export const metadata: Metadata = { title: "Leads" };
 
@@ -71,7 +72,25 @@ export default async function LeadsPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {leads.map((lead) => (
+              {leads.map((lead) =>
+                isLeadLocked(company, lead) ? (
+                  <tr key={lead.id} className="bg-slate-50/60">
+                    <td className="px-4 py-3">
+                      <Link
+                        href="/dashboard/abonnement"
+                        className="font-medium text-slate-500 hover:underline"
+                      >
+                        🔒 Nieuwe aanvraag
+                      </Link>
+                      <div className="text-xs text-slate-400">Activeer een plan om te bekijken</div>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">{formatDateTime(lead.createdAt)}</td>
+                    <td className="px-4 py-3 capitalize text-slate-600">{lead.moveType}</td>
+                    <td className="px-4 py-3 text-right text-slate-400">—</td>
+                    <td className="px-4 py-3 text-right text-slate-400">—</td>
+                    <td className="px-4 py-3" />
+                  </tr>
+                ) : (
                 <tr key={lead.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3">
                     <Link
@@ -101,7 +120,8 @@ export default async function LeadsPage({
                     </span>
                   </td>
                 </tr>
-              ))}
+                ),
+              )}
             </tbody>
           </table>
         </div>

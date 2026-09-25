@@ -3,6 +3,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { db, companies, type Company } from "@/lib/db";
 import { DEMO_CLERK_ID, DEMO_COMPANY_ID, DEMO_COMPANY_PUBLIC } from "@/lib/demo";
 import { seatLimit, type PlanId } from "@/lib/plans";
+import type { SubscriptionStatus } from "@/lib/stripe";
 
 export async function getCompanyByOrgId(clerkOrgId: string): Promise<Company | null> {
   const [row] = await db
@@ -42,6 +43,14 @@ export async function getOrCreateCompany(input: {
     organizationId: input.clerkOrgId,
   });
 
+  // Eén proefperiode per gebruiker: wie al eerder een bedrijf aanmaakte, begint
+  // meteen zonder proef (anders kun je eindeloos gratis blijven).
+  const [earlier] = await db
+    .select({ id: companies.id })
+    .from(companies)
+    .where(eq(companies.clerkUserId, input.clerkUserId))
+    .limit(1);
+
   const [created] = await db
     .insert(companies)
     .values({
@@ -49,6 +58,7 @@ export async function getOrCreateCompany(input: {
       clerkUserId: input.clerkUserId,
       email: input.email,
       name: org.name.trim() || "Mijn bedrijf",
+      ...(earlier ? { trialEndsAt: new Date() } : {}),
     })
     .onConflictDoNothing({ target: companies.clerkOrgId })
     .returning();
@@ -193,4 +203,41 @@ export async function setCompanyPlan(id: string, plan: PlanId): Promise<Company>
     .returning();
   await syncSeatLimit(row);
   return row;
+}
+
+export async function getCompanyByStripeCustomerId(customerId: string): Promise<Company | null> {
+  const [row] = await db
+    .select()
+    .from(companies)
+    .where(eq(companies.stripeCustomerId, customerId))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function setStripeCustomerId(id: string, customerId: string): Promise<void> {
+  await db
+    .update(companies)
+    .set({ stripeCustomerId: customerId, updatedAt: new Date() })
+    .where(eq(companies.id, id));
+}
+
+/**
+ * Verwerkt de stand van een Stripe-abonnement (vanuit de webhook) op het bedrijf
+ * en past de gebruikerslimiet in Clerk mee aan.
+ */
+export async function applySubscription(
+  id: string,
+  values: {
+    plan?: PlanId;
+    subscriptionStatus: SubscriptionStatus;
+    stripeSubscriptionId: string | null;
+    extraSeats: number;
+  },
+): Promise<void> {
+  const [row] = await db
+    .update(companies)
+    .set({ ...values, updatedAt: new Date() })
+    .where(eq(companies.id, id))
+    .returning();
+  if (row) await syncSeatLimit(row);
 }
