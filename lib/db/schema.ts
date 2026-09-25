@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   uuid,
@@ -55,12 +56,25 @@ export type MoveDetails = {
 };
 
 /**
- * Verhuizers — elk gekoppeld aan precies één Clerk-account.
+ * Verhuizers — elk gekoppeld aan precies één Clerk-organisatie (het team).
  * Alle bedragen staan in eurocenten (integer), exclusief btw.
  */
 export const companies = pgTable("companies", {
   id: uuid("id").primaryKey().defaultRandom(),
-  clerkUserId: text("clerk_user_id").notNull().unique(),
+  // De Clerk-organisatie van dit bedrijf. Null alleen bij de demo en bij oude
+  // accounts die nog niet zijn overgezet (zie `ensureLegacyOrganization`).
+  clerkOrgId: text("clerk_org_id").unique(),
+  // Wie het bedrijf heeft aangemaakt; zegt niets meer over toegang.
+  clerkUserId: text("clerk_user_id").notNull(),
+
+  // Abonnement. `plan`: "basic" | "standard" | "premium" (zie `lib/plans.ts`).
+  // Zonder betaald abonnement geldt de proefperiode tot `trialEndsAt`.
+  plan: text("plan").notNull().default("standard"),
+  trialEndsAt: timestamp("trial_ends_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now() + interval '14 days'`),
+  subscriptionStatus: text("subscription_status").notNull().default("trialing"), // "trialing" | "active"
+  extraSeats: integer("extra_seats").notNull().default(0), // alleen Premium
 
   // Bedrijfsgegevens / white-label
   name: text("name").notNull().default("Mijn verhuisbedrijf"),
@@ -131,6 +145,8 @@ export const leads = pgTable(
 
     // Verhuisgegevens
     moveType: text("move_type").notNull().default("verhuizing"), // verhuizing | ontruiming
+    // Kanaal: "onsite" (widget op de site) | "onlink" (deel-link) | "onspot" (zelf gescand).
+    source: text("source").notNull().default("onsite"),
     fromAddress: text("from_address"),
     toAddress: text("to_address"),
     fromFloor: text("from_floor"),

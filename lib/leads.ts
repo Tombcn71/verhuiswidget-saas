@@ -1,6 +1,18 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { db, leads, type Lead, type NewLead } from "@/lib/db";
 
+export type LeadSource = "onsite" | "onlink" | "onspot";
+
+export const LEAD_SOURCE_LABEL: Record<LeadSource, string> = {
+  onsite: "Widget",
+  onlink: "Link",
+  onspot: "Zelf gescand",
+};
+
+export function normalizeLeadSource(value: unknown): LeadSource {
+  return value === "onlink" || value === "onspot" ? value : "onsite";
+}
+
 export async function createLead(values: NewLead): Promise<Lead> {
   const [row] = await db.insert(leads).values(values).returning();
   return row;
@@ -55,6 +67,23 @@ export async function updateLeadNotes(
     .update(leads)
     .set({ notes: notes || null })
     .where(and(eq(leads.companyId, companyId), eq(leads.id, leadId)));
+}
+
+/**
+ * Offerteaanvragen (= scans) in de huidige kalendermaand, Nederlandse tijd.
+ * Telt mee voor de scan-limiet van het plan.
+ */
+export async function countLeadsThisMonth(companyId: string): Promise<number> {
+  const [row] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(leads)
+    .where(
+      and(
+        eq(leads.companyId, companyId),
+        sql`${leads.createdAt} >= date_trunc('month', now() at time zone 'Europe/Amsterdam') at time zone 'Europe/Amsterdam'`,
+      ),
+    );
+  return row?.count ?? 0;
 }
 
 export type LeadStats = {

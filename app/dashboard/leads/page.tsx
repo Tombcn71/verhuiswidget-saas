@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireCompany } from "@/lib/current-company";
 import { normalizeServiceType } from "@/lib/companies";
-import { listLeadsForCompany } from "@/lib/leads";
+import { LEAD_SOURCE_LABEL, listLeadsForCompany, normalizeLeadSource } from "@/lib/leads";
 import { formatEuroCents, formatDateTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Leads" };
@@ -83,7 +83,12 @@ export default async function LeadsPage({
                     <div className="text-xs text-slate-500">{lead.customerEmail}</div>
                   </td>
                   <td className="px-4 py-3 text-slate-600">{formatDateTime(lead.createdAt)}</td>
-                  <td className="px-4 py-3 capitalize text-slate-600">{lead.moveType}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    <span className="capitalize">{lead.moveType}</span>
+                    <div className="text-xs text-slate-400">
+                      {LEAD_SOURCE_LABEL[normalizeLeadSource(lead.source)]}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-right text-slate-600">
                     {Number(lead.totalVolumeM3).toFixed(1)} m³
                   </td>

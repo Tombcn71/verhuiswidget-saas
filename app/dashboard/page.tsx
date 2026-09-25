@@ -2,17 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireCompany } from "@/lib/current-company";
 import { normalizeServiceType } from "@/lib/companies";
-import { getLeadStats, listLeadsForCompany } from "@/lib/leads";
+import { countLeadsThisMonth, getLeadStats, listLeadsForCompany } from "@/lib/leads";
+import { planFor, scanUsage } from "@/lib/plans";
+import { UsageBar } from "./usage-bar";
 import { formatEuroCents, formatDateTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Overzicht" };
 
 export default async function DashboardOverviewPage() {
   const company = await requireCompany();
-  const [stats, leads] = await Promise.all([
+  const [stats, leads, used] = await Promise.all([
     getLeadStats(company.id),
     listLeadsForCompany(company.id, 5),
+    countLeadsThisMonth(company.id),
   ]);
+  const usage = scanUsage(company, used);
 
   const serviceType = normalizeServiceType(company.serviceType);
   const cards = [
@@ -36,6 +40,13 @@ export default async function DashboardOverviewPage() {
             <div className="mt-1 text-2xl font-bold">{c.value}</div>
           </div>
         ))}
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:max-w-sm">
+        <div className="text-sm text-slate-500">
+          Offerteaanvragen deze maand · {planFor(company).label}
+        </div>
+        <UsageBar usage={usage} className="mt-1" />
       </div>
 
       {serviceType === "beide" && (

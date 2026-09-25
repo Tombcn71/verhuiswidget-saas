@@ -22,6 +22,8 @@ export function OPTIONS() {
 
 const payloadSchema = z.object({
   companyId: z.uuid(),
+  // Alleen een label voor de verhuizer (niet geverifieerd): widget, link of zelf gescand.
+  source: z.enum(["onsite", "onlink", "onspot"]).default("onsite"),
   customer: z.object({
     name: z.string().trim().min(1).max(120),
     email: z.email(),
@@ -231,6 +233,7 @@ export async function POST(request: Request) {
 
   const lead = await createLead({
     companyId: company.id,
+    source: parsed.source,
     customerName: parsed.customer.name,
     customerEmail: parsed.customer.email,
     customerPhone: parsed.customer.phone || null,

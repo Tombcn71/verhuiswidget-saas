@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { requireCompany } from "@/lib/current-company";
+import { requireAdminCompany } from "@/lib/current-company";
 import { normalizeServiceType } from "@/lib/companies";
 import { TariffForm } from "./tariff-form";
 
 export const metadata: Metadata = { title: "Tarieven" };
 
 export default async function TariffPage() {
-  const company = await requireCompany();
+  const company = await requireAdminCompany();
   const serviceType = normalizeServiceType(company.serviceType);
 
   return (

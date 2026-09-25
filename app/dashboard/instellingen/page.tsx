@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { requireCompany } from "@/lib/current-company";
+import { requireAdminCompany } from "@/lib/current-company";
 import { SettingsForm } from "./settings-form";
 
 export const metadata: Metadata = { title: "Bedrijf" };
 
 export default async function SettingsPage() {
-  const company = await requireCompany();
+  const company = await requireAdminCompany();
 
   return (
     <div className="space-y-6">

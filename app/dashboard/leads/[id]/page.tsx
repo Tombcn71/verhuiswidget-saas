@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireCompany } from "@/lib/current-company";
-import { getLeadForCompany } from "@/lib/leads";
+import { LEAD_SOURCE_LABEL, getLeadForCompany, normalizeLeadSource } from "@/lib/leads";
 import { formatEuroCents, formatDate, formatDateTime } from "@/lib/format";
 import { setLeadStatus, saveLeadNotes } from "./actions";
 
@@ -37,6 +37,7 @@ export default async function LeadDetailPage({
     ["E-mail", lead.customerEmail],
     ["Telefoon", lead.customerPhone ?? "—"],
     ["Type", lead.moveType],
+    ["Kanaal", LEAD_SOURCE_LABEL[normalizeLeadSource(lead.source)]],
     [isClearance ? "Ontruimadres" : "Van", lead.fromAddress ?? "—"],
     ...(isClearance ? [] : ([["Naar", lead.toAddress ?? "—"]] as Array<[string, string]>)),
     ["Etage", isClearance ? (lead.fromFloor ?? "—") : `${lead.fromFloor ?? "—"} → ${lead.toFloor ?? "—"}`],

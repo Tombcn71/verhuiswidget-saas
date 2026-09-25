@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { LeadSource } from "@/lib/leads";
 import { MoveFlow } from "./move-flow";
 
 type CompanyPublic = {
@@ -18,10 +19,12 @@ export function Widget({
   company,
   demo = false,
   preview = false,
+  source = "onsite",
 }: {
   company: CompanyPublic;
   demo?: boolean;
   preview?: boolean;
+  source?: LeadSource;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -96,6 +99,7 @@ export function Widget({
         company={company}
         demo={demo}
         preview={preview}
+        source={source}
         appChrome
         showToggle={showToggle}
         moveType={moveType}

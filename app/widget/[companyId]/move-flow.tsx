@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import type { LeadSource } from "@/lib/leads";
 import {
   Bath,
   Bed,
@@ -105,6 +106,7 @@ export function MoveFlow({
   onBackToIntro,
   preview = false,
   appChrome = false,
+  source = "onsite",
 }: {
   company: CompanyPublic;
   demo: boolean;
@@ -117,8 +119,11 @@ export function MoveFlow({
   preview?: boolean;
   /** Volledig-scherm app-weergave (demo, preview én de directe deel-link). */
   appChrome?: boolean;
+  /** Kanaal van de lead; bij "onspot" vult de verhuizer de flow in bij de klant. */
+  source?: LeadSource;
 }) {
   const chrome = demo || appChrome;
+  const onspot = source === "onspot";
   // Stap 1 — contact
   const [name, setName] = useState(demo ? "Demo Gebruiker" : "");
   const [email, setEmail] = useState(demo ? "demo@voorbeeld.nl" : "");
@@ -326,6 +331,7 @@ export function MoveFlow({
       const payload = isClearance
         ? {
             companyId: company.id,
+            source,
             customer: { name, email, phone },
             details,
             works: {
@@ -344,6 +350,7 @@ export function MoveFlow({
           }
         : {
             companyId: company.id,
+            source,
             moveType,
             customer: { name, email, phone },
             move: {
@@ -751,14 +758,15 @@ export function MoveFlow({
       {chrome && (
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight">
-            Jouw{" "}
+            {onspot ? "Gegevens van de " : "Jouw "}
             <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-              gegevens
+              {onspot ? "klant" : "gegevens"}
             </span>
           </h2>
           <p className="mx-auto mt-1 max-w-xs text-sm text-slate-500">
-            Vul je naam en e-mail in — je prijsindicatie verschijnt op het scherm en komt ook in je
-            mailbox.
+            {onspot
+              ? "De offerte komt bij je leads en wordt naar de klant gemaild."
+              : "Vul je naam en e-mail in — je prijsindicatie verschijnt op het scherm en komt ook in je mailbox."}
           </p>
         </div>
       )}
@@ -1223,11 +1231,17 @@ export function MoveFlow({
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center">
-        <p className="text-sm font-semibold">Je offerte is verzonden ✓</p>
+        <p className="text-sm font-semibold">
+          {onspot ? "Opgeslagen bij je leads ✓" : "Je offerte is verzonden ✓"}
+        </p>
         <p className="mt-1 text-xs text-slate-500">
-          {result.emailSent
-            ? `De offerte staat nu in je mailbox (${email}). ${company.name} neemt binnenkort contact met je op.`
-            : `Je aanvraag is ontvangen. ${company.name} neemt binnenkort contact met je op.`}
+          {onspot
+            ? result.emailSent
+              ? `De offerte is gemaild naar ${email}.`
+              : "De offerte kon niet gemaild worden; stuur 'm vanuit je leads."
+            : result.emailSent
+              ? `De offerte staat nu in je mailbox (${email}). ${company.name} neemt binnenkort contact met je op.`
+              : `Je aanvraag is ontvangen. ${company.name} neemt binnenkort contact met je op.`}
         </p>
       </div>
     </div>
@@ -1254,7 +1268,9 @@ export function MoveFlow({
       : step === 1
         ? "Bevestigen"
         : step === LAST_INPUT_STEP
-          ? "Ontvang je offerte"
+          ? onspot
+            ? "Offerte maken"
+            : "Ontvang je offerte"
           : "Volgende";
 
   const onNext = () => {

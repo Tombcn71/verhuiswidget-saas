@@ -9,13 +9,15 @@ export default async function WidgetPage({
   searchParams,
 }: PageProps<"/widget/[companyId]">) {
   const { companyId } = await params;
-  const { embed, preview } = await searchParams;
+  const { embed, preview, popup } = await searchParams;
   const company = await getCompanyById(companyId);
   if (!company) notFound();
 
   const widget = (
     <Widget
       preview={preview !== undefined}
+      // `?popup`-links (ook in de embed.js-modal) en losse links = Onlink; de iframe op de site = Onsite.
+      source={popup !== undefined || embed === undefined ? "onlink" : "onsite"}
       company={{
         id: company.id,
         name: company.name,

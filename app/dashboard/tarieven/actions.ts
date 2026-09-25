@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireCompany } from "@/lib/current-company";
+import { requireAdminCompany } from "@/lib/current-company";
 import {
   updateCompanySettings,
   normalizeServiceType,
@@ -72,7 +72,7 @@ export async function updateTariffs(
   _prev: TariffFormState,
   formData: FormData,
 ): Promise<TariffFormState> {
-  const company = await requireCompany();
+  const company = await requireAdminCompany();
   const serviceType = normalizeServiceType(company.serviceType);
 
   const parsed = schema.safeParse(Object.fromEntries(formData));

@@ -4,6 +4,7 @@ import { Show } from "@clerk/nextjs";
 import heroImage from "@/public/hero.jpg";
 import { DemoModal } from "@/app/_components/demo-modal";
 import { Logo } from "@/app/_components/logo";
+import { PLANS, PLAN_ORDER, type Plan, type PlanId } from "@/lib/plans";
 import {
   Timer,
   Fuel,
@@ -74,50 +75,26 @@ const steps = [
   },
 ];
 
-const plans = [
-  {
-    name: "Verhuizen",
-    dienst: "verhuizen",
-    price: "€89",
-    tagline: "Voor verhuisbedrijven.",
-    featured: false,
-    features: [
-      "AI-widget voor verhuisoffertes",
-      "Pop-up én inline op je eigen site",
-      "Onbeperkt aantal leads met offerte-e-mails",
-      "Tarieven: voorrijkosten, m³, km en toeslagen",
-      "Je eigen logo en huisstijlkleur",
-    ],
-  },
-  {
-    name: "Ontruimen",
-    dienst: "ontruimen",
-    price: "€89",
-    tagline: "Voor ontruimingsbedrijven.",
-    featured: false,
-    features: [
-      "AI-widget voor ontruimingsoffertes",
-      "Pop-up én inline op je eigen site",
-      "Onbeperkt aantal leads met offerte-e-mails",
-      "Widget afgestemd op ontruimen (geen bezorgadres)",
-      "Je eigen logo en huisstijlkleur",
-    ],
-  },
-  {
-    name: "Verhuizen + Ontruimen",
-    dienst: "beide",
-    price: "€149",
-    tagline: "Voor bedrijven die allebei de diensten aanbieden.",
-    featured: true,
-    features: [
-      "Alles uit Verhuizen én Ontruimen",
-      "Toggle in de widget: je klant kiest zelf",
-      "Toggle in je dashboard",
-      "Eén widget voor beide diensten",
-      "Voorrang bij support",
-    ],
-  },
-];
+// Wat elk plan krijgt; de verschillen (gebruikers, aanvragen) komen uit `lib/plans.ts`.
+const PLAN_TAGLINE: Record<PlanId, string> = {
+  basic: "Voor de zelfstandige verhuizer of ontruimer.",
+  standard: "Voor het MKB met een klein team.",
+  premium: "Voor groeiende bedrijven met meerdere teams.",
+};
+
+function planFeatures(plan: Plan): string[] {
+  return [
+    plan.seats === 1
+      ? "1 gebruiker"
+      : `Tot ${plan.seats} gebruikers${plan.extraSeatCents !== null ? ` (extra: €${plan.extraSeatCents / 100}/mnd)` : ""}`,
+    plan.scans === null
+      ? "Onbeperkt offerteaanvragen"
+      : `${plan.scans} offerteaanvragen per maand`,
+    "Widget op je site, deel-links én zelf scannen",
+    "Verhuizen én ontruimen",
+    "Je eigen logo en huisstijlkleur",
+  ];
+}
 
 function CheckIcon() {
   return (
@@ -153,7 +130,7 @@ export default function HomePage() {
               Inloggen
             </Link>
             <Link
-              href="/registreren"
+              href="/#prijzen"
               className={`rounded-lg px-4 py-2 ${aiButton}`}>
               Gratis starten
             </Link>
@@ -196,7 +173,7 @@ export default function HomePage() {
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
-                  href="/registreren"
+                  href="/#prijzen"
                   className={`w-full rounded-lg px-6 py-3 text-center font-semibold sm:w-auto ${aiButton}`}>
                   Gratis account aanmaken
                 </Link>
@@ -261,7 +238,7 @@ export default function HomePage() {
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Link
-                  href="/registreren"
+                  href="/#prijzen"
                   className={`rounded-lg px-6 py-3 text-center font-semibold ${aiButton}`}>
                   Gratis account aanmaken
                 </Link>
@@ -297,44 +274,46 @@ export default function HomePage() {
           className="scroll-mt-20 border-t border-slate-100 bg-slate-50 py-20">
           <div className="mx-auto w-full max-w-5xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Kies je dienst
+              Kies je plan
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-              Eén vast bedrag per maand. Maandelijks opzegbaar, geen
-              setup-kosten. Prijzen exclusief btw.
+              Probeer 14 dagen gratis, zonder betaalkaart. Daarna één vast
+              bedrag per maand, maandelijks opzegbaar. Prijzen exclusief btw.
             </p>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {plans.map((plan) => (
+              {PLAN_ORDER.map((id) => PLANS[id]).map((plan) => {
+                const featured = plan.id === "standard";
+                return (
                 <div
-                  key={plan.name}
+                  key={plan.id}
                   className={
-                    plan.featured
+                    featured
                       ? "rounded-2xl bg-linear-to-br from-blue-600 to-violet-600 p-px shadow-xl shadow-indigo-500/25"
                       : ""
                   }>
                   <div
                     className={`relative flex h-full flex-col bg-white p-8 ${
-                      plan.featured
+                      featured
                         ? "rounded-[15px]"
                         : "rounded-2xl border border-slate-200 shadow-sm"
                     }`}>
-                    {plan.featured && (
+                    {featured && (
                       <span className="absolute -top-3 left-8 rounded-full bg-linear-to-br from-blue-600 to-violet-600 px-3 py-1 text-xs font-semibold text-white">
                         Populair
                       </span>
                     )}
-                    <h3 className="text-lg font-semibold">{plan.name}</h3>
+                    <h3 className="text-lg font-semibold">{plan.label}</h3>
                     <p className="mt-1 min-h-11 text-sm text-slate-600">
-                      {plan.tagline}
+                      {PLAN_TAGLINE[plan.id]}
                     </p>
                     <p className="mt-5 flex items-baseline gap-1">
                       <span className="text-4xl font-bold tracking-tight">
-                        {plan.price}
+                        €{plan.priceCents / 100}
                       </span>
                       <span className="text-sm text-slate-500">/ maand</span>
                     </p>
                     <ul className="mt-6 flex-1 space-y-3 text-sm text-slate-600">
-                      {plan.features.map((f) => (
+                      {planFeatures(plan).map((f) => (
                         <li key={f} className="flex gap-2.5">
                           <CheckIcon />
                           <span>{f}</span>
@@ -342,17 +321,18 @@ export default function HomePage() {
                       ))}
                     </ul>
                     <Link
-                      href={`/kies-plan?dienst=${plan.dienst}`}
+                      href={`/kies-plan?plan=${plan.id}`}
                       className={`mt-8 rounded-lg px-6 py-3 text-center font-semibold ${
-                        plan.featured
+                        featured
                           ? aiButton
                           : "border border-slate-300 text-slate-700 hover:bg-slate-50"
                       }`}>
-                      Kies {plan.name}
+                      Probeer {plan.label} gratis
                     </Link>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           </div>
         </section>
@@ -368,7 +348,7 @@ export default function HomePage() {
               vandaag nog op je site.
             </p>
             <Link
-              href="/registreren"
+              href="/#prijzen"
               className="mt-6 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-indigo-700 shadow-lg hover:bg-slate-50">
               Gratis starten
             </Link>

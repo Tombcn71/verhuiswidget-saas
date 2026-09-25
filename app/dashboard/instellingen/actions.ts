@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireCompany } from "@/lib/current-company";
+import { requireAdminCompany } from "@/lib/current-company";
 import { updateCompanySettings } from "@/lib/companies";
 
 const schema = z.object({
@@ -28,7 +28,7 @@ export async function updateCompany(
   _prev: SettingsFormState,
   formData: FormData,
 ): Promise<SettingsFormState> {
-  const company = await requireCompany();
+  const company = await requireAdminCompany();
 
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

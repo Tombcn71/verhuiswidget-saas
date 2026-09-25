@@ -3,22 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// `adminOnly`: alleen zichtbaar voor org-admins (de pagina's zelf checken dit ook).
 const items = [
   { href: "/dashboard", label: "Overzicht" },
   { href: "/dashboard/leads", label: "Leads" },
-  { href: "/dashboard/tarieven", label: "Tarieven" },
+  { href: "/dashboard/scan", label: "Scannen" },
+  { href: "/dashboard/tarieven", label: "Tarieven", adminOnly: true },
   { href: "/dashboard/preview", label: "Preview" },
-  { href: "/dashboard/instellingen", label: "Bedrijf" },
+  { href: "/dashboard/instellingen", label: "Bedrijf", adminOnly: true },
   { href: "/dashboard/embed", label: "Widget-link" },
+  { href: "/dashboard/team", label: "Team" },
+  { href: "/dashboard/abonnement", label: "Abonnement", adminOnly: true },
 ];
 
-export function DashboardNav() {
+export function DashboardNav({ admin }: { admin: boolean }) {
   const pathname = usePathname();
 
   return (
     <nav className="md:w-56 md:shrink-0">
       <ul className="flex gap-1 overflow-x-auto md:flex-col">
-        {items.map((item) => {
+        {items.filter((item) => admin || !item.adminOnly).map((item) => {
           const active =
             item.href === "/dashboard"
               ? pathname === "/dashboard"
