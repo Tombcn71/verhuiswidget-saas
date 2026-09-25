@@ -7,9 +7,13 @@ import { nextPlan, planFor, seatLimit } from "@/lib/plans";
 
 export const metadata: Metadata = { title: "Team" };
 
-export default async function TeamPage() {
+export default async function TeamPage({ searchParams }: PageProps<"/dashboard/team">) {
   const company = await requireCompany();
-  const [members, admin] = await Promise.all([countMembers(company), isOrgAdmin()]);
+  const [members, admin, { welkom }] = await Promise.all([
+    countMembers(company),
+    isOrgAdmin(),
+    searchParams,
+  ]);
 
   const plan = planFor(company);
   const limit = seatLimit(company);
@@ -18,13 +22,35 @@ export default async function TeamPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Team</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Nodig collega&apos;s uit en beheer wie toegang heeft. Admins beheren tarieven en
-          bedrijfsgegevens; leden werken met de leads.
-        </p>
-      </div>
+      {welkom !== undefined ? (
+        // Eerste bezoek na het aanmaken (via /kies-plan bij Standard/Premium).
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Welkom bij moverAI, {company.name}!
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Je {plan.label}-plan heeft plek voor {limit} gebruikers. Nodig je collega&apos;s
+              uit via &lsquo;Leden&rsquo; → &lsquo;Uitnodigen&rsquo; hieronder, of doe het later
+              via Team in het menu.
+            </p>
+          </div>
+          <Link
+            href="/dashboard"
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Overslaan, naar dashboard
+          </Link>
+        </div>
+      ) : (
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Team</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Nodig collega&apos;s uit en beheer wie toegang heeft. Admins beheren tarieven en
+            bedrijfsgegevens; leden werken met de leads.
+          </p>
+        </div>
+      )}
 
       <div
         className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm ${

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getOrCreateCompany, setCompanyPlan } from "@/lib/companies";
-import { normalizePlan, trialState } from "@/lib/plans";
+import { PLANS, normalizePlan, trialState } from "@/lib/plans";
 
 /**
  * Landt hier vanaf de pricing-knop "Probeer … gratis". Het begin van de flow:
@@ -35,6 +35,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard/abonnement", origin));
     }
     await setCompanyPlan(company.id, plan);
+  }
+
+  // Net aangemaakt bedrijf met plek voor een team: eerst collega's uitnodigen.
+  // Het plan (en dus de gebruikerslimiet) staat nu vast.
+  const isNew = Date.now() - company.createdAt.getTime() < 10 * 60 * 1000;
+  if (isNew && PLANS[plan].seats > 1) {
+    return NextResponse.redirect(new URL("/dashboard/team?welkom=1", origin));
   }
 
   return NextResponse.redirect(new URL("/dashboard", origin));
