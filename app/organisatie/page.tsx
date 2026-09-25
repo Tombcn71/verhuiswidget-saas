@@ -30,8 +30,11 @@ export default async function OrganizationPage({ searchParams }: PageProps<"/org
       <Link href="/" className="mb-8">
         <Logo />
       </Link>
+      {/* Geen uitnodigscherm direct na aanmaken: het plan (en dus het aantal
+          gebruikers) staat pas vast als het bedrijf in de app bestaat. */}
       <OrganizationList
         hidePersonal
+        skipInvitationScreen
         afterSelectOrganizationUrl={next}
         afterCreateOrganizationUrl={next}
       />

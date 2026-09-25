@@ -42,6 +42,7 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-4">
             <OrganizationSwitcher
               hidePersonal
+              skipInvitationScreen
               afterSelectOrganizationUrl="/dashboard"
               afterCreateOrganizationUrl="/dashboard"
               organizationProfileMode="navigation"
