@@ -4,7 +4,7 @@ import { Show } from "@clerk/nextjs";
 import heroImage from "@/public/hero.jpg";
 import { DemoModal } from "@/app/_components/demo-modal";
 import { Logo } from "@/app/_components/logo";
-import { PLANS, PLAN_ORDER, type Plan, type PlanId } from "@/lib/plans";
+import { CHANNEL_FEATURES, PLANS, PLAN_ORDER, type Plan, type PlanId } from "@/lib/plans";
 import {
   Timer,
   Fuel,
@@ -23,76 +23,83 @@ const features = [
   {
     Icon: Timer,
     title: "Personeelsuren",
-    body: "Geen reistijd en fysieke voorinspecties; je behoudt dure uren op de werkvloer.",
+    body: "Geen reistijd en fysieke voorinspecties; je behoudt dure uren op de werkvloer of op kantoor.",
   },
   {
     Icon: Fuel,
     title: "Brandstofkosten",
-    body: "Geen onnodige voorrijkilometers met zware wagens om de inboedel te bekijken.",
+    body: "Geen onnodige voorrijkilometers met personenwagens om alleen maar een inboedel te bekijken.",
   },
   {
     Icon: Truck,
     title: "Geen halflege ritten",
-    body: "Exacte volumeberekening vooraf zorgt altijd voor de juiste wagenmaat.",
+    body: "Exacte volumeberekening vooraf zorgt dat je planners altijd de juiste wagenmaat inzetten.",
   },
   {
     Icon: TrendingDown,
     title: "Lagere uitstoot",
-    body: "Minder kilometers op de teller voor een kleinere ecologische voetafdruk.",
+    body: "Minder loze kilometers op de teller voor een kleinere ecologische voetafdruk.",
   },
   {
     Icon: Zap,
     title: "Snellere offertes",
-    body: "Geen handmatig telwerk of Excel-sheets; offertes gaan direct de deur uit.",
+    body: "Geen handmatig telwerk of ingewikkelde Excel-sheets; offertes gaan direct automatisch de deur uit.",
   },
   {
     Icon: Monitor,
-    title: "24/7 leads",
-    body: "Je widget verzamelt ook 's avonds en in het weekend automatisch aanvragen.",
+    title: "24/7 leads & scans",
+    body: "Je software verzamelt ook 's avonds en in het weekend automatisch aanvragen en inboedellijsten.",
   },
 ];
 
-const steps = [
+const channels = [
   {
-    n: "1",
-    t: "Plaats de widget",
-    d: "Kopieer je unieke embed-code en plak 'm op je site.",
+    emoji: "🌐",
+    t: "1. Onsite (De Website Widget)",
+    d: "Plaats de widget met één regel code op je website. Klanten vullen hun gegevens in, uploaden foto's van hun kamers en de AI doet de rest.",
   },
   {
-    n: "2",
-    t: "Klant vult in",
-    d: "Contactgegevens, adressen en foto's van elke kamer.",
+    emoji: "🔗",
+    t: "2. Onlink (Het Directe Linkje)",
+    d: "Krijg je een beller of WhatsApp-bericht? Genereer in één klik een uniek linkje vanuit je dashboard en stuur deze naar de klant om direct foto's te uploaden.",
   },
   {
-    n: "3",
-    t: "AI analyseert",
-    d: "Gemini maakt de inventarislijst en berekent de prijs met jouw tarieven.",
-  },
-  {
-    n: "4",
-    t: "Jij ontvangt de lead",
-    d: "Compleet met offerte in je mailbox en dashboard.",
+    emoji: "📍",
+    t: "3. Onspot (De Mobiele App-Scanner)",
+    d: "Sta je zelf bij een groot pand of complex project? Open de moverAI web-app op je telefoon, scan de ruimtes live op locatie en zie direct het aantal kubieke meters rollen.",
   },
 ];
 
-// Wat elk plan krijgt; de verschillen (gebruikers, aanvragen) komen uit `lib/plans.ts`.
+// Teksten per plan; aantallen (gebruikers, scans, prijzen) komen uit `lib/plans.ts`.
 const PLAN_TAGLINE: Record<PlanId, string> = {
-  basic: "Voor de zelfstandige verhuizer of ontruimer.",
-  standard: "Voor het MKB met een klein team.",
-  premium: "Voor groeiende bedrijven met meerdere teams.",
+  basic: "Voor de zelfstandige verhuizer die direct professioneel wil scannen.",
+  standard: "Voor groeiende verhuisbedrijven met een kantoor- of planningsteam.",
+  premium: "Voor de grotere verhuisketens met meerdere planners en taxateurs op de weg.",
+};
+
+const PLAN_EXTRA: Record<PlanId, string> = {
+  basic: "Tarieven volledig instelbaar: m³, km en toeslagen",
+  standard: "Uitgebreid dashboard voor planners",
+  premium: "Voorrang bij support",
 };
 
 function planFeatures(plan: Plan): string[] {
-  return [
+  const seats =
     plan.seats === 1
-      ? "1 gebruiker"
-      : `Tot ${plan.seats} gebruikers${plan.extraSeatCents !== null ? ` (extra: €${plan.extraSeatCents / 100}/mnd)` : ""}`,
+      ? "1 actieve gebruiker (seat)"
+      : plan.extraSeatCents !== null
+        ? `Max. ${plan.seats} gebruikers inclusief (extra gebruikers los toe te voegen voor €${plan.extraSeatCents / 100}/md)`
+        : `Max. ${plan.seats} gebruikers (seats) om flexibel samen te werken`;
+  const scans =
     plan.scans === null
-      ? "Onbeperkt offerteaanvragen"
-      : `${plan.scans} offerteaanvragen per maand`,
-    "Widget op je site, deel-links én zelf scannen",
-    "Verhuizen én ontruimen",
-    "Je eigen logo en huisstijlkleur",
+      ? "Onbeperkt aantal AI-scans per maand (geen extra kosten)"
+      : `Inclusief ${plan.scans} AI-scans per maand`;
+  return [
+    ...CHANNEL_FEATURES,
+    seats,
+    scans,
+    "White-label: je eigen logo en huisstijlkleuren",
+    PLAN_EXTRA[plan.id],
   ];
 }
 
@@ -163,25 +170,30 @@ export default function HomePage() {
                 <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
                   1 minuut
                 </span>{" "}
-                je verhuis- en ontruimingsoffertes versturen
+                je verhuis- en ontruimingsoffertes berekenen en versturen
               </h1>
               <p className="mt-6 text-lg text-slate-600">
-                moverAI is de white-label widget die je met één regel code op je
-                website zet. Je klant uploadt foto&apos;s, de AI berekent binnen
-                60 seconden de prijs op basis van jouw tarieven en stuurt direct
-                een offerte naar de klant én jou toe.
+                moverAI is de ultieme workflow-tool voor de moderne verhuizer.{" "}
+                <strong className="text-slate-900">Onsite</strong> op je website
+                via onze slimme widget,{" "}
+                <strong className="text-slate-900">Onlink</strong> via een direct
+                sms- of WhatsApp-linkje naar je klant, of{" "}
+                <strong className="text-slate-900">Onspot</strong> als mobiele
+                scanner in de hand van je taxateur. De AI herkent meubels binnen
+                60 seconden, berekent het exacte volume op basis van jouw tarieven
+                en stuurt direct een kant-en-klare offerte naar de klant én jouw
+                dashboard.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
                   href="/#prijzen"
                   className={`w-full rounded-lg px-6 py-3 text-center font-semibold sm:w-auto ${aiButton}`}>
-                  Gratis account aanmaken
+                  Probeer 14 dagen gratis
                 </Link>
                 <DemoModal />
               </div>
               <p className="mt-3 text-sm text-slate-400">
-                Geen account nodig — de demo analyseert echte foto&apos;s en
-                rekent live een prijs uit.
+                Geen betaalgegevens nodig
               </p>
             </div>
 
@@ -221,29 +233,33 @@ export default function HomePage() {
 
             <div className="mx-auto mt-16 max-w-3xl rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200 sm:p-10 sm:text-center">
               <h3 className="text-2xl font-bold tracking-tight">
-                Bespaar tot 80% tijd
+                Bespaar tot 80% tijd op administratie en taxatie
               </h3>
               <p className="mt-4 text-slate-600">
                 Een traditioneel offerteproces kost al snel meer dan twee uur
                 per klant: bellen voor een afspraak, op en neer rijden naar de
                 woning, door het huis lopen om meubels te noteren, en &apos;s
-                avonds op kantoor alles handmatig verwerken in een Excel-sheet
-                of PDF.
+                avonds op kantoor alles handmatig verwerken.
               </p>
               <p className="mt-4 text-slate-600">
-                Met moverAI doet de klant het voorwerk via de foto&apos;s,
-                berekent de AI direct het volume en rolt er een kant-en-klare
-                aanvraag in je dashboard. Zo reduceer je dat hele
-                administratieve tijdrovende proces met maar liefst 80 procent.
+                Met moverAI automatiseer je dit hele proces. Of de klant nu zelf
+                foto&apos;s uploadt via je site (Onsite), je een linkje stuurt na
+                een telefoontje (Onlink), of je planner zelf ter plaatse de app
+                opent (Onspot): onze geavanceerde AI doet binnen een minuut de
+                volumeberekening. Zo reduceer je het administratieve proces met
+                maar liefst 80 procent.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Link
                   href="/#prijzen"
                   className={`rounded-lg px-6 py-3 text-center font-semibold ${aiButton}`}>
-                  Gratis account aanmaken
+                  Probeer 14 dagen gratis
                 </Link>
                 <DemoModal />
               </div>
+              <p className="mt-3 text-sm text-slate-400">
+                Geen betaalgegevens nodig
+              </p>
             </div>
           </div>
         </section>
@@ -252,16 +268,20 @@ export default function HomePage() {
         <section className="py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Hoe het werkt
+              Hoe het werkt: 3 manieren om te scannen
             </h2>
-            <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {steps.map((s) => (
-                <div key={s.n}>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-600 to-violet-600 font-bold text-white">
-                    {s.n}
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {channels.map((c) => (
+                <div
+                  key={c.t}
+                  className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div
+                    aria-hidden="true"
+                    className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-2xl">
+                    {c.emoji}
                   </div>
-                  <h3 className="mt-4 font-semibold">{s.t}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{s.d}</p>
+                  <h3 className="mt-4 font-semibold">{c.t}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{c.d}</p>
                 </div>
               ))}
             </div>
@@ -274,11 +294,12 @@ export default function HomePage() {
           className="scroll-mt-20 border-t border-slate-100 bg-slate-50 py-20">
           <div className="mx-auto w-full max-w-5xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Kies je plan
+              Kies je prijsplan
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
-              Probeer 14 dagen gratis, zonder betaalkaart. Daarna één vast
-              bedrag per maand, maandelijks opzegbaar. Prijzen exclusief btw.
+            <p className="mx-auto mt-3 max-w-2xl text-center text-slate-600">
+              Elk pakket geeft je team toegang tot alle features: Onsite, Onlink
+              én Onspot. Tarieven zijn per maand, maandelijks opzegbaar en
+              exclusief btw. Probeer 14 dagen gratis, zonder betaalkaart.
             </p>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {PLAN_ORDER.map((id) => PLANS[id]).map((plan) => {
@@ -302,7 +323,12 @@ export default function HomePage() {
                         Populair
                       </span>
                     )}
-                    <h3 className="text-lg font-semibold">{plan.label}</h3>
+                    <h3 className="text-lg font-semibold">
+                      {plan.label}{" "}
+                      <span className="font-normal text-slate-500">
+                        ({plan.audience})
+                      </span>
+                    </h3>
                     <p className="mt-1 min-h-11 text-sm text-slate-600">
                       {PLAN_TAGLINE[plan.id]}
                     </p>
@@ -327,7 +353,7 @@ export default function HomePage() {
                           ? aiButton
                           : "border border-slate-300 text-slate-700 hover:bg-slate-50"
                       }`}>
-                      Probeer {plan.label} gratis
+                      Kies {plan.label}
                     </Link>
                   </div>
                 </div>
@@ -341,11 +367,12 @@ export default function HomePage() {
         <section className="bg-linear-to-br from-blue-600 via-indigo-600 to-violet-700 py-16">
           <div className="mx-auto w-full max-w-3xl px-6 text-center text-white">
             <h2 className="text-3xl font-bold tracking-tight">
-              Klaar om meer leads te krijgen?
+              Klaar om meer leads te converteren?
             </h2>
             <p className="mt-3 text-white/80">
-              Maak een account aan, stel je tarieven in en plaats de widget
-              vandaag nog op je site.
+              Maak binnen 2 minuten een account aan, nodig eventueel je
+              teamleden uit, stel je m³-tarieven in en begin vandaag nog met
+              slim scannen.
             </p>
             <Link
               href="/#prijzen"

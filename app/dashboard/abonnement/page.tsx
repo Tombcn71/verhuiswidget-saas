@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { requireAdminCompany } from "@/lib/current-company";
 import { countMembers } from "@/lib/companies";
 import { countLeadsThisMonth } from "@/lib/leads";
-import { PLANS, PLAN_ORDER, normalizePlan, planFor, scanUsage, seatLimit, trialState } from "@/lib/plans";
+import { CHANNEL_FEATURES, PLANS, PLAN_ORDER, normalizePlan, planFor, scanUsage, seatLimit, trialState } from "@/lib/plans";
 import { formatDate, formatEuroCents } from "@/lib/format";
 import { UsageBar } from "../usage-bar";
 import { choosePlan } from "./actions";
@@ -94,7 +94,9 @@ export default async function SubscriptionPage({
                     ? "Onbeperkt offerteaanvragen (fair use)"
                     : `${p.scans} offerteaanvragen per maand`}
                 </li>
-                <li>Widget, links en zelf scannen</li>
+                {CHANNEL_FEATURES.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
                 <li>Verhuizen én ontruimen</li>
               </ul>
               <button

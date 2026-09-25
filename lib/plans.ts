@@ -34,7 +34,7 @@ export const PLANS: Record<PlanId, Plan> = {
   premium: {
     id: "premium",
     label: "Premium",
-    audience: "Groeiende bedrijven",
+    audience: "Enterprise",
     priceCents: 19900,
     seats: 5,
     extraSeatCents: 1500,
@@ -43,6 +43,13 @@ export const PLANS: Record<PlanId, Plan> = {
 };
 
 export const PLAN_ORDER: PlanId[] = ["basic", "standard", "premium"];
+
+/** De drie kanalen; zitten in elk plan. */
+export const CHANNEL_FEATURES = [
+  "Onsite: de widget op je website",
+  "Onlink: direct linkje via sms of WhatsApp",
+  "Onspot: zelf scannen op locatie",
+];
 
 export function normalizePlan(value: unknown): PlanId {
   return value === "basic" || value === "premium" ? value : "standard";
