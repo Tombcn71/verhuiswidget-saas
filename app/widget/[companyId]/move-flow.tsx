@@ -23,6 +23,7 @@ import {
 import { FLOOR_TYPES } from "@/lib/pricing";
 import { upload } from "@vercel/blob/client";
 import { Logo } from "@/app/_components/logo";
+import { AddressInput, EMPTY_ADDRESS, addressText, type AddressValue } from "./address-input";
 
 export const ROOM_PRESETS: { label: string; Icon: typeof Sofa }[] = [
   { label: "Woonkamer", Icon: Sofa },
@@ -130,8 +131,15 @@ export function MoveFlow({
   const [phone, setPhone] = useState("");
 
   // Stap 2 — adressen
-  const [fromAddress, setFromAddress] = useState("");
-  const [toAddress, setToAddress] = useState("");
+  const [from, setFrom] = useState<AddressValue>(EMPTY_ADDRESS);
+  const [to, setTo] = useState<AddressValue>(EMPTY_ADDRESS);
+  // Afstand ophaal → bezorg; automatisch berekend, door de klant aan te passen.
+  const [distanceKm, setDistanceKm] = useState("");
+  const [distanceStatus, setDistanceStatus] = useState<"idle" | "loading" | "auto" | "manual">(
+    "idle",
+  );
+  const fromAddress = addressText(from);
+  const toAddress = addressText(to);
   const [propertyType, setPropertyType] = useState<"huis" | "appartement">("huis");
   const [fromFloor, setFromFloor] = useState("");
   const [moveDate, setMoveDate] = useState("");
@@ -230,12 +238,44 @@ export function MoveFlow({
     });
   };
 
+  // Beide adressen gevonden: rij-afstand ophalen. Lukt dat niet, dan vult de
+  // klant 'm zelf in.
+  const fromPoint = from.resolved;
+  const toPoint = to.resolved;
+  useEffect(() => {
+    if (isClearance || !fromPoint || !toPoint) return;
+    let cancelled = false;
+    (async () => {
+      setDistanceStatus("loading");
+      try {
+        const params = new URLSearchParams({
+          from: `${fromPoint.lat},${fromPoint.lon}`,
+          to: `${toPoint.lat},${toPoint.lon}`,
+        });
+        const res = await fetch(`/api/widget/distance?${params}`);
+        const data = (await res.json()) as { km: number | null };
+        if (cancelled) return;
+        setDistanceKm(data.km == null ? "" : String(data.km));
+        setDistanceStatus(data.km == null ? "manual" : "auto");
+      } catch {
+        if (!cancelled) setDistanceStatus("manual");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isClearance, fromPoint, toPoint]);
+
   const stepValid = useMemo(() => {
     if (step === 0) return photos.length > 0;
+    if (step === 2)
+      return isClearance
+        ? !!from.resolved
+        : !!from.resolved && !!to.resolved && Number(distanceKm) > 0;
     if (step === LAST_INPUT_STEP)
       return name.trim().length > 1 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
     return true;
-  }, [step, name, email, photos.length]);
+  }, [step, name, email, photos.length, isClearance, from.resolved, to.resolved, distanceKm]);
 
   const flatInventory = useMemo<InventoryItem[]>(
     () =>
@@ -320,6 +360,7 @@ export function MoveFlow({
       const photoUrls = photos.map((p) => p.blobUrl).filter((u): u is string => !!u);
       const details = {
         address: fromAddress,
+        point: from.resolved ? { lat: from.resolved.lat, lon: from.resolved.lon } : null,
         propertyType,
         floor: Number(fromFloor) || 0,
         roomCount: Number(roomCount) || 0,
@@ -363,7 +404,9 @@ export function MoveFlow({
               hasElevator,
               streetAccessible,
               moveDate,
-              distanceKm: 0,
+              distanceKm: Number(distanceKm) || 0,
+              fromPoint: from.resolved ? { lat: from.resolved.lat, lon: from.resolved.lon } : null,
+              toPoint: to.resolved ? { lat: to.resolved.lat, lon: to.resolved.lon } : null,
             },
             options: {
               packing,
@@ -949,32 +992,35 @@ export function MoveFlow({
           </p>
         )}
         <div className={`space-y-3 ${chrome ? "" : "mt-2"}`}>
-          <label className="block">
-            <span className="text-xs font-medium text-slate-500">
-              {isClearance ? "Ontruimadres" : "Ophaaladres"}
-            </span>
-            <div className="relative mt-1">
-              <MapPin className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                className={`${inputCls} pl-11`}
-                value={fromAddress}
-                onChange={(e) => setFromAddress(e.target.value)}
-                placeholder="Straat, huisnummer, postcode, plaats"
-              />
-            </div>
-          </label>
+          <AddressInput
+            label={isClearance ? "Ontruimadres" : "Ophaaladres"}
+            value={from}
+            onChange={setFrom}
+            inputCls={inputCls}
+          />
           {!isClearance && (
+            <AddressInput label="Bezorgadres" value={to} onChange={setTo} inputCls={inputCls} />
+          )}
+          {!isClearance && from.resolved && to.resolved && (
             <label className="block">
-              <span className="text-xs font-medium text-slate-500">Bezorgadres</span>
+              <span className="text-xs font-medium text-slate-500">Afstand (km)</span>
               <div className="relative mt-1">
                 <MapPin className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
                   className={`${inputCls} pl-11`}
-                  value={toAddress}
-                  onChange={(e) => setToAddress(e.target.value)}
-                  placeholder="Straat, huisnummer, postcode, plaats"
+                  value={distanceKm}
+                  onChange={(e) => setDistanceKm(e.target.value.replace(/[^\d]/g, ""))}
+                  inputMode="numeric"
+                  placeholder={distanceStatus === "loading" ? "Afstand berekenen…" : "Vul de afstand in"}
                 />
               </div>
+              <span className="mt-1.5 block text-xs text-slate-400">
+                {distanceStatus === "auto"
+                  ? "Berekend via de route. Klopt het niet? Pas het aan."
+                  : distanceStatus === "manual"
+                    ? "We konden de afstand niet berekenen. Vul het aantal km in."
+                    : null}
+              </span>
             </label>
           )}
         </div>

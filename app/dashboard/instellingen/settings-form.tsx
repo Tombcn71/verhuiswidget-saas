@@ -105,6 +105,34 @@ export function SettingsForm({ company }: { company: Company }) {
         </div>
       </section>
 
+      <section className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="text-lg font-semibold">Vestigingsadres</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Waar je wagens vertrekken. Hiermee rekent de offerte ook de aan- en afrijkilometers
+          (vestiging → ophaaladres, en na afloop terug), tegen je prijs per km. Leeg laten = geen
+          aanrijkilometers.
+        </p>
+        <div className="mt-6 grid gap-5 sm:grid-cols-2">
+          <Field
+            label="Postcode"
+            name="basePostcode"
+            defaultValue={company.basePostcode ?? ""}
+            error={e.basePostcode}
+            hint="Bijv. 3511 AR"
+          />
+          <Field
+            label="Huisnummer"
+            name="baseHouseNumber"
+            defaultValue={company.baseHouseNumber ?? ""}
+          />
+        </div>
+        {company.baseAddress && (
+          <p className="mt-4 text-sm text-slate-600">
+            📍 <span className="font-medium">{company.baseAddress}</span>
+          </p>
+        )}
+      </section>
+
       <div className="flex items-center gap-4">
         <button
           type="submit"

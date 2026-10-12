@@ -69,6 +69,8 @@ export function calculatePrice(
   input: {
     inventory: InventoryItem[];
     distanceKm: number;
+    /** Vestiging → ophaaladres en terug (km); 0 als er geen vestigingsadres is. */
+    approachKm?: number;
     options: LeadOptions;
     fromFloor?: number;
     toFloor?: number;
@@ -120,6 +122,14 @@ export function calculatePrice(
           ? `Transport (${trips} ritten · ${km} km)`
           : `Transport (${km} km)`,
       amountCents: drivenKm * company.pricePerKmCents,
+    });
+  }
+
+  const approachKm = Math.max(0, Math.round(input.approachKm ?? 0));
+  if (approachKm > 0) {
+    lines.push({
+      label: `Aan- en afrijden (${approachKm} km)`,
+      amountCents: approachKm * company.pricePerKmCents,
     });
   }
 

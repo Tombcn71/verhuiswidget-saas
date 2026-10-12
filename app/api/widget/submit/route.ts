@@ -6,12 +6,13 @@ import { isDemoCompany } from "@/lib/demo";
 import { createLead } from "@/lib/leads";
 import { analyzePhotos, type PhotoInput } from "@/lib/gemini";
 import { calculatePrice, isRushDate } from "@/lib/pricing";
-import { estimateDistanceKm } from "@/lib/geo";
+import { approachKm } from "@/lib/route";
 import { sendQuoteEmails } from "@/lib/email";
 import {
   CORS,
   checkDemoRateLimit,
   clientIp,
+  geoPoint,
   jsonResponse as json,
 } from "@/lib/widget-request";
 import type { InventoryItem } from "@/lib/db/schema";
@@ -47,6 +48,9 @@ const payloadSchema = z.object({
     streetAccessible: z.boolean().default(true),
     moveDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
     distanceKm: z.coerce.number().min(0).max(5000).default(0),
+    // Coördinaten van de gevonden adressen (PDOK), voor de aanrijroute.
+    fromPoint: geoPoint,
+    toPoint: geoPoint,
   }),
   options: z.object({
     packing: z.boolean().default(false),
@@ -171,16 +175,16 @@ export async function POST(request: Request) {
     );
   }
 
-  // 2. Afstand: gebruik de opgegeven schatting, of geocodeer de adressen.
-  let distanceKm = parsed.move.distanceKm;
-  if (distanceKm === 0 && parsed.move.fromAddress && parsed.move.toAddress) {
-    distanceKm = (await estimateDistanceKm(parsed.move.fromAddress, parsed.move.toAddress)) ?? 0;
-  }
+  // 2. Afstand: zoals de klant 'm zag (berekend of zelf ingevuld). Plus aan- en
+  //    afrijden: vestiging → ophaaladres, en bezorgadres → vestiging.
+  const distanceKm = parsed.move.distanceKm;
+  const approach = await approachKm(company, parsed.move.fromPoint, parsed.move.toPoint);
 
   // 3. Prijsberekening met de tarieven van deze verhuizer
   const price = calculatePrice(company, {
     inventory,
     distanceKm,
+    approachKm: approach,
     options: parsed.options,
     fromFloor: Number(parsed.move.fromFloor) || 0,
     toFloor: Number(parsed.move.toFloor) || 0,

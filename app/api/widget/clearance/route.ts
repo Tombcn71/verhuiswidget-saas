@@ -6,10 +6,12 @@ import { isDemoCompany } from "@/lib/demo";
 import { createLead } from "@/lib/leads";
 import { calculatePrice, clearanceTariffs, floorTypeRate, isRushDate } from "@/lib/pricing";
 import { sendQuoteEmails } from "@/lib/email";
+import { approachKm } from "@/lib/route";
 import {
   CORS,
   checkDemoRateLimit,
   clientIp,
+  geoPoint,
   jsonResponse as json,
 } from "@/lib/widget-request";
 import type { InventoryItem, PriceLine } from "@/lib/db/schema";
@@ -32,6 +34,7 @@ const payloadSchema = z.object({
   }),
   details: z.object({
     address: z.string().trim().max(200).optional().or(z.literal("")),
+    point: geoPoint,
     propertyType: z.string().trim().max(60).optional().or(z.literal("")),
     floor: z.coerce.number().int().min(0).max(50).default(0),
     roomCount: z.coerce.number().int().min(0).max(50).default(0),
@@ -120,10 +123,13 @@ export async function POST(request: Request) {
   const w = parsed.works;
 
   // Basisprijs: net als verhuizen — inboedelvolume (m³) + verdieping + inpakken.
-  // Met een gebouwlift vervalt de verdieping-toeslag.
+  // Met een gebouwlift vervalt de verdieping-toeslag. Aan- en afrijden:
+  // vestiging → ontruimadres en terug.
+  const point = parsed.details.point;
   const base = calculatePrice(company, {
     inventory,
     distanceKm: 0,
+    approachKm: await approachKm(company, point, point),
     options: { packing: w.packing, assembly: false, storageMonths: 0 },
     fromFloor: parsed.details.floor,
     hasElevator: parsed.details.hasElevator,

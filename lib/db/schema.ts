@@ -9,6 +9,7 @@ import {
   date,
   jsonb,
   index,
+  doublePrecision,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -84,6 +85,12 @@ export const companies = pgTable("companies", {
   email: text("email").notNull(),
   phone: text("phone"),
   website: text("website"),
+  // Vestigingsadres: start- en eindpunt voor de aan- en afrijkilometers.
+  basePostcode: text("base_postcode"),
+  baseHouseNumber: text("base_house_number"),
+  baseAddress: text("base_address"),
+  baseLat: doublePrecision("base_lat"),
+  baseLon: doublePrecision("base_lon"),
   logoUrl: text("logo_url"),
   primaryColor: text("primary_color").notNull().default("#2563eb"),
 

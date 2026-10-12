@@ -1,56 +1,82 @@
 /**
- * Geocodeert een vrij ingevoerd adres via de PDOK Locatieserver (gratis, NL)
- * en schat de rij-afstand tussen twee adressen.
+ * Adressen via de PDOK Locatieserver (gratis, officieel NL-adresregister) en
+ * rij-afstanden via OpenRouteService (gratis Standard-plan, `ORS_API_KEY`).
  */
 
-type LatLon = { lat: number; lon: number };
+export type GeoPoint = { lat: number; lon: number };
 
-const PDOK =
-  "https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?fl=centroide_ll&rows=1&q=";
+export type ResolvedAddress = GeoPoint & {
+  /** Bijv. "Oudegracht 50, 3511AR Utrecht". */
+  label: string;
+};
 
-export async function geocode(address: string): Promise<LatLon | null> {
-  const q = address.trim();
-  if (q.length < 4) return null;
+const PDOK = "https://api.pdok.nl/bzk/locatieserver/search/v3_1/free";
+const ORS = "https://api.openrouteservice.org/v2/directions/driving-car";
+
+/** "3511 ar" → "3511AR"; null als het geen geldige NL-postcode is. */
+export function normalizePostcode(value: string): string | null {
+  const pc = value.replace(/\s+/g, "").toUpperCase();
+  return /^[1-9]\d{3}[A-Z]{2}$/.test(pc) ? pc : null;
+}
+
+/**
+ * Zoekt een adres exact op postcode + huisnummer. Geeft null als het adres
+ * niet bestaat (dus nooit een "ongeveer goed" adres in een andere plaats).
+ */
+export async function lookupAddress(
+  postcode: string,
+  houseNumber: string,
+): Promise<ResolvedAddress | null> {
+  const pc = normalizePostcode(postcode);
+  const nr = houseNumber.trim().match(/^\d+/)?.[0];
+  if (!pc || !nr) return null;
+
+  const params = new URLSearchParams({ fl: "weergavenaam,centroide_ll", rows: "1" });
+  params.append("fq", "type:adres");
+  params.append("fq", `postcode:${pc}`);
+  params.append("fq", `huisnummer:${nr}`);
+
   try {
-    const res = await fetch(PDOK + encodeURIComponent(q), {
+    const res = await fetch(`${PDOK}?${params}`, {
       headers: { Accept: "application/json" },
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return null;
     const data = (await res.json()) as {
-      response?: { docs?: { centroide_ll?: string }[] };
+      response?: { docs?: { weergavenaam?: string; centroide_ll?: string }[] };
     };
-    const point = data.response?.docs?.[0]?.centroide_ll;
+    const doc = data.response?.docs?.[0];
     // formaat: "POINT(5.12143 52.09074)" -> lon lat
-    const m = point?.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
-    if (!m) return null;
-    return { lon: Number(m[1]), lat: Number(m[2]) };
+    const m = doc?.centroide_ll?.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+    if (!doc?.weergavenaam || !m) return null;
+    return { label: doc.weergavenaam, lon: Number(m[1]), lat: Number(m[2]) };
   } catch {
     return null;
   }
 }
 
-function haversineKm(a: LatLon, b: LatLon): number {
-  const R = 6371;
-  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
-  const dLon = ((b.lon - a.lon) * Math.PI) / 180;
-  const s =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((a.lat * Math.PI) / 180) *
-      Math.cos((b.lat * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(s));
-}
-
 /**
- * Geeft de geschatte rij-afstand in km tussen twee adressen (hemelsbreed × 1.3
- * als wegfactor), of `null` als één van beide niet te geocoderen is.
+ * Rij-afstand over de weg in hele km via OpenRouteService, of null als dat niet
+ * lukt (geen sleutel, limiet bereikt, dienst niet bereikbaar).
  */
-export async function estimateDistanceKm(
-  fromAddress: string,
-  toAddress: string,
-): Promise<number | null> {
-  const [a, b] = await Promise.all([geocode(fromAddress), geocode(toAddress)]);
-  if (!a || !b) return null;
-  return Math.round(haversineKm(a, b) * 1.3);
+export async function drivingDistanceKm(a: GeoPoint, b: GeoPoint): Promise<number | null> {
+  const key = process.env.ORS_API_KEY;
+  if (!key) return null;
+
+  const params = new URLSearchParams({
+    api_key: key,
+    start: `${a.lon},${a.lat}`,
+    end: `${b.lon},${b.lat}`,
+  });
+  try {
+    const res = await fetch(`${ORS}?${params}`, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      features?: { properties?: { summary?: { distance?: number } } }[];
+    };
+    const meters = data.features?.[0]?.properties?.summary?.distance;
+    return typeof meters === "number" ? Math.round(meters / 1000) : null;
+  } catch {
+    return null;
+  }
 }

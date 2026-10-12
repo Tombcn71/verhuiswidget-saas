@@ -70,7 +70,13 @@ function BaseTariffs({
       <Group title="Basis">
         <Field label="Voorrijkosten / basistarief" name="baseFee" defaultValue={money(company.baseFeeCents)} error={errors.baseFee} />
         <Field label="Prijs per m³ inboedel" name="pricePerM3" defaultValue={money(company.pricePerM3Cents)} error={errors.pricePerM3} />
-        <Field label="Prijs per km (enkele reis)" name="pricePerKm" defaultValue={money(company.pricePerKmCents)} error={errors.pricePerKm} />
+        <Field
+          label="Prijs per km"
+          name="pricePerKm"
+          defaultValue={money(company.pricePerKmCents)}
+          error={errors.pricePerKm}
+          hint="Voor de rit van ophaal- naar bezorgadres, en voor aan- en afrijden vanaf je vestigingsadres (in te stellen bij Bedrijf)."
+        />
         <Field
           label="Laadvermogen wagen"
           name="truckCapacityM3"

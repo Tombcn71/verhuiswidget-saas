@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 export const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -47,3 +48,9 @@ export function checkDemoRateLimit(ip: string): string | null {
   demoHits.set(ip, [...mine, now]);
   return null;
 }
+
+/** Coördinaten van een via PDOK gevonden adres (voor de aanrijroute). */
+export const geoPoint = z
+  .object({ lat: z.number().min(-90).max(90), lon: z.number().min(-180).max(180) })
+  .nullable()
+  .default(null);
