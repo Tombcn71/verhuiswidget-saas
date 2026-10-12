@@ -13,6 +13,7 @@ import {
 } from "@/lib/plans";
 import { Logo } from "@/app/_components/logo";
 import { DashboardNav } from "./nav";
+import { FeedbackButton } from "@/app/_components/FeedbackButton";
 
 export default async function DashboardLayout({
   children,
@@ -74,6 +75,8 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
+
+      <FeedbackButton />
     </div>
   );
 }

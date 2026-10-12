@@ -15,6 +15,14 @@ type CompanyPublic = {
 
 const AI_GRADIENT = "bg-linear-to-br from-blue-600 via-indigo-600 to-violet-600";
 
+// Startscherm van de marketing-demo: de bezoeker is een verhuizer, dus eerst
+// uitleggen dat hij nu de kant van zijn klant ziet.
+const DEMO_STEPS = [
+  { icon: "📸", text: "Maak foto's van 1 of 2 kamers" },
+  { icon: "🤖", text: "De AI herkent de meubels en berekent de m³" },
+  { icon: "💶", text: "Je ziet direct de prijs, met voorbeeldtarieven" },
+];
+
 export function Widget({
   company,
   demo = false,
@@ -36,7 +44,7 @@ export function Widget({
         ? "verhuizing"
         : null;
 
-  // De video-intro tonen we alleen in de losse marketing-demo.
+  // Het startscherm tonen we alleen in de losse marketing-demo.
   const [started, setStarted] = useState(!demo);
   const [moveType, setMoveType] = useState<"verhuizing" | "ontruiming">(
     forcedType ?? "verhuizing",
@@ -62,33 +70,38 @@ export function Widget({
     return (
       <div
         ref={rootRef}
-        className="flex h-full min-h-dvh flex-col bg-white px-5 py-8 text-center text-slate-900"
+        className="flex h-full min-h-dvh flex-col justify-center bg-white px-6 py-10 text-center text-slate-900"
       >
-        <h2 className="text-2xl font-bold tracking-tight">
-          Verhuizen,{" "}
+        <h2 className="text-3xl font-bold tracking-tight">
+          Zo ziet{" "}
           <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-            opnieuw uitgevonden
-          </span>
-          .
+            jouw klant
+          </span>{" "}
+          het
         </h2>
+        <p className="mt-2 text-sm text-slate-500">Probeer het zelf in een minuut:</p>
 
-        <div className="mx-auto mt-6 w-full flex-1 overflow-hidden rounded-xl shadow-lg">
-          <iframe
-            className="h-full w-full"
-            src="https://www.youtube.com/embed/eyoyGdp0Zpo?si=At4BHuvWhF0EIBfm"
-            title="YouTube video player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
-        </div>
+        <ul className="mx-auto mt-8 w-full max-w-xs space-y-3 text-left">
+          {DEMO_STEPS.map((s) => (
+            <li
+              key={s.text}
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+            >
+              <span aria-hidden="true" className="text-2xl">
+                {s.icon}
+              </span>
+              <span>{s.text}</span>
+            </li>
+          ))}
+        </ul>
 
         <button
           onClick={() => setStarted(true)}
-          className={`mx-auto mt-6 block rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg ${AI_GRADIENT}`}
+          className={`mx-auto mt-10 block rounded-full px-10 py-3.5 text-sm font-semibold text-white shadow-lg ${AI_GRADIENT}`}
         >
-          Overslaan
+          Start de demo
         </button>
+        <p className="mt-3 text-xs text-slate-400">Tip: werkt het best op je telefoon</p>
       </div>
     );
   }

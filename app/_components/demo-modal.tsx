@@ -47,7 +47,7 @@ export function DemoModal() {
             >
               ×
             </button>
-            {/* Altijd van boven tot onder (mobiel én desktop) — de demo-video is voor mobiel gemaakt. */}
+            {/* Altijd van boven tot onder (mobiel én desktop) — de demo is voor mobiel gemaakt. */}
             <div className="h-dvh w-full overflow-y-auto bg-white sm:shadow-xl">
               <Widget company={DEMO_COMPANY_PUBLIC} demo />
             </div>
