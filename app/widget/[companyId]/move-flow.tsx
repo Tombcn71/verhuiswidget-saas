@@ -143,6 +143,8 @@ export function MoveFlow({
   const [propertyType, setPropertyType] = useState<"huis" | "appartement">("huis");
   const [fromFloor, setFromFloor] = useState("");
   const [moveDate, setMoveDate] = useState("");
+  // Vandaag als JJJJ-MM-DD in de tijdzone van de klant: eerder kiezen kan niet.
+  const todayIso = new Date().toLocaleDateString("sv-SE");
   const [roomCount, setRoomCount] = useState("1");
   const [hasElevator, setHasElevator] = useState(false);
   const [streetAccessible, setStreetAccessible] = useState(true);
@@ -1054,7 +1056,14 @@ export function MoveFlow({
         <span className="text-sm font-semibold">
           {isClearance ? "Wanneer wil je de ontruiming?" : "Wanneer ga je verhuizen?"}
         </span>
-        <input className={`${inputCls} mt-2`} type="date" value={moveDate} onChange={(e) => setMoveDate(e.target.value)} />
+        <input
+          className={`${inputCls} mt-2`}
+          type="date"
+          min={todayIso}
+          value={moveDate}
+          // Getypte datums in het verleden negeren (`min` houdt alleen de kalender tegen).
+          onChange={(e) => setMoveDate(e.target.value && e.target.value < todayIso ? "" : e.target.value)}
+        />
       </label>
 
       <div>
@@ -1214,18 +1223,28 @@ export function MoveFlow({
               </span>
             </span>
           </label>
-          <label className="block rounded-lg border border-slate-200 p-3">
-            <span className="block text-sm font-medium">Tijdelijke opslag</span>
-            <span className="mb-2 block text-xs text-slate-500">
-              Aantal maanden dat je spullen bij ons worden opgeslagen (0 = geen opslag).
-            </span>
-            <input
-              className={inputCls}
-              inputMode="numeric"
-              value={storageMonths}
-              onChange={(e) => setStorageMonths(e.target.value.replace(/[^0-9]/g, "") || "0")}
-            />
-          </label>
+          <div className="rounded-lg border border-slate-200 p-3">
+            <label className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={Number(storageMonths) > 0}
+                onChange={(e) => setStorageMonths(e.target.checked ? "1" : "0")}
+                className="mt-1"
+              />
+              <span>
+                <span className="block text-sm font-medium">Tijdelijke opslag</span>
+                <span className="block text-xs text-slate-500">
+                  Wij slaan je spullen tijdelijk voor je op.
+                </span>
+              </span>
+            </label>
+            {Number(storageMonths) > 0 && (
+              <div className="mt-3 border-t border-slate-100 pt-3 text-center">
+                <span className="text-xs font-medium text-slate-500">Hoeveel maanden?</span>
+                {stepperControl(storageMonths, setStorageMonths, 1)}
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

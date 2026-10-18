@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { updateCompany, type SettingsFormState } from "./actions";
 import type { Company } from "@/lib/db";
+import { LogoUpload } from "./logo-upload";
 
 const initialState: SettingsFormState = { status: "idle" };
 
@@ -88,12 +89,10 @@ export function SettingsForm({ company }: { company: Company }) {
             error={e.website}
             hint="Bijv. https://jouwbedrijf.nl"
           />
-          <Field
-            label="Logo-URL"
-            name="logoUrl"
+          <LogoUpload
+            companyId={company.id}
             defaultValue={company.logoUrl ?? ""}
             error={e.logoUrl}
-            hint="Directe link naar een afbeelding (png/svg)."
           />
           <Field
             label="Huisstijlkleur"

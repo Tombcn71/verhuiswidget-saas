@@ -11,6 +11,7 @@ import {
   CORS,
   checkDemoRateLimit,
   clientIp,
+  futureDate,
   geoPoint,
   jsonResponse as json,
 } from "@/lib/widget-request";
@@ -40,7 +41,7 @@ const payloadSchema = z.object({
     roomCount: z.coerce.number().int().min(0).max(50).default(0),
     hasElevator: z.boolean().default(false),
     streetAccessible: z.boolean().default(true),
-    moveDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
+    moveDate: futureDate,
   }),
   works: z.object({
     floorRemoval: z

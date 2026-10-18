@@ -54,3 +54,18 @@ export const geoPoint = z
   .object({ lat: z.number().min(-90).max(90), lon: z.number().min(-180).max(180) })
   .nullable()
   .default(null);
+
+/**
+ * Gewenste datum (JJJJ-MM-DD, optioneel), niet in het verleden. Eén dag speling
+ * voor tijdzones: de klant kiest in z'n eigen tijd, de server rekent in UTC.
+ */
+export const futureDate = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .refine(
+    (d) => d >= new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+    "Kies een datum vanaf vandaag.",
+  )
+  .optional()
+  .or(z.literal(""));
