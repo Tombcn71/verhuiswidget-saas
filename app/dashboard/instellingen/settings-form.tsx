@@ -105,6 +105,25 @@ export function SettingsForm({ company }: { company: Company }) {
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="text-lg font-semibold">E-mailhandtekening</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Komt onderaan de offerte-mail aan je klant. Leeg laten = &ldquo;Met vriendelijke groet,
+          {" "}{company.name}&rdquo;.
+        </p>
+        <textarea
+          name="emailSignature"
+          defaultValue={company.emailSignature ?? ""}
+          rows={5}
+          maxLength={1000}
+          placeholder={`Met vriendelijke groet,\n\nJan de Vries\n${company.name}\n06 12345678 · www.jouwbedrijf.nl`}
+          className="mt-4 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-600"
+        />
+        {e.emailSignature ? (
+          <span className="mt-1 block text-xs text-red-600">{e.emailSignature}</span>
+        ) : null}
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6">
         <h2 className="text-lg font-semibold">Vestigingsadres</h2>
         <p className="mt-1 text-sm text-slate-500">
           Waar je wagens vertrekken. Hiermee rekent de offerte ook de aan- en afrijkilometers

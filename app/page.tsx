@@ -296,10 +296,19 @@ export default function HomePage() {
             <h2 className="text-center text-3xl font-bold tracking-tight">
               Kies je prijsplan
             </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-center text-slate-600">
+            <div className="mt-5 flex justify-center">
+              <p className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200">
+                <span>🎁 Eerste 2 weken gratis</span>
+                <span aria-hidden="true" className="text-emerald-300">·</span>
+                <span>Geen betaalkaart nodig</span>
+                <span aria-hidden="true" className="text-emerald-300">·</span>
+                <span>Niets wordt automatisch afgeschreven</span>
+              </p>
+            </div>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-slate-600">
               Elk pakket geeft je team toegang tot alle features: Onsite, Onlink
               én Onspot. Tarieven zijn per maand, maandelijks opzegbaar en
-              exclusief btw. Probeer 14 dagen gratis, zonder betaalkaart.
+              exclusief btw.
             </p>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {PLAN_ORDER.map((id) => PLANS[id]).map((plan) => {
@@ -337,6 +346,9 @@ export default function HomePage() {
                         €{plan.priceCents / 100}
                       </span>
                       <span className="text-sm text-slate-500">/ maand</span>
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-emerald-700">
+                      Eerste 2 weken gratis, zonder betaalkaart
                     </p>
                     <ul className="mt-6 flex-1 space-y-3 text-sm text-slate-600">
                       {planFeatures(plan).map((f) => (

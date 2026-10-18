@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { isValidPhone } from "@/lib/phone";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { hasAccess } from "@/lib/plans";
 import { isDemoCompany } from "@/lib/demo";
@@ -31,7 +32,11 @@ const payloadSchema = z.object({
   customer: z.object({
     name: z.string().trim().min(1).max(120),
     email: z.email(),
-    phone: z.string().trim().max(40).optional().or(z.literal("")),
+    phone: z
+      .string()
+      .trim()
+      .max(40)
+      .refine((p) => isValidPhone(p), "Vul een geldig telefoonnummer in."),
   }),
   details: z.object({
     address: z.string().trim().max(200).optional().or(z.literal("")),

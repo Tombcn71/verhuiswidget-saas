@@ -17,6 +17,7 @@ const schema = z.object({
     .string()
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/, "Gebruik een hex-kleur zoals #2563eb"),
+  emailSignature: z.string().trim().max(1000, "Maximaal 1000 tekens").optional().or(z.literal("")),
   basePostcode: z.string().trim().max(10).optional().or(z.literal("")),
   baseHouseNumber: z.string().trim().max(10).optional().or(z.literal("")),
 });
@@ -80,6 +81,7 @@ export async function updateCompany(
     email: d.email,
     phone: d.phone || null,
     website: d.website || null,
+    emailSignature: d.emailSignature || null,
     logoUrl: d.logoUrl || null,
     primaryColor: d.primaryColor,
   });

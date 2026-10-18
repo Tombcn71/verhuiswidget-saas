@@ -85,6 +85,8 @@ export const companies = pgTable("companies", {
   email: text("email").notNull(),
   phone: text("phone"),
   website: text("website"),
+  // Handtekening onderaan de offerte-mail aan de klant (platte tekst, met regels).
+  emailSignature: text("email_signature"),
   // Vestigingsadres: start- en eindpunt voor de aan- en afrijkilometers.
   basePostcode: text("base_postcode"),
   baseHouseNumber: text("base_house_number"),

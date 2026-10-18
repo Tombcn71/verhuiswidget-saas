@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import type { LeadSource } from "@/lib/leads";
+import { isValidPhone } from "@/lib/phone";
 import {
   Bath,
   Bed,
@@ -128,7 +129,7 @@ export function MoveFlow({
   // Stap 1 — contact
   const [name, setName] = useState(demo ? "Demo Gebruiker" : "");
   const [email, setEmail] = useState(demo ? "demo@voorbeeld.nl" : "");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(demo ? "06 12345678" : "");
 
   // Stap 2 — adressen
   const [from, setFrom] = useState<AddressValue>(EMPTY_ADDRESS);
@@ -275,9 +276,13 @@ export function MoveFlow({
         ? !!from.resolved
         : !!from.resolved && !!to.resolved && Number(distanceKm) > 0;
     if (step === LAST_INPUT_STEP)
-      return name.trim().length > 1 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+      return (
+        name.trim().length > 1 &&
+        /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) &&
+        isValidPhone(phone)
+      );
     return true;
-  }, [step, name, email, photos.length, isClearance, from.resolved, to.resolved, distanceKm]);
+  }, [step, name, email, phone, photos.length, isClearance, from.resolved, to.resolved, distanceKm]);
 
   const flatInventory = useMemo<InventoryItem[]>(
     () =>
@@ -831,8 +836,21 @@ export function MoveFlow({
         />
       </label>
       <label className="block">
-        <span className="text-sm font-medium">Telefoonnummer</span>
-        <input className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <span className="text-sm font-medium">Telefoonnummer *</span>
+        <input
+          className={inputCls}
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          placeholder="06 12345678"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
+        {phone.trim() && !isValidPhone(phone) && (
+          <span className="mt-1.5 block text-xs text-red-600">
+            Controleer je nummer, bijv. 06 12345678 of +32 470 12 34 56.
+          </span>
+        )}
       </label>
     </div>
   );

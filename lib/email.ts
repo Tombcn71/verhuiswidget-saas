@@ -109,8 +109,15 @@ function customerEmailHtml(d: QuoteData): string {
      ${priceBlock(d)}
      <p style="font-size:13px;color:#64748b">Dit is een automatische indicatie op basis van foto-analyse en geen bindende offerte. ${esc(d.company.name)} neemt binnenkort contact met je op om de details te bevestigen.</p>
      <h3 style="font-size:16px">Herkende inboedel</h3>
-     ${inventoryBlock(d)}`,
+     ${inventoryBlock(d)}
+     ${signatureBlock(d.company)}`,
   );
+}
+
+/** Handtekening van de verhuizer (Dashboard → Bedrijf), of een nette standaardgroet. */
+function signatureBlock(company: Company): string {
+  const text = company.emailSignature?.trim() || `Met vriendelijke groet,\n\n${company.name}`;
+  return `<p style="font-size:14px;margin-top:24px">${esc(text).replace(/\n/g, "<br>")}</p>`;
 }
 
 function detailRows(details: Record<string, string> | undefined): string {

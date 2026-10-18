@@ -161,6 +161,7 @@ export type CompanySettingsInput = Partial<
     | "email"
     | "phone"
     | "website"
+    | "emailSignature"
     | "basePostcode"
     | "baseHouseNumber"
     | "baseAddress"
