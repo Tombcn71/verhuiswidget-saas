@@ -304,6 +304,8 @@ export function MoveFlow({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "De analyse is mislukt.");
       setRoomInventory(data.rooms as typeof roomInventory);
+      // Aantal kamers alvast invullen met de gefotografeerde kamers.
+      setRoomCount(String(Math.max(1, (data.rooms as unknown[] | undefined)?.length ?? 1)));
       setStep(1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Er ging iets mis.");
@@ -497,7 +499,7 @@ export function MoveFlow({
               </span>{" "}
               je {isClearance ? "woning" : "ruimtes"}
             </h2>
-            <p className="mx-auto mt-1 max-w-xs text-sm text-slate-500">
+            <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
               Maak foto&apos;s terwijl je door je huis loopt, of kies bestaande foto&apos;s uit je
               gallerij.
             </p>
@@ -506,7 +508,7 @@ export function MoveFlow({
           <>
             <button
               onClick={() => setPhotoMethod(null)}
-              className="text-xs text-slate-400 hover:text-slate-700"
+              className="text-xs text-slate-500 hover:text-slate-700"
             >
               ‹ Andere methode
             </button>
@@ -517,7 +519,7 @@ export function MoveFlow({
               </span>{" "}
               begin je?
             </h2>
-            <p className="mx-auto mt-1 max-w-xs text-sm text-slate-500">
+            <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
               Maak foto&apos;s kamer voor kamer, je kan altijd terug om meer toe te voegen.
             </p>
           </>
@@ -633,7 +635,7 @@ export function MoveFlow({
                 ))}
               </div>
             )}
-            <p className="text-xs text-slate-400">{photos.length} / 14 foto&apos;s</p>
+            <p className="text-xs text-slate-500">{photos.length} / 14 foto&apos;s</p>
           </div>
         )}
       </div>
@@ -687,7 +689,7 @@ export function MoveFlow({
                 <Camera className="h-5 w-5" />
               </span>
               <span className="text-sm font-semibold">Camera</span>
-              <span className="text-xs text-slate-500">Maak foto&apos;s terwijl je door je huis loopt</span>
+              <span className="text-xs text-slate-600">Maak foto&apos;s terwijl je door je huis loopt</span>
             </button>
             <button
               onClick={() => setPhotoMethod("gallery")}
@@ -700,7 +702,7 @@ export function MoveFlow({
                 <ImageIcon className="h-5 w-5" />
               </span>
               <span className="text-sm font-semibold">Gallerij</span>
-              <span className="text-xs text-slate-500">Upload foto&apos;s die je al hebt</span>
+              <span className="text-xs text-slate-600">Upload foto&apos;s die je al hebt</span>
             </button>
           </div>
         </>
@@ -710,12 +712,12 @@ export function MoveFlow({
             <p className="text-sm font-medium">Welke ruimte nu?</p>
             <button
               onClick={() => setPhotoMethod(null)}
-              className="text-xs text-slate-400 hover:text-slate-700"
+              className="text-xs text-slate-500 hover:text-slate-700"
             >
               ‹ Andere methode
             </button>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-600">
             Leg elke ruimte apart vast. Je kunt later nog ruimtes of foto&apos;s toevoegen.
           </p>
 
@@ -791,7 +793,7 @@ export function MoveFlow({
               ))}
             </div>
           )}
-          <p className="text-xs text-slate-400">{photos.length} / 14 foto&apos;s</p>
+          <p className="text-xs text-slate-500">{photos.length} / 14 foto&apos;s</p>
         </>
       )}
     </div>
@@ -808,7 +810,7 @@ export function MoveFlow({
               {onspot ? "klant" : "gegevens"}
             </span>
           </h2>
-          <p className="mx-auto mt-1 max-w-xs text-sm text-slate-500">
+          <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
             {onspot
               ? "De offerte komt bij je leads en wordt naar de klant gemaild."
               : "Vul je naam en e-mail in — je prijsindicatie verschijnt op het scherm en komt ook in je mailbox."}
@@ -845,9 +847,10 @@ export function MoveFlow({
             inboedel
           </span>
         </h2>
-        <p className="mx-auto mt-1 max-w-xs text-sm text-slate-500">
-          Onze AI herkende dit. Pas aantallen aan of voeg ontbrekende spullen toe. Kleine losse
-          spullen hoef je niet te noemen — die zitten in de doos-inschatting.
+        <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
+          Onze AI herkende dit. Pas aantallen aan of voeg ontbrekende spullen toe. Losse spullen
+          zoals boeken, servies en kleding hoef je niet apart te noemen: die tellen we als
+          verhuisdozen.
         </p>
       </div>
 
@@ -862,7 +865,7 @@ export function MoveFlow({
             )}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{room.name}</p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 {roomPhotos.length > 0 &&
                   `${roomPhotos.length} foto${roomPhotos.length > 1 ? "'s" : ""} · `}
                 {room.items.reduce((n, it) => n + it.quantity, 0)} items
@@ -895,6 +898,12 @@ export function MoveFlow({
                   {it.name}
                   {it.needsInfo && (
                     <span className="ml-1 text-xs text-amber-600">· check</span>
+                  )}
+                  {/verhuisdo/i.test(it.name) && (
+                    <span className="block text-xs text-slate-500">
+                      Schatting voor de losse spullen in deze kamer. Telt mee voor het volume;
+                      verwacht je meer of minder, pas het aan.
+                    </span>
                   )}
                 </span>
                 <div className="flex items-center gap-3">
@@ -1016,7 +1025,7 @@ export function MoveFlow({
                   placeholder={distanceStatus === "loading" ? "Afstand berekenen…" : "Vul de afstand in"}
                 />
               </div>
-              <span className="mt-1.5 block text-xs text-slate-400">
+              <span className="mt-1.5 block text-xs text-slate-500">
                 {distanceStatus === "auto"
                   ? "Berekend via de route. Klopt het niet? Pas het aan."
                   : distanceStatus === "manual"
@@ -1073,9 +1082,9 @@ export function MoveFlow({
 
       <div>
         <p className="text-sm font-semibold">Hoeveel kamers heb je?</p>
-        <p className="mt-1 text-xs text-slate-500">
-          Een kamer is elke ruimte in je huis: keuken, woonkamer, slaapkamer… Reken op één of twee
-          foto&apos;s per kamer.
+        <p className="mt-1 text-xs text-slate-600">
+          Een kamer is elke ruimte in je huis: keuken, woonkamer, slaapkamer, zolder… We hebben het
+          aantal kamers van je foto&apos;s alvast ingevuld. Heeft je woning er meer? Pas het aan.
         </p>
         {stepperControl(roomCount, setRoomCount, 1)}
       </div>
@@ -1087,7 +1096,7 @@ export function MoveFlow({
 
       <div>
         <p className="text-sm font-semibold">Is je woning bereikbaar vanaf de straat?</p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-600">
           Staat je huis direct aan de straat of juist inpandig? Kan een verhuiswagen er parkeren,
           of is het een voetgangersgebied?
         </p>
@@ -1149,7 +1158,7 @@ export function MoveFlow({
                       onChange={(e) => setFloorRemovalM2(e.target.value.replace(/[^0-9]/g, ""))}
                       placeholder="0"
                     />
-                    <span className="w-8 text-xs text-slate-500">m²</span>
+                    <span className="w-8 text-xs text-slate-600">m²</span>
                   </div>
                 </div>
               </div>
@@ -1182,7 +1191,7 @@ export function MoveFlow({
                       onChange={(e) => set(e.target.value.replace(/[^0-9]/g, ""))}
                       placeholder="0"
                     />
-                    <span className="w-8 text-xs text-slate-500">{unit}</span>
+                    <span className="w-8 text-xs text-slate-600">{unit}</span>
                   </div>
                 </div>
               )}
@@ -1197,7 +1206,7 @@ export function MoveFlow({
             <input type="checkbox" checked={packing} onChange={(e) => setPacking(e.target.checked)} className="mt-1" />
             <span>
               <span className="block text-sm font-medium">Inpakservice</span>
-              <span className="block text-xs text-slate-500">
+              <span className="block text-xs text-slate-600">
                 Wij pakken de losse spullen in met dozen en inpakmateriaal.
               </span>
             </span>
@@ -1209,7 +1218,7 @@ export function MoveFlow({
             <input type="checkbox" checked={packing} onChange={(e) => setPacking(e.target.checked)} className="mt-1" />
             <span>
               <span className="block text-sm font-medium">Inpakservice</span>
-              <span className="block text-xs text-slate-500">
+              <span className="block text-xs text-slate-600">
                 Wij pakken je spullen in met verhuisdozen en inpakmateriaal.
               </span>
             </span>
@@ -1218,7 +1227,7 @@ export function MoveFlow({
             <input type="checkbox" checked={assembly} onChange={(e) => setAssembly(e.target.checked)} className="mt-1" />
             <span>
               <span className="block text-sm font-medium">Meubelmontage en -demontage</span>
-              <span className="block text-xs text-slate-500">
+              <span className="block text-xs text-slate-600">
                 Bedden, kasten en tafels worden uit elkaar gehaald en weer opgebouwd.
               </span>
             </span>
@@ -1233,7 +1242,7 @@ export function MoveFlow({
               />
               <span>
                 <span className="block text-sm font-medium">Tijdelijke opslag</span>
-                <span className="block text-xs text-slate-500">
+                <span className="block text-xs text-slate-600">
                   Wij slaan je spullen tijdelijk voor je op.
                 </span>
               </span>
@@ -1299,7 +1308,7 @@ export function MoveFlow({
         <p className="text-sm font-semibold">
           {onspot ? "Opgeslagen bij je leads ✓" : "Je offerte is verzonden ✓"}
         </p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-600">
           {onspot
             ? result.emailSent
               ? `De offerte is gemaild naar ${email}.`
@@ -1354,7 +1363,7 @@ export function MoveFlow({
             <ImageIcon className="h-7 w-7" />
           </div>
           <p className="text-lg font-semibold">AI analyseert je foto&apos;s…</p>
-          <p className="max-w-xs text-sm text-slate-500">
+          <p className="max-w-xs text-sm text-slate-600">
             We herkennen je meubels en stellen een inventarislijst samen. Dit duurt een paar
             seconden.
           </p>
@@ -1437,7 +1446,7 @@ export function MoveFlow({
           <ImageIcon className="h-6 w-6" />
         </div>
         <p className="text-sm font-semibold">AI analyseert je foto&apos;s…</p>
-        <p className="max-w-xs text-xs text-slate-500">Een paar seconden geduld.</p>
+        <p className="max-w-xs text-xs text-slate-600">Een paar seconden geduld.</p>
       </div>
     );
   }
@@ -1484,7 +1493,7 @@ export function MoveFlow({
           <button
             onClick={() => setStep((s) => Math.max(0, s - 1))}
             disabled={step === 0 || submitting}
-            className="text-sm text-slate-500 disabled:opacity-0"
+            className="text-sm text-slate-600 disabled:opacity-0"
           >
             ← Vorige
           </button>
