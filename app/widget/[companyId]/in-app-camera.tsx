@@ -41,7 +41,6 @@ export function InAppCamera({
   useEffect(() => {
     let stream: MediaStream | null = null;
     let cancelled = false;
-    rootRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
 
     navigator.mediaDevices
       .getUserMedia({
@@ -93,51 +92,62 @@ export function InAppCamera({
     setTimeout(() => setFlash(false), 150);
   }
 
+  // Schermvullend, zoals de camera-app: zwart, beeld over de hele hoogte,
+  // knoppen eroverheen. Rekening houden met de notch/home-balk (safe-area).
   return (
-    <div ref={rootRef} className="space-y-3">
-      <div className="flex items-baseline justify-between">
-        <p className="text-sm font-semibold">{room}</p>
-        <p className="text-xs text-slate-600">
+    <div
+      ref={rootRef}
+      role="dialog"
+      aria-label={`Camera: ${room}`}
+      className="fixed inset-0 z-50 flex flex-col bg-black text-white"
+    >
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      {!ready && (
+        <p className="absolute inset-0 flex items-center justify-center px-8 text-center text-sm text-white/80">
+          Camera starten… Sta toegang toe als je browser erom vraagt.
+        </p>
+      )}
+      {flash && <div className="absolute inset-0 bg-white/70" />}
+
+      {/* Boven: ruimte + aantal foto's */}
+      {/* Links houden: rechtsboven zit op de telefoon het sluitkruisje van de pop-up. */}
+      <div className="relative flex items-center gap-3 bg-linear-to-b from-black/60 to-transparent px-5 pb-8 pt-[max(1rem,env(safe-area-inset-top))]">
+        <p className="text-base font-semibold">{room}</p>
+        <p className="rounded-full bg-black/40 px-3 py-1 text-sm">
           {count} foto{count === 1 ? "" : "'s"}
         </p>
       </div>
 
-      <div className="relative aspect-3/4 w-full overflow-hidden rounded-2xl bg-slate-900">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="h-full w-full object-cover"
-        />
-        {!ready && (
-          <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-white/80">
-            Camera starten… Sta toegang toe als je browser erom vraagt.
-          </p>
-        )}
-        {flash && <div className="absolute inset-0 bg-white/70" />}
-      </div>
+      <div className="flex-1" />
 
-      <p className="text-center text-xs text-slate-600">
-        Maak 1–3 foto&apos;s per ruimte, zo dat de meubels goed in beeld zijn.
-      </p>
-
-      <div className="flex items-center justify-between gap-4">
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-24 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Klaar
-        </button>
-        <button
-          type="button"
-          onClick={takePhoto}
-          disabled={!ready}
-          aria-label="Foto maken"
-          className="h-16 w-16 rounded-full border-4 border-slate-300 bg-(--accent) shadow-md transition active:scale-95 disabled:opacity-40"
-        />
-        <span className="w-24" />
+      {/* Onder: tip, Klaar en sluiter */}
+      <div className="relative bg-linear-to-t from-black/70 to-transparent px-6 pt-10 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <p className="mb-5 text-center text-sm text-white/90">
+          Maak 1–3 foto&apos;s per ruimte, met de meubels goed in beeld.
+        </p>
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-20 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold backdrop-blur"
+          >
+            Klaar
+          </button>
+          <button
+            type="button"
+            onClick={takePhoto}
+            disabled={!ready}
+            aria-label="Foto maken"
+            className="h-20 w-20 rounded-full border-[5px] border-white bg-white/30 transition active:scale-90 disabled:opacity-40"
+          />
+          <span className="w-20" />
+        </div>
       </div>
     </div>
   );
