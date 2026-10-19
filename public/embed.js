@@ -103,7 +103,7 @@
     var iframe = document.createElement("iframe");
     iframe.src = src;
     iframe.title = "Offerte aanvragen";
-    iframe.setAttribute("allow", "clipboard-write");
+    iframe.setAttribute("allow", "camera; clipboard-write");
     iframe.style.cssText =
       "width:100%;border:0;overflow:hidden;display:block;background:transparent;min-height:520px;";
 
@@ -225,7 +225,7 @@
   inlineFrame.src = widgetUrl;
   inlineFrame.title = "Offerte aanvragen";
   inlineFrame.loading = "lazy";
-  inlineFrame.setAttribute("allow", "clipboard-write");
+  inlineFrame.setAttribute("allow", "camera; clipboard-write");
   inlineFrame.style.cssText =
     "width:100%;border:0;overflow:hidden;display:block;background:transparent;min-height:520px;";
 

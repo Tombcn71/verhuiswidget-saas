@@ -25,6 +25,7 @@ import { FLOOR_TYPES } from "@/lib/pricing";
 import { upload } from "@vercel/blob/client";
 import { Logo } from "@/app/_components/logo";
 import { AddressInput, EMPTY_ADDRESS, addressText, type AddressValue } from "./address-input";
+import { InAppCamera, canUseInAppCamera } from "./in-app-camera";
 
 export const ROOM_PRESETS: { label: string; Icon: typeof Sofa }[] = [
   { label: "Woonkamer", Icon: Sofa },
@@ -76,7 +77,7 @@ const fmt = (cents: number) => euro.format((cents ?? 0) / 100);
 // Huisstijlkleur van de verhuizer (white-label); gezet als --accent op de widget.
 const ACCENT_BG = "bg-(--accent)";
 
-async function downscale(file: File, maxSize = 1280, quality = 0.8): Promise<Blob> {
+async function downscale(file: Blob, maxSize = 1280, quality = 0.8): Promise<Blob> {
   if (!file.type.startsWith("image/")) return file;
   try {
     const bitmap = await createImageBitmap(file);
@@ -253,7 +254,7 @@ export function MoveFlow({
   }, [photos, customRooms, result, demo, preview, draftKey]);
 
   const onFiles = useCallback(
-    async (room: string, list: FileList | null) => {
+    async (room: string, list: FileList | Blob[] | null) => {
       if (!list?.length) return;
       const incoming: Photo[] = [];
       for (const file of Array.from(list).slice(0, 14)) {
@@ -279,8 +280,18 @@ export function MoveFlow({
     [demo, preview, company.id],
   );
 
+  // Camera ín de widget (zie InAppCamera); valt terug op de camera-app als het
+  // niet kan of de klant geen toestemming geeft.
+  const [cameraRoom, setCameraRoom] = useState<string | null>(null);
+  const [cameraFailed, setCameraFailed] = useState(false);
+
   const openRoomPicker = (room: string) => {
     pendingRoomRef.current = room;
+    setError(null);
+    if (photoMethod === "camera" && chrome && !cameraFailed && canUseInAppCamera()) {
+      setCameraRoom(room);
+      return;
+    }
     fileInputRef.current?.click();
   };
 
@@ -618,6 +629,22 @@ export function MoveFlow({
               <span className="text-sm font-semibold">Gallerij</span>
             </button>
           </div>
+        ) : cameraRoom ? (
+          <InAppCamera
+            room={cameraRoom}
+            count={photos.filter((p) => p.room === cameraRoom).length}
+            onCapture={(blob) => void onFiles(cameraRoom, [blob])}
+            onClose={() => setCameraRoom(null)}
+            onUnavailable={() => {
+              // Geen toestemming of geen camera. De camera-app openen mag alleen
+              // direct na een tik, dus de klant tikt nog een keer op de ruimte.
+              setCameraFailed(true);
+              setCameraRoom(null);
+              setError(
+                "De camera in je browser lukt niet. Tik nog een keer op de ruimte om de camera van je telefoon te gebruiken.",
+              );
+            }}
+          />
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-3">

@@ -23,6 +23,7 @@ export default async function PreviewPage() {
         <iframe
           src={src}
           title="Widget-preview"
+          allow="camera"
           className="h-[780px] w-full"
         />
       </div>
