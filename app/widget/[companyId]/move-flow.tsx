@@ -202,6 +202,56 @@ export function MoveFlow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Foto's bewaren in sessionStorage. Op telefoons herlaadt de browser de site
+  // van de verhuizer soms terwijl de camera-app open is; dan gaan de al
+  // geüploade foto's niet verloren. Alleen foto's die al in Blob staan (URL).
+  const draftKey = `moverai:fotos:${company.id}`;
+  const draftRestored = useRef(false);
+  useEffect(() => {
+    if (demo || preview) return;
+    let draft: {
+      photos: { id: string; room: string; blobUrl: string }[];
+      customRooms: string[];
+    } | null = null;
+    try {
+      const raw = sessionStorage.getItem(draftKey);
+      draft = raw ? JSON.parse(raw) : null;
+    } catch {
+      // geen opslag beschikbaar (privémodus, geblokkeerd) — gewoon opnieuw beginnen
+    }
+    // Pas na de eerste render terugzetten (sessionStorage bestaat niet op de
+    // server); daarna pas opslaan, anders overschrijft de lege start het concept.
+    queueMicrotask(() => {
+      if (draft?.photos.length) {
+        setPhotos(draft.photos.map((p) => ({ ...p, url: p.blobUrl, file: new Blob() })));
+        setCustomRooms(draft.customRooms ?? []);
+        setPhotoMethod("gallery");
+      }
+      draftRestored.current = true;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (demo || preview || !draftRestored.current) return;
+    try {
+      // Offerte verstuurd: concept opruimen.
+      if (result) {
+        sessionStorage.removeItem(draftKey);
+        return;
+      }
+      const saved = photos
+        .filter((p) => p.blobUrl)
+        .map((p) => ({ id: p.id, room: p.room, blobUrl: p.blobUrl! }));
+      if (saved.length) {
+        sessionStorage.setItem(draftKey, JSON.stringify({ photos: saved, customRooms }));
+      } else {
+        sessionStorage.removeItem(draftKey);
+      }
+    } catch {
+      // negeren
+    }
+  }, [photos, customRooms, result, demo, preview, draftKey]);
+
   const onFiles = useCallback(
     async (room: string, list: FileList | null) => {
       if (!list?.length) return;

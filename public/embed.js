@@ -13,11 +13,36 @@
   var companyId = current.getAttribute("data-company-id");
   var mode = (current.getAttribute("data-mode") || "").toLowerCase();
 
+  function reopenIfRemembered() {
+    var url = rememberedUrl();
+    if (!url) return;
+    if (document.body) openModal(url);
+    else document.addEventListener("DOMContentLoaded", function () { openModal(url); });
+  }
+
   // ------------------------------------------------------------------
   // Modal: widget in een pop-up met vervaagde achtergrond
   // ------------------------------------------------------------------
   var overlay = null;
   var lastFocus = null;
+
+  // Onthoud een open pop-up: telefoons herladen de pagina soms terwijl de
+  // camera-app open is. Dan openen we 'm na het herladen meteen weer.
+  var OPEN_KEY = "moverai:popup";
+  var OPEN_MAX_AGE = 30 * 60 * 1000;
+  function rememberOpen(url) {
+    try {
+      if (url) sessionStorage.setItem(OPEN_KEY, JSON.stringify({ url: url, t: Date.now() }));
+      else sessionStorage.removeItem(OPEN_KEY);
+    } catch {}
+  }
+  function rememberedUrl() {
+    try {
+      var saved = JSON.parse(sessionStorage.getItem(OPEN_KEY) || "null");
+      if (saved && saved.url && Date.now() - saved.t < OPEN_MAX_AGE) return saved.url;
+    } catch {}
+    return null;
+  }
 
   function onKey(e) {
     if (e.key === "Escape" || e.keyCode === 27) closeModal();
@@ -25,6 +50,7 @@
 
   function closeModal() {
     if (!overlay) return;
+    rememberOpen(null);
     document.removeEventListener("keydown", onKey);
     if (overlay._onMessage) window.removeEventListener("message", overlay._onMessage);
     document.documentElement.style.overflow = overlay._prevOverflow || "";
@@ -35,6 +61,7 @@
 
   function openModal(widgetUrl) {
     if (overlay) return;
+    rememberOpen(widgetUrl);
     lastFocus = document.activeElement;
 
     var sep = widgetUrl.indexOf("?") === -1 ? "?" : "&";
@@ -129,6 +156,7 @@
       },
       false,
     );
+    reopenIfRemembered();
     return;
   }
 
@@ -167,6 +195,7 @@
       openModal(widgetUrl);
     });
     current.parentNode.insertBefore(btn, current.nextSibling);
+    reopenIfRemembered();
 
     if (!current.getAttribute("data-color") && window.fetch) {
       window
