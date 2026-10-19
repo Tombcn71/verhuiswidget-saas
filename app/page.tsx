@@ -1,10 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Show } from "@clerk/nextjs";
 import heroImage from "@/public/hero.jpg";
 import { DemoModal } from "@/app/_components/demo-modal";
-import { Logo } from "@/app/_components/logo";
-import { CHANNEL_FEATURES, PLANS, PLAN_ORDER, type Plan, type PlanId } from "@/lib/plans";
+import { SiteHeader } from "@/app/_components/site-header";
+import {
+  CHANNEL_FEATURES,
+  PLANS,
+  PLAN_ORDER,
+  type Plan,
+  type PlanId,
+} from "@/lib/plans";
 import {
   Timer,
   Fuel,
@@ -16,7 +21,8 @@ import {
 } from "@/app/_components/icons";
 
 // Hoofdknop: effen merkblauw.
-const aiButton = "bg-brand-600 text-white shadow-sm transition hover:bg-brand-700";
+const aiButton =
+  "bg-brand-600 text-white shadow-sm transition hover:bg-brand-700";
 
 const features = [
   {
@@ -72,8 +78,10 @@ const channels = [
 // Teksten per plan; aantallen (gebruikers, scans, prijzen) komen uit `lib/plans.ts`.
 const PLAN_TAGLINE: Record<PlanId, string> = {
   basic: "Voor de zelfstandige verhuizer die direct professioneel wil scannen.",
-  standard: "Voor groeiende verhuisbedrijven met een kantoor- of planningsteam.",
-  premium: "Voor de grotere verhuisketens met meerdere planners en taxateurs op de weg.",
+  standard:
+    "Voor groeiende verhuisbedrijven met een kantoor- of planningsteam.",
+  premium:
+    "Voor de grotere verhuisketens met meerdere planners en taxateurs op de weg.",
 };
 
 const PLAN_EXTRA: Record<PlanId, string> = {
@@ -121,37 +129,7 @@ function CheckIcon() {
 export default function HomePage() {
   return (
     <div className="flex min-h-full flex-col">
-      <header className="border-b border-slate-200">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
-        <Logo />
-        <nav className="flex items-center gap-3 text-sm font-medium">
-          <a
-            href="#prijzen"
-            className="hidden rounded-lg px-3 py-2 text-slate-600 hover:text-slate-900 sm:block">
-            Prijzen
-          </a>
-          <Show when="signed-out">
-            <Link
-              href="/inloggen"
-              className="rounded-lg px-3 py-2 text-slate-600 hover:text-slate-900">
-              Inloggen
-            </Link>
-            <a
-              href="#prijzen"
-              className={`rounded-lg px-4 py-2 ${aiButton}`}>
-              Gratis starten
-            </a>
-          </Show>
-          <Show when="signed-in">
-            <Link
-              href="/dashboard"
-              className={`rounded-lg px-4 py-2 ${aiButton}`}>
-              Naar dashboard
-            </Link>
-          </Show>
-        </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="flex-1">
         {/* Hero */}
@@ -163,10 +141,8 @@ export default function HomePage() {
                 AI-software voor verhuizers en ontruimers
               </p>
               <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                Meer offertes. Minder werk.{" "}
-                <span className="text-brand-600">
-                  Met AI.
-                </span>
+                Meer offertes. Minder kosten.{" "}
+                <span className="text-brand-600">Door AI.</span>
               </h1>
               <p className="mt-6 text-lg text-slate-600">
                 Laat klanten hun inboedel zelf scannen. moverAI herkent meubels,
@@ -201,7 +177,9 @@ export default function HomePage() {
         </section>
 
         {/* Features */}
-        <section className="border-t border-slate-100 bg-slate-50 py-20">
+        <section
+          id="voordelen"
+          className="scroll-mt-20 border-t border-slate-100 bg-slate-50 py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
               Waarom verhuizen naar AI offertes?
@@ -232,11 +210,11 @@ export default function HomePage() {
               </p>
               <p className="mt-4 text-slate-600">
                 Met moverAI automatiseer je dit hele proces. Of de klant nu zelf
-                foto&apos;s uploadt via je site (Onsite), je een linkje stuurt na
-                een telefoontje (Onlink), of je planner zelf ter plaatse de app
-                opent (Onspot): onze geavanceerde AI doet binnen een minuut de
-                volumeberekening. Zo reduceer je het administratieve proces met
-                maar liefst 80 procent.
+                foto&apos;s uploadt via je site (Onsite), je een linkje stuurt
+                na een telefoontje (Onlink), of je planner zelf ter plaatse de
+                app opent (Onspot): onze geavanceerde AI doet binnen een minuut
+                de volumeberekening. Zo reduceer je het administratieve proces
+                met maar liefst 80 procent.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <a
@@ -254,7 +232,7 @@ export default function HomePage() {
         </section>
 
         {/* Hoe het werkt */}
-        <section className="py-20">
+        <section id="hoe-het-werkt" className="scroll-mt-20 py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
               Hoe het werkt: 3 manieren om te scannen
@@ -288,9 +266,13 @@ export default function HomePage() {
             <div className="mt-5 flex justify-center">
               <p className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200">
                 <span>🎁 Eerste 2 weken gratis</span>
-                <span aria-hidden="true" className="text-emerald-300">·</span>
+                <span aria-hidden="true" className="text-emerald-300">
+                  ·
+                </span>
                 <span>Geen betaalkaart nodig</span>
-                <span aria-hidden="true" className="text-emerald-300">·</span>
+                <span aria-hidden="true" className="text-emerald-300">
+                  ·
+                </span>
                 <span>Niets wordt automatisch afgeschreven</span>
               </p>
             </div>
@@ -303,62 +285,60 @@ export default function HomePage() {
               {PLAN_ORDER.map((id) => PLANS[id]).map((plan) => {
                 const featured = plan.id === "standard";
                 return (
-                <div
-                  key={plan.id}
-                  className={
-                    featured
-                      ? "rounded-2xl bg-brand-600 p-0.5 shadow-xl"
-                      : ""
-                  }>
                   <div
-                    className={`relative flex h-full flex-col bg-white p-8 ${
-                      featured
-                        ? "rounded-[15px]"
-                        : "rounded-2xl border border-slate-200 shadow-sm"
-                    }`}>
-                    {featured && (
-                      <span className="absolute -top-3 left-8 rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white">
-                        Populair
-                      </span>
-                    )}
-                    <h3 className="text-lg font-semibold">
-                      {plan.label}{" "}
-                      <span className="font-normal text-slate-500">
-                        ({plan.audience})
-                      </span>
-                    </h3>
-                    <p className="mt-1 min-h-11 text-sm text-slate-600">
-                      {PLAN_TAGLINE[plan.id]}
-                    </p>
-                    <p className="mt-5 flex items-baseline gap-1">
-                      <span className="text-4xl font-bold tracking-tight">
-                        €{plan.priceCents / 100}
-                      </span>
-                      <span className="text-sm text-slate-500">/ maand</span>
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-emerald-700">
-                      Eerste 2 weken gratis, zonder betaalkaart
-                    </p>
-                    <ul className="mt-6 flex-1 space-y-3 text-sm text-slate-600">
-                      {planFeatures(plan).map((f) => (
-                        <li key={f} className="flex gap-2.5">
-                          <CheckIcon />
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link
-                      href={`/kies-plan?plan=${plan.id}`}
-                      className={`mt-8 rounded-lg px-6 py-3 text-center font-semibold ${
+                    key={plan.id}
+                    className={
+                      featured ? "rounded-2xl bg-brand-600 p-0.5 shadow-xl" : ""
+                    }>
+                    <div
+                      className={`relative flex h-full flex-col bg-white p-8 ${
                         featured
-                          ? aiButton
-                          : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+                          ? "rounded-[15px]"
+                          : "rounded-2xl border border-slate-200 shadow-sm"
                       }`}>
-                      Kies {plan.label}
-                    </Link>
+                      {featured && (
+                        <span className="absolute -top-3 left-8 rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white">
+                          Populair
+                        </span>
+                      )}
+                      <h3 className="text-lg font-semibold">
+                        {plan.label}{" "}
+                        <span className="font-normal text-slate-500">
+                          ({plan.audience})
+                        </span>
+                      </h3>
+                      <p className="mt-1 min-h-11 text-sm text-slate-600">
+                        {PLAN_TAGLINE[plan.id]}
+                      </p>
+                      <p className="mt-5 flex items-baseline gap-1">
+                        <span className="text-4xl font-bold tracking-tight">
+                          €{plan.priceCents / 100}
+                        </span>
+                        <span className="text-sm text-slate-500">/ maand</span>
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-emerald-700">
+                        Eerste 2 weken gratis, zonder betaalkaart
+                      </p>
+                      <ul className="mt-6 flex-1 space-y-3 text-sm text-slate-600">
+                        {planFeatures(plan).map((f) => (
+                          <li key={f} className="flex gap-2.5">
+                            <CheckIcon />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Link
+                        href={`/kies-plan?plan=${plan.id}`}
+                        className={`mt-8 rounded-lg px-6 py-3 text-center font-semibold ${
+                          featured
+                            ? aiButton
+                            : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+                        }`}>
+                        Kies {plan.label}
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              );
+                );
               })}
             </div>
           </div>
