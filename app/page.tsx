@@ -165,24 +165,16 @@ export default function HomePage() {
                 <Sparkles className="h-3.5 w-3.5" />
                 AI-software voor verhuizers en ontruimers
               </p>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                Laat AI binnen{" "}
+              <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+                Meer offertes. Minder werk.{" "}
                 <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-                  1 minuut
-                </span>{" "}
-                je verhuis- en ontruimingsoffertes berekenen en versturen
+                  Met AI.
+                </span>
               </h1>
               <p className="mt-6 text-lg text-slate-600">
-                moverAI is de ultieme workflow-tool voor de moderne verhuizer.{" "}
-                <strong className="text-slate-900">Onsite</strong> op je website
-                via onze slimme widget,{" "}
-                <strong className="text-slate-900">Onlink</strong> via een direct
-                sms- of WhatsApp-linkje naar je klant, of{" "}
-                <strong className="text-slate-900">Onspot</strong> als mobiele
-                scanner in de hand van je taxateur. De AI herkent meubels binnen
-                60 seconden, berekent het exacte volume op basis van jouw tarieven
-                en stuurt direct een kant-en-klare offerte naar de klant én jouw
-                dashboard.
+                Laat klanten hun inboedel zelf scannen. moverAI herkent meubels,
+                schat het verhuisvolume en helpt je sneller een offerte op basis
+                van je eigen tarieven te maken.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
