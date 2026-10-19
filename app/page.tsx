@@ -15,9 +15,8 @@ import {
   Sparkles,
 } from "@/app/_components/icons";
 
-// Herbruikbare gradient-knopstijl (Tailwind-utilities, geen custom CSS).
-const aiButton =
-  "bg-linear-to-br from-blue-600 via-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30 transition hover:brightness-110";
+// Hoofdknop: effen merkblauw.
+const aiButton = "bg-brand-600 text-white shadow-sm transition hover:bg-brand-700";
 
 const features = [
   {
@@ -122,25 +121,26 @@ function CheckIcon() {
 export default function HomePage() {
   return (
     <div className="flex min-h-full flex-col">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
+      <header className="border-b border-slate-200">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
         <Logo />
         <nav className="flex items-center gap-3 text-sm font-medium">
-          <Link
+          <a
             href="#prijzen"
             className="hidden rounded-lg px-3 py-2 text-slate-600 hover:text-slate-900 sm:block">
             Prijzen
-          </Link>
+          </a>
           <Show when="signed-out">
             <Link
               href="/inloggen"
               className="rounded-lg px-3 py-2 text-slate-600 hover:text-slate-900">
               Inloggen
             </Link>
-            <Link
-              href="/#prijzen"
+            <a
+              href="#prijzen"
               className={`rounded-lg px-4 py-2 ${aiButton}`}>
               Gratis starten
-            </Link>
+            </a>
           </Show>
           <Show when="signed-in">
             <Link
@@ -150,24 +150,21 @@ export default function HomePage() {
             </Link>
           </Show>
         </nav>
+        </div>
       </header>
 
       <main className="flex-1">
         {/* Hero */}
         <section className="relative mx-auto w-full max-w-6xl overflow-hidden px-6 pt-16 pb-20">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-linear-to-br from-blue-400 to-violet-400 opacity-40 blur-3xl sm:h-96 sm:w-96"
-          />
           <div className="relative grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div className="text-center lg:text-left">
-              <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-violet-500/20">
+              <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
                 <Sparkles className="h-3.5 w-3.5" />
                 AI-software voor verhuizers en ontruimers
               </p>
               <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
                 Meer offertes. Minder werk.{" "}
-                <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+                <span className="text-brand-600">
                   Met AI.
                 </span>
               </h1>
@@ -177,11 +174,11 @@ export default function HomePage() {
                 van je eigen tarieven te maken.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
-                <Link
-                  href="/#prijzen"
+                <a
+                  href="#prijzen"
                   className={`w-full rounded-lg px-6 py-3 text-center font-semibold sm:w-auto ${aiButton}`}>
                   Probeer 14 dagen gratis
-                </Link>
+                </a>
                 <DemoModal />
               </div>
               <p className="mt-3 text-sm text-slate-400">
@@ -189,7 +186,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl shadow-[0_30px_70px_-25px_rgba(79,70,229,0.45)] ring-1 ring-violet-500/15 lg:order-last">
+            <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl shadow-xl ring-1 ring-slate-200 lg:order-last">
               <Image
                 src={heroImage}
                 alt="Telefoon scant een woonkamer; moverAI herkent de meubels en toont een offerte-indicatie."
@@ -214,7 +211,7 @@ export default function HomePage() {
                 <div
                   key={f.title}
                   className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <div className="inline-flex rounded-xl bg-linear-to-br from-blue-600 to-violet-600 p-2.5 text-white">
+                  <div className="inline-flex rounded-xl bg-brand-600 p-2.5 text-white">
                     <f.Icon className="h-6 w-6" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
@@ -242,11 +239,11 @@ export default function HomePage() {
                 maar liefst 80 procent.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-                <Link
-                  href="/#prijzen"
+                <a
+                  href="#prijzen"
                   className={`rounded-lg px-6 py-3 text-center font-semibold ${aiButton}`}>
                   Probeer 14 dagen gratis
-                </Link>
+                </a>
                 <DemoModal />
               </div>
               <p className="mt-3 text-sm text-slate-400">
@@ -310,7 +307,7 @@ export default function HomePage() {
                   key={plan.id}
                   className={
                     featured
-                      ? "rounded-2xl bg-linear-to-br from-blue-600 to-violet-600 p-px shadow-xl shadow-indigo-500/25"
+                      ? "rounded-2xl bg-brand-600 p-0.5 shadow-xl"
                       : ""
                   }>
                   <div
@@ -320,7 +317,7 @@ export default function HomePage() {
                         : "rounded-2xl border border-slate-200 shadow-sm"
                     }`}>
                     {featured && (
-                      <span className="absolute -top-3 left-8 rounded-full bg-linear-to-br from-blue-600 to-violet-600 px-3 py-1 text-xs font-semibold text-white">
+                      <span className="absolute -top-3 left-8 rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white">
                         Populair
                       </span>
                     )}
@@ -368,7 +365,7 @@ export default function HomePage() {
         </section>
 
         {/* CTA */}
-        <section className="bg-linear-to-br from-blue-600 via-indigo-600 to-violet-700 py-16">
+        <section className="bg-brand-600 py-16">
           <div className="mx-auto w-full max-w-3xl px-6 text-center text-white">
             <h2 className="text-3xl font-bold tracking-tight">
               Klaar om meer leads te converteren?
@@ -378,11 +375,11 @@ export default function HomePage() {
               teamleden uit, stel je m³-tarieven in en begin vandaag nog met
               slim scannen.
             </p>
-            <Link
-              href="/#prijzen"
-              className="mt-6 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-indigo-700 shadow-lg hover:bg-slate-50">
+            <a
+              href="#prijzen"
+              className="mt-6 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 shadow-sm hover:bg-slate-50">
               Gratis starten
-            </Link>
+            </a>
           </div>
         </section>
       </main>

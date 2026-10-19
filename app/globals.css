@@ -2,14 +2,17 @@
 
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
+  /* Google-blauw (#1A73E8): effen, geen verlopen. Wit op 600 haalt WCAG AA. */
+  --color-brand-50: #e8f0fe;
+  --color-brand-100: #d2e3fc;
+  --color-brand-600: #1a73e8;
+  --color-brand-700: #1557b0;
 }
 
 html {
   color-scheme: light;
+  /* Vloeiend naar #prijzen en andere ankers op de pagina. */
+  scroll-behavior: smooth;
 }
 
 body {

@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ALTER COLUMN "primary_color" SET DEFAULT '#1a73e8';

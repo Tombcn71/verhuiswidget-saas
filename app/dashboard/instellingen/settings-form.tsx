@@ -99,7 +99,7 @@ export function SettingsForm({ company }: { company: Company }) {
             name="primaryColor"
             defaultValue={company.primaryColor}
             error={e.primaryColor}
-            hint="Hex-code, bijv. #2563eb"
+            hint="Hex-code, bijv. #1a73e8"
           />
         </div>
       </section>

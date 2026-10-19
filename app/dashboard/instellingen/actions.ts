@@ -16,7 +16,7 @@ const schema = z.object({
   primaryColor: z
     .string()
     .trim()
-    .regex(/^#[0-9a-fA-F]{6}$/, "Gebruik een hex-kleur zoals #2563eb"),
+    .regex(/^#[0-9a-fA-F]{6}$/, "Gebruik een hex-kleur zoals #1a73e8"),
   emailSignature: z.string().trim().max(1000, "Maximaal 1000 tekens").optional().or(z.literal("")),
   basePostcode: z.string().trim().max(10).optional().or(z.literal("")),
   baseHouseNumber: z.string().trim().max(10).optional().or(z.literal("")),

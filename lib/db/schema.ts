@@ -94,7 +94,7 @@ export const companies = pgTable("companies", {
   baseLat: doublePrecision("base_lat"),
   baseLon: doublePrecision("base_lon"),
   logoUrl: text("logo_url"),
-  primaryColor: text("primary_color").notNull().default("#2563eb"),
+  primaryColor: text("primary_color").notNull().default("#1a73e8"),
 
   // Welke dienst(en) dit bedrijf aanbiedt: "verhuizen" | "ontruimen" | "beide".
   // Stuurt de widget-toggle en het dashboard aan.

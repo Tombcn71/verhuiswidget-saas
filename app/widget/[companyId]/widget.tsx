@@ -13,7 +13,8 @@ type CompanyPublic = {
   serviceType: "verhuizen" | "ontruimen" | "beide";
 };
 
-const AI_GRADIENT = "bg-linear-to-br from-blue-600 via-indigo-600 to-violet-600";
+// Huisstijlkleur van de verhuizer (white-label); gezet als --accent op de widget.
+const ACCENT_BG = "bg-(--accent)";
 
 // Startscherm van de marketing-demo: de bezoeker is een verhuizer, dus eerst
 // uitleggen dat hij nu de kant van zijn klant ziet.
@@ -35,6 +36,8 @@ export function Widget({
   source?: LeadSource;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
+  // Alle accenten in de widget (knoppen, toggles, koppen) in de kleur van de verhuizer.
+  const accentStyle = { "--accent": company.primaryColor } as React.CSSProperties;
 
   const showToggle = company.serviceType === "beide";
   const forcedType: "verhuizing" | "ontruiming" | null =
@@ -70,11 +73,12 @@ export function Widget({
     return (
       <div
         ref={rootRef}
+        style={accentStyle}
         className="flex h-full min-h-dvh flex-col justify-center bg-white px-6 py-10 text-center text-slate-900"
       >
         <h2 className="text-3xl font-bold tracking-tight">
           Zo ziet{" "}
-          <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+          <span className="text-(--accent)">
             jouw klant
           </span>{" "}
           het
@@ -97,7 +101,7 @@ export function Widget({
 
         <button
           onClick={() => setStarted(true)}
-          className={`mx-auto mt-10 block rounded-full px-10 py-3.5 text-sm font-semibold text-white shadow-lg ${AI_GRADIENT}`}
+          className={`mx-auto mt-10 block rounded-full px-10 py-3.5 text-sm font-semibold text-white shadow-lg ${ACCENT_BG}`}
         >
           Start de demo
         </button>
@@ -107,7 +111,7 @@ export function Widget({
   }
 
   return (
-    <div ref={rootRef} className="bg-white text-slate-900">
+    <div ref={rootRef} style={accentStyle} className="bg-white text-slate-900">
       <MoveFlow
         company={company}
         demo={demo}

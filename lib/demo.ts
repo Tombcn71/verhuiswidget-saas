@@ -19,7 +19,7 @@ export const DEMO_COMPANY_PUBLIC = {
   id: DEMO_COMPANY_ID,
   name: "Demo Verhuisbedrijf",
   logoUrl: null as string | null,
-  primaryColor: "#2563eb",
+  primaryColor: "#1a73e8",
   phone: null as string | null,
   serviceType: "beide" as const,
 };

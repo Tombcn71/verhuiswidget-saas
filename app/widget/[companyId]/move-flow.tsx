@@ -73,7 +73,8 @@ const RESULT_STEP = 5;
 
 const euro = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" });
 const fmt = (cents: number) => euro.format((cents ?? 0) / 100);
-const AI_GRADIENT = "bg-linear-to-br from-blue-600 via-indigo-600 to-violet-600";
+// Huisstijlkleur van de verhuizer (white-label); gezet als --accent op de widget.
+const ACCENT_BG = "bg-(--accent)";
 
 async function downscale(file: File, maxSize = 1280, quality = 0.8): Promise<Blob> {
   if (!file.type.startsWith("image/")) return file;
@@ -193,8 +194,8 @@ export function MoveFlow({
   const [result, setResult] = useState<Result | null>(null);
 
   const accent = company.primaryColor;
-  const fillClass = chrome ? AI_GRADIENT : "";
-  const fillStyle = chrome ? undefined : { background: accent };
+  const fillClass = ACCENT_BG;
+  const fillStyle = undefined;
 
   useEffect(() => {
     return () => photos.forEach((p) => URL.revokeObjectURL(p.url));
@@ -478,7 +479,7 @@ export function MoveFlow({
         type="button"
         onClick={() => onChange(!value)}
         aria-pressed={value}
-        className={`relative h-7 w-12 shrink-0 rounded-full transition ${value ? AI_GRADIENT : "bg-slate-200"}`}
+        className={`relative h-7 w-12 shrink-0 rounded-full transition ${value ? ACCENT_BG : "bg-slate-200"}`}
       >
         <span
           className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all ${
@@ -499,7 +500,7 @@ export function MoveFlow({
         {!roomPickerOpen ? (
           <>
             <h2 className="text-3xl font-bold tracking-tight">
-              <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+              <span className="text-(--accent)">
                 Scan
               </span>{" "}
               je {isClearance ? "woning" : "ruimtes"}
@@ -519,7 +520,7 @@ export function MoveFlow({
             </button>
             <h2 className="mt-2 text-3xl font-bold tracking-tight">
               Welke{" "}
-              <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+              <span className="text-(--accent)">
                 ruimte
               </span>{" "}
               begin je?
@@ -539,7 +540,7 @@ export function MoveFlow({
                 key={t}
                 onClick={() => setMoveType(t)}
                 className={`rounded-full px-3 py-1 capitalize ${
-                  moveType === t ? `${AI_GRADIENT} text-white` : "text-slate-500"
+                  moveType === t ? `${ACCENT_BG} text-white` : "text-slate-500"
                 }`}
               >
                 {t}
@@ -583,7 +584,7 @@ export function MoveFlow({
                   >
                     {count > 0 && (
                       <span
-                        className={`absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold text-white ${AI_GRADIENT}`}
+                        className={`absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold text-white ${ACCENT_BG}`}
                       >
                         {count}
                       </span>
@@ -659,7 +660,7 @@ export function MoveFlow({
                 key={t}
                 onClick={() => setMoveType(t)}
                 className={`rounded-lg border px-3 py-2 text-sm capitalize ${
-                  moveType === t && chrome ? `${AI_GRADIENT} border-transparent text-white` : ""
+                  moveType === t && chrome ? `${ACCENT_BG} border-transparent text-white` : ""
                 }`}
                 style={{
                   borderColor: moveType === t ? (chrome ? undefined : accent) : "#cbd5e1",
@@ -811,7 +812,7 @@ export function MoveFlow({
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight">
             {onspot ? "Gegevens van de " : "Jouw "}
-            <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+            <span className="text-(--accent)">
               {onspot ? "klant" : "gegevens"}
             </span>
           </h2>
@@ -861,7 +862,7 @@ export function MoveFlow({
       <div className="text-center">
         <h2 className="text-3xl font-bold tracking-tight">
           Check je{" "}
-          <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+          <span className="text-(--accent)">
             inboedel
           </span>
         </h2>
@@ -900,7 +901,7 @@ export function MoveFlow({
                 .map((it, i) => (
                   <span
                     key={i}
-                    className={`absolute -translate-x-1/2 -translate-y-full rounded-full px-2 py-0.5 text-[10px] font-semibold text-white shadow ${AI_GRADIENT}`}
+                    className={`absolute -translate-x-1/2 -translate-y-full rounded-full px-2 py-0.5 text-[10px] font-semibold text-white shadow ${ACCENT_BG}`}
                     style={{ left: `${(it.x ?? 0.5) * 100}%`, top: `${(it.y ?? 0.5) * 100}%` }}
                   >
                     {it.name}
@@ -1007,7 +1008,7 @@ export function MoveFlow({
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight">
             {isClearance ? "Waar is de " : "Waar ga je "}
-            <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+            <span className="text-(--accent)">
               {isClearance ? "ontruiming" : "naartoe"}
             </span>
             ?
@@ -1130,7 +1131,7 @@ export function MoveFlow({
         <div className="mb-2 text-center">
           <h2 className="text-3xl font-bold tracking-tight">
             Nog wat{" "}
-            <span className="bg-linear-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+            <span className="text-(--accent)">
               extra&apos;s
             </span>
             ?
@@ -1376,7 +1377,7 @@ export function MoveFlow({
       return (
         <div className="flex h-dvh flex-col items-center justify-center gap-4 bg-white px-5 text-center text-slate-900">
           <div
-            className={`flex h-14 w-14 items-center justify-center rounded-2xl text-white ${AI_GRADIENT} animate-pulse`}
+            className={`flex h-14 w-14 items-center justify-center rounded-2xl text-white ${ACCENT_BG} animate-pulse`}
           >
             <ImageIcon className="h-7 w-7" />
           </div>
@@ -1420,7 +1421,7 @@ export function MoveFlow({
               {STEPS.slice(0, STEPS.length - 1).map((label, i) => (
                 <span
                   key={label}
-                  className={`h-2 w-2 rounded-full ${i <= step ? AI_GRADIENT : ""}`}
+                  className={`h-2 w-2 rounded-full ${i <= step ? ACCENT_BG : ""}`}
                   style={{ background: i <= step ? undefined : "#e2e8f0" }}
                 />
               ))}
@@ -1445,7 +1446,7 @@ export function MoveFlow({
           <button
             onClick={onNext}
             disabled={!stepValid || submitting}
-            className={`flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-md disabled:opacity-40 ${AI_GRADIENT} ${
+            className={`flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-md disabled:opacity-40 ${ACCENT_BG} ${
               submitting ? "animate-pulse" : ""
             }`}
           >
