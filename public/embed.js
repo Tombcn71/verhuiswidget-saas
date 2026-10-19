@@ -68,6 +68,9 @@
     var src =
       widgetUrl.indexOf("embed=1") === -1 ? widgetUrl + sep + "embed=1" : widgetUrl;
 
+    // Telefoon: schermvullend (zoals een app), zonder rand. Desktop: venster.
+    var mobile = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
+
     overlay = document.createElement("div");
     overlay._prevOverflow = document.documentElement.style.overflow;
     overlay.setAttribute("role", "dialog");
@@ -75,42 +78,48 @@
     overlay.setAttribute("aria-label", "Offerte aanvragen");
     overlay.style.cssText =
       "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:flex-start;" +
-      "justify-content:center;overflow-y:auto;padding:24px;box-sizing:border-box;" +
+      "justify-content:center;overflow-y:auto;box-sizing:border-box;" +
+      (mobile ? "padding:0;" : "padding:24px;") +
       "background:rgba(15,23,42,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);";
     overlay.addEventListener("click", function (e) {
       if (e.target === overlay) closeModal();
     });
 
     var panel = document.createElement("div");
-    panel.style.cssText =
-      "position:relative;margin:auto;width:100%;max-width:520px;background:#fff;" +
-      "border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);";
+    panel.style.cssText = mobile
+      ? "position:relative;width:100%;height:100dvh;background:#fff;"
+      : "position:relative;margin:auto;width:100%;max-width:520px;background:#fff;" +
+        "border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);";
 
     var x = document.createElement("button");
     x.type = "button";
     x.setAttribute("aria-label", "Sluiten");
     x.innerHTML = "&times;";
     x.style.cssText =
-      "position:absolute;top:-14px;right:-14px;width:34px;height:34px;border:0;cursor:pointer;" +
+      "position:absolute;width:34px;height:34px;border:0;cursor:pointer;z-index:1;" +
+      (mobile ? "top:14px;right:14px;" : "top:-14px;right:-14px;") +
       "border-radius:999px;background:#0f172a;color:#fff;font-size:20px;line-height:34px;" +
       "box-shadow:0 4px 12px rgba(0,0,0,.3);";
     x.addEventListener("click", closeModal);
 
     var scroller = document.createElement("div");
-    scroller.style.cssText =
-      "max-height:88vh;overflow-y:auto;border-radius:16px;-webkit-overflow-scrolling:touch;";
+    scroller.style.cssText = mobile
+      ? "height:100%;overflow:hidden;"
+      : "max-height:88vh;overflow-y:auto;border-radius:16px;-webkit-overflow-scrolling:touch;";
 
     var iframe = document.createElement("iframe");
     iframe.src = src;
     iframe.title = "Offerte aanvragen";
     iframe.setAttribute("allow", "camera; clipboard-write");
     iframe.style.cssText =
-      "width:100%;border:0;overflow:hidden;display:block;background:transparent;min-height:520px;";
+      "width:100%;border:0;overflow:hidden;display:block;background:transparent;" +
+      (mobile ? "height:100%;" : "min-height:520px;");
 
     overlay._onMessage = function (event) {
       if (event.origin !== origin) return;
       var data = event.data || {};
-      if (data.type === "verhuiswidget:height" && typeof data.height === "number") {
+      // Op de telefoon vult de widget het hele scherm en scrolt hij zelf.
+      if (!mobile && data.type === "verhuiswidget:height" && typeof data.height === "number") {
         iframe.style.height = Math.ceil(data.height) + "px";
       }
     };

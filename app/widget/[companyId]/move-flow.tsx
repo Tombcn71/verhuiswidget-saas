@@ -594,7 +594,7 @@ export function MoveFlow({
       </div>
 
       {showToggle && !roomPickerOpen && (
-        <div className="mt-10 flex justify-center">
+        <div className="mt-6 flex justify-center">
           <div className="inline-flex rounded-full border border-slate-200 p-1 text-xs">
             {(["verhuizing", "ontruiming"] as const).map((t) => (
               <button
@@ -611,7 +611,7 @@ export function MoveFlow({
         </div>
       )}
 
-      <div className="mt-10">
+      <div className="mt-6">
         {!roomPickerOpen ? (
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -1468,7 +1468,7 @@ export function MoveFlow({
     }
 
     return (
-      <div className="flex h-dvh flex-col bg-white px-5 py-6 text-slate-900">
+      <div className="flex h-dvh flex-col bg-white px-5 py-4 text-slate-900">
         {hiddenFileInput}
 
         {/* Topbalk */}
@@ -1506,7 +1506,7 @@ export function MoveFlow({
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto pb-4 pt-10">
+        <div className="flex-1 overflow-y-auto pb-4 pt-6">
           {step === 0 && fancyFotosBody}
           {step === 1 && inventarisBody}
           {step === 2 && adressenBody}
