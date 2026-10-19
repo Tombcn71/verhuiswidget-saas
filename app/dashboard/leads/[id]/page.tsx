@@ -5,6 +5,20 @@ import { requireCompany } from "@/lib/current-company";
 import { LEAD_SOURCE_LABEL, getLeadForCompany, normalizeLeadSource } from "@/lib/leads";
 import { formatEuroCents, formatDate, formatDateTime } from "@/lib/format";
 import { isLeadLocked } from "@/lib/plans";
+import { ArrowLeft, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { PageHeader } from "../../page-header";
 import { setLeadStatus, saveLeadNotes } from "./actions";
 
 export const metadata: Metadata = { title: "Lead" };
@@ -21,20 +35,21 @@ export default async function LeadDetailPage({
 
   if (isLeadLocked(company, lead)) {
     return (
-      <div className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center">
-        <div className="text-3xl">🔒</div>
-        <h1 className="mt-3 text-xl font-bold">Nieuwe aanvraag</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Binnengekomen op {formatDateTime(lead.createdAt)}. Je proefperiode is afgelopen;
-          activeer een plan om de klantgegevens en offerte te bekijken.
-        </p>
-        <Link
-          href="/dashboard/abonnement"
-          className="mt-5 inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-        >
-          Bekijk plannen
-        </Link>
-      </div>
+      <Card className="mx-auto max-w-md text-center">
+        <CardHeader>
+          <Lock className="mx-auto size-8 text-muted-foreground" />
+          <CardTitle className="mt-2 text-xl">Nieuwe aanvraag</CardTitle>
+          <CardDescription>
+            Binnengekomen op {formatDateTime(lead.createdAt)}. Je proefperiode is afgelopen;
+            activeer een plan om de klantgegevens en offerte te bekijken.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild>
+            <Link href="/dashboard/abonnement">Bekijk plannen</Link>
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -76,174 +91,199 @@ export default async function LeadDetailPage({
   const works = cl?.works;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <Link href="/dashboard/leads" className="text-sm text-brand-600">
-          ← Terug naar leads
+    <>
+      <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2 text-muted-foreground">
+        <Link href="/dashboard/leads">
+          <ArrowLeft /> Terug naar leads
         </Link>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">{lead.customerName}</h1>
-      </div>
-
-      <form action={setLeadStatus} className="flex flex-wrap items-center gap-2">
-        <input type="hidden" name="leadId" value={lead.id} />
-        <span className="text-sm text-slate-500">Status:</span>
-        {STATUSES.map((s) => (
-          <button
-            key={s}
-            name="status"
-            value={s}
-            className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
-              lead.status === s
-                ? "bg-brand-600 text-white"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
-            {s}
-          </button>
-        ))}
-      </form>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="font-semibold">Gegevens</h2>
-          <dl className="mt-4 space-y-2 text-sm">
-            {rows.map(([k, v]) => (
-              <div key={k} className="flex justify-between gap-4">
-                <dt className="text-slate-500">{k}</dt>
-                <dd className="text-right font-medium capitalize">{v}</dd>
-              </div>
+      </Button>
+      <PageHeader
+        title={lead.customerName}
+        description={`${lead.moveType === "ontruiming" ? "Ontruiming" : "Verhuizing"} · aangevraagd op ${formatDateTime(lead.createdAt)}`}
+        action={
+          <form action={setLeadStatus} className="flex flex-wrap items-center gap-1.5">
+            <input type="hidden" name="leadId" value={lead.id} />
+            {STATUSES.map((s) => (
+              <Button
+                key={s}
+                name="status"
+                value={s}
+                size="sm"
+                variant={lead.status === s ? "default" : "outline"}
+                className="capitalize"
+              >
+                {s}
+              </Button>
             ))}
-          </dl>
-          {(options.packing || options.assembly || (options.storageMonths ?? 0) > 0) && (
-            <div className="mt-4 border-t border-slate-100 pt-3 text-sm">
-              <div className="text-slate-500">Extra opties</div>
-              <ul className="mt-1 list-inside list-disc">
-                {options.packing && <li>Inpakservice</li>}
-                {options.assembly && <li>Meubelmontage en -demontage</li>}
-                {(options.storageMonths ?? 0) > 0 && (
-                  <li>Opslag: {options.storageMonths} maand(en)</li>
-                )}
-              </ul>
-            </div>
-          )}
-          {works && (
-            <div className="mt-4 border-t border-slate-100 pt-3 text-sm">
-              <div className="text-slate-500">Extra werkzaamheden</div>
-              <ul className="mt-1 list-inside list-disc">
-                {works.floorRemoval && (
-                  <li>
-                    Vloer verwijderen ({works.floorRemoval.type}) — {works.floorRemoval.m2} m²
-                  </li>
-                )}
-                {(works.wallpaperM2 ?? 0) > 0 && <li>Behang verwijderen — {works.wallpaperM2} m²</li>}
-                {(works.holes ?? 0) > 0 && <li>Gaatjes stoppen — {works.holes} stuks</li>}
-                {(works.paintingM2 ?? 0) > 0 && <li>Schilderwerk — {works.paintingM2} m²</li>}
-                {works.curtains && <li>Gordijnen verwijderen</li>}
-                {works.packing && <li>Inpakservice</li>}
-              </ul>
-            </div>
-          )}
-        </section>
+          </form>
+        }
+      />
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="font-semibold">Prijsopbouw</h2>
-          <table className="mt-4 w-full text-sm">
-            <tbody>
-              {(lead.priceBreakdown ?? []).map((line, i) => (
-                <tr key={i}>
-                  <td className="py-1 text-slate-600">{line.label}</td>
-                  <td className="py-1 text-right">{formatEuroCents(line.amountCents)}</td>
-                </tr>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Gegevens</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="space-y-2 text-sm">
+              {rows.map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">{k}</dt>
+                  <dd className="text-right font-medium">{v}</dd>
+                </div>
               ))}
-              <tr className="border-t border-slate-200">
-                <td className="py-1 text-slate-600">Subtotaal</td>
-                <td className="py-1 text-right">{formatEuroCents(lead.subtotalCents)}</td>
-              </tr>
-              <tr>
-                <td className="py-1 text-slate-600">Btw</td>
-                <td className="py-1 text-right">{formatEuroCents(lead.vatCents)}</td>
-              </tr>
-              <tr className="border-t-2 border-slate-900 font-bold">
-                <td className="py-2">Totaal incl. btw</td>
-                <td className="py-2 text-right">{formatEuroCents(lead.totalCents)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
+            </dl>
+            {(options.packing || options.assembly || (options.storageMonths ?? 0) > 0) && (
+              <>
+                <Separator className="my-4" />
+                <p className="text-sm text-muted-foreground">Extra opties</p>
+                <ul className="mt-1 list-inside list-disc text-sm">
+                  {options.packing && <li>Inpakservice</li>}
+                  {options.assembly && <li>Meubelmontage en -demontage</li>}
+                  {(options.storageMonths ?? 0) > 0 && (
+                    <li>Opslag: {options.storageMonths} maand(en)</li>
+                  )}
+                </ul>
+              </>
+            )}
+            {works && (
+              <>
+                <Separator className="my-4" />
+                <p className="text-sm text-muted-foreground">Extra werkzaamheden</p>
+                <ul className="mt-1 list-inside list-disc text-sm">
+                  {works.floorRemoval && (
+                    <li>
+                      Vloer verwijderen ({works.floorRemoval.type}) — {works.floorRemoval.m2} m²
+                    </li>
+                  )}
+                  {(works.wallpaperM2 ?? 0) > 0 && <li>Behang verwijderen — {works.wallpaperM2} m²</li>}
+                  {(works.holes ?? 0) > 0 && <li>Gaatjes stoppen — {works.holes} stuks</li>}
+                  {(works.paintingM2 ?? 0) > 0 && <li>Schilderwerk — {works.paintingM2} m²</li>}
+                  {works.curtains && <li>Gordijnen verwijderen</li>}
+                  {works.packing && <li>Inpakservice</li>}
+                </ul>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Prijsopbouw</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableBody>
+                {(lead.priceBreakdown ?? []).map((line, i) => (
+                  <TableRow key={i}>
+                    <TableCell className="text-muted-foreground">{line.label}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatEuroCents(line.amountCents)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow>
+                  <TableCell className="text-muted-foreground">Subtotaal</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatEuroCents(lead.subtotalCents)}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-muted-foreground">Btw</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatEuroCents(lead.vatCents)}
+                  </TableCell>
+                </TableRow>
+                <TableRow className="text-base font-semibold hover:bg-transparent">
+                  <TableCell>Totaal incl. btw</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatEuroCents(lead.totalCents)}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="font-semibold">Notitie</h2>
-        <form action={saveLeadNotes} className="mt-3">
-          <input type="hidden" name="leadId" value={lead.id} />
-          <textarea
-            name="notes"
-            rows={3}
-            defaultValue={lead.notes ?? ""}
-            placeholder="Bijv. gebeld op 12/3, komt langs voor bezichtiging…"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-600"
-          />
-          <button
-            type="submit"
-            className="mt-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-          >
-            Notitie opslaan
-          </button>
-        </form>
-      </section>
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Notitie</CardTitle>
+          <CardDescription>Alleen zichtbaar voor jou en je team.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={saveLeadNotes} className="space-y-3">
+            <input type="hidden" name="leadId" value={lead.id} />
+            <Textarea
+              name="notes"
+              rows={3}
+              defaultValue={lead.notes ?? ""}
+              placeholder="Bijv. gebeld op 12/3, komt langs voor bezichtiging…"
+            />
+            <Button type="submit" variant="secondary">
+              Notitie opslaan
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
       {(lead.photoUrls ?? []).length > 0 && (
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="font-semibold">
-            Foto&apos;s van de klant{" "}
-            <span className="text-slate-400">({lead.photoUrls.length})</span>
-          </h2>
-          <div className="mt-4 flex flex-wrap gap-3">
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Foto&apos;s van de klant</CardTitle>
+            <CardDescription>{lead.photoUrls.length} foto&apos;s · klik om te vergroten</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-3">
             {lead.photoUrls.map((url, i) => (
               <a key={i} href={url} target="_blank" rel="noreferrer">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={url}
                   alt={`Foto ${i + 1}`}
-                  className="h-28 w-28 rounded-lg object-cover ring-1 ring-slate-200"
+                  className="size-28 rounded-lg border object-cover transition hover:opacity-90"
                 />
               </a>
             ))}
-          </div>
-        </section>
+          </CardContent>
+        </Card>
       )}
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="font-semibold">
-          Inventarislijst <span className="text-slate-400">({lead.inventory?.length ?? 0} regels)</span>
-        </h2>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-slate-500">
-              <tr>
-                <th className="py-2 font-medium">Object</th>
-                <th className="py-2 font-medium">Categorie</th>
-                <th className="py-2 text-right font-medium">Aantal</th>
-                <th className="py-2 text-right font-medium">Volume p/st</th>
-                <th className="py-2 text-right font-medium">Totaal</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Inventarislijst</CardTitle>
+          <CardDescription>{lead.inventory?.length ?? 0} regels</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Object</TableHead>
+                <TableHead className="hidden sm:table-cell">Categorie</TableHead>
+                <TableHead className="text-right">Aantal</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">Volume p/st</TableHead>
+                <TableHead className="text-right">Totaal</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {(lead.inventory ?? []).map((item, i) => (
-                <tr key={i}>
-                  <td className="py-2">{item.name}</td>
-                  <td className="py-2 capitalize text-slate-500">{item.category}</td>
-                  <td className="py-2 text-right">{item.quantity}×</td>
-                  <td className="py-2 text-right">{item.volumeM3.toFixed(2)} m³</td>
-                  <td className="py-2 text-right">
+                <TableRow key={i}>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell className="hidden capitalize text-muted-foreground sm:table-cell">
+                    {item.category}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">{item.quantity}×</TableCell>
+                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
+                    {item.volumeM3.toFixed(2)} m³
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
                     {(item.volumeM3 * item.quantity).toFixed(2)} m³
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </>
   );
 }

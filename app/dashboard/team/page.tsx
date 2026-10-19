@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { OrganizationProfile } from "@clerk/nextjs";
+import { Users } from "lucide-react";
 import { isOrgAdmin, requireCompany } from "@/lib/current-company";
 import { countMembers } from "@/lib/companies";
 import { nextPlan, planFor, seatLimit } from "@/lib/plans";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { PageHeader } from "../page-header";
 
 export const metadata: Metadata = { title: "Team" };
 
@@ -21,63 +26,64 @@ export default async function TeamPage({ searchParams }: PageProps<"/dashboard/t
   const upgrade = nextPlan(plan);
 
   return (
-    <div className="space-y-6">
+    <>
       {welkom !== undefined ? (
         // Eerste bezoek na het aanmaken (via /kies-plan bij Standard/Premium).
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Welkom bij moverAI, {company.name}!
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Je {plan.label}-plan heeft plek voor {limit} gebruikers. Nodig je collega&apos;s
-              uit via &lsquo;Leden&rsquo; → &lsquo;Uitnodigen&rsquo; hieronder, of doe het later
-              via Team in het menu.
-            </p>
-          </div>
-          <Link
-            href="/dashboard"
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Overslaan, naar dashboard
-          </Link>
-        </div>
+        <PageHeader
+          title={`Welkom bij moverAI, ${company.name}!`}
+          description={
+            <>
+              Je {plan.label}-plan heeft plek voor {limit} gebruikers. Nodig je collega&apos;s uit
+              via &lsquo;Leden&rsquo; → &lsquo;Uitnodigen&rsquo; hieronder, of doe het later via
+              Team in het menu.
+            </>
+          }
+          action={
+            <Button asChild variant="outline">
+              <Link href="/dashboard">Overslaan, naar dashboard</Link>
+            </Button>
+          }
+        />
       ) : (
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Team</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Nodig collega&apos;s uit en beheer wie toegang heeft. Admins beheren tarieven en
-            bedrijfsgegevens; leden werken met de leads.
-          </p>
-        </div>
+        <PageHeader
+          title="Team"
+          description="Nodig collega's uit en beheer wie toegang heeft. Admins beheren tarieven en bedrijfsgegevens; leden werken met de leads."
+        />
       )}
 
-      <div
-        className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm ${
-          full ? "border-amber-200 bg-amber-50 text-amber-900" : "border-slate-200 bg-white"
-        }`}
-      >
-        <span>
-          <strong>
-            {members} / {limit}
-          </strong>{" "}
-          {limit === 1 ? "gebruiker" : "gebruikers"} op {plan.label}.
-          {full &&
-            (upgrade
-              ? ` Wil je collega's toevoegen? ${upgrade.label} heeft plek voor ${upgrade.seats}.`
-              : " Extra gebruikers kun je bijkopen via je abonnement.")}
-        </span>
-        {full && admin && (
-          <Link
-            href="/dashboard/abonnement"
-            className="rounded-lg bg-amber-600 px-3 py-1.5 font-semibold text-white hover:bg-amber-700"
-          >
-            {upgrade ? "Upgraden" : "Abonnement"}
-          </Link>
-        )}
-      </div>
+      <Card className={full ? "mb-4 border-amber-200 bg-amber-50" : "mb-4"}>
+        <CardContent className="flex flex-wrap items-center gap-4">
+          <Users className="size-5 text-muted-foreground" />
+          <div className="min-w-48 flex-1">
+            <p className="text-sm">
+              <strong className="tabular-nums">
+                {members} / {limit}
+              </strong>{" "}
+              {limit === 1 ? "gebruiker" : "gebruikers"} op {plan.label}
+              {full &&
+                (upgrade
+                  ? ` — wil je collega's toevoegen? ${upgrade.label} heeft plek voor ${upgrade.seats}.`
+                  : " — extra gebruikers kun je bijkopen via je abonnement.")}
+            </p>
+            <Progress value={Math.min(100, (members / limit) * 100)} className="mt-2 h-1.5" />
+          </div>
+          {full && admin && (
+            <Button asChild size="sm">
+              <Link href="/dashboard/abonnement">{upgrade ? "Upgraden" : "Abonnement"}</Link>
+            </Button>
+          )}
+        </CardContent>
+      </Card>
 
-      <OrganizationProfile routing="hash" />
-    </div>
+      <OrganizationProfile
+        routing="hash"
+        appearance={{
+          elements: {
+            rootBox: "w-full",
+            cardBox: "w-full max-w-none rounded-xl border shadow-none",
+          },
+        }}
+      />
+    </>
   );
 }

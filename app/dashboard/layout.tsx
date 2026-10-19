@@ -11,8 +11,12 @@ import {
   type ScanUsage,
   type TrialState,
 } from "@/lib/plans";
-import { Logo } from "@/app/_components/logo";
-import { DashboardNav } from "./nav";
+import { TriangleAlert } from "lucide-react";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { AppSidebar } from "./app-sidebar";
 import { FeedbackButton } from "@/app/_components/FeedbackButton";
 
 export default async function DashboardLayout({
@@ -30,54 +34,52 @@ export default async function DashboardLayout({
       : planNotice(plan, scanUsage(company, used), trial);
 
   return (
-    <div className="flex min-h-full flex-col bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-3">
-            <Logo className="text-base" />
-            <span className="hidden rounded-full border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-500 sm:inline">
-              {plan.label}
-              {trial.kind === "trial" && ` · proef nog ${trial.daysLeft}d`}
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <OrganizationSwitcher
-              hidePersonal
-              skipInvitationScreen
-              afterSelectOrganizationUrl="/dashboard"
-              afterCreateOrganizationUrl="/dashboard"
-              organizationProfileMode="navigation"
-              organizationProfileUrl="/dashboard/team"
-            />
-            <UserButton />
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-8 md:flex-row">
-        <DashboardNav admin={admin} />
-        <main className="min-w-0 flex-1">
-          {notice && (
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              <span>{notice}</span>
-              {admin ? (
-                <Link
-                  href="/dashboard/abonnement"
-                  className="rounded-lg bg-amber-600 px-3 py-1.5 font-semibold text-white hover:bg-amber-700"
-                >
-                  Bekijk plannen
-                </Link>
-              ) : (
-                <span className="text-amber-700">Vraag je beheerder om te upgraden.</span>
-              )}
+    <TooltipProvider>
+      <SidebarProvider>
+        <AppSidebar
+          admin={admin}
+          planLabel={plan.label}
+          trialDaysLeft={trial.kind === "trial" ? trial.daysLeft : null}
+        />
+        <SidebarInset className="bg-muted/40">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-1 h-4!" />
+            <div className="ml-auto flex items-center gap-3">
+              <OrganizationSwitcher
+                hidePersonal
+                skipInvitationScreen
+                afterSelectOrganizationUrl="/dashboard"
+                afterCreateOrganizationUrl="/dashboard"
+                organizationProfileMode="navigation"
+                organizationProfileUrl="/dashboard/team"
+              />
+              <UserButton />
             </div>
-          )}
-          {children}
-        </main>
-      </div>
+          </header>
 
-      <FeedbackButton />
-    </div>
+          <main className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-8">
+            {notice && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <span className="flex items-center gap-2">
+                  <TriangleAlert className="size-4 shrink-0" />
+                  {notice}
+                </span>
+                {admin ? (
+                  <Button asChild size="sm" className="bg-amber-600 hover:bg-amber-700">
+                    <Link href="/dashboard/abonnement">Bekijk plannen</Link>
+                  </Button>
+                ) : (
+                  <span className="text-amber-700">Vraag je beheerder om te upgraden.</span>
+                )}
+              </div>
+            )}
+            {children}
+          </main>
+        </SidebarInset>
+        <FeedbackButton />
+      </SidebarProvider>
+    </TooltipProvider>
   );
 }
 

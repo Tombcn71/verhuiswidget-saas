@@ -5,6 +5,11 @@ import { updateTariffs, type TariffFormState } from "./actions";
 import type { Company } from "@/lib/db";
 import { CLEARANCE_TARIFF_DEFAULTS } from "@/lib/db/schema";
 import type { ServiceType } from "@/lib/companies";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const initialState: TariffFormState = { status: "idle" };
 
@@ -28,31 +33,42 @@ function Field({
   hint?: string;
 }) {
   return (
-    <label className="block">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
-      <div className="mt-1 flex items-center rounded-lg border border-slate-300 bg-white focus-within:border-brand-600">
-        {unit === "€" && <span className="pl-3 text-sm text-slate-400">€</span>}
-        <input
+    <div className="grid gap-1.5">
+      <Label htmlFor={name}>{label}</Label>
+      <div className="relative">
+        {unit === "€" && (
+          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">
+            €
+          </span>
+        )}
+        <Input
+          id={name}
           name={name}
           defaultValue={defaultValue}
           inputMode="decimal"
-          className="w-full rounded-lg bg-transparent px-3 py-2 text-sm outline-none"
+          aria-invalid={!!error}
+          className={cn(unit === "€" && "pl-7", (unit === "%" || suffix) && "pr-12", "tabular-nums")}
         />
-        {unit === "%" && <span className="pr-3 text-sm text-slate-400">%</span>}
-        {suffix && <span className="pr-3 text-sm text-slate-400">{suffix}</span>}
+        {(unit === "%" || suffix) && (
+          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground">
+            {unit === "%" ? "%" : suffix}
+          </span>
+        )}
       </div>
-      {hint ? <span className="mt-1 block text-xs text-slate-400">{hint}</span> : null}
-      {error ? <span className="mt-1 block text-xs text-red-600">{error}</span> : null}
-    </label>
+      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+    </div>
   );
 }
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div>
-      <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
-      <div className="mt-3 grid gap-5 sm:grid-cols-2">{children}</div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-5 sm:grid-cols-2">{children}</CardContent>
+    </Card>
   );
 }
 
@@ -187,7 +203,7 @@ function ClearanceTariffsFields({
   errors: Record<string, string>;
 }) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <BaseTariffs company={company} errors={errors} withMoveExtras={false} />
       <Group title="Extra werkzaamheden">
         <ClearanceExtras company={company} errors={errors} />
@@ -208,10 +224,10 @@ export function TariffForm({
   const combi = serviceType === "beide";
 
   return (
-    <form action={formAction} className="space-y-6">
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
+    <form action={formAction} className="space-y-4">
+      <div className="space-y-4">
         {combi ? (
-          <div className="space-y-8">
+          <div className="space-y-4">
             <BaseTariffs company={company} errors={e} withMoveExtras />
             <Group title="Ontruiming — extra werkzaamheden">
               <ClearanceExtras company={company} errors={e} />
@@ -222,21 +238,18 @@ export function TariffForm({
         ) : (
           <MoveTariffs company={company} errors={e} />
         )}
-      </section>
+      </div>
 
-      <div className="flex items-center gap-4">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
-        >
+      {/* Opslaan blijft onderin in beeld bij een lang formulier. */}
+      <div className="sticky bottom-0 -mx-4 flex items-center gap-4 border-t bg-background/95 px-4 py-3 backdrop-blur md:-mx-8 md:px-8">
+        <Button type="submit" disabled={pending}>
           {pending ? "Opslaan…" : "Tarieven opslaan"}
-        </button>
+        </Button>
         {state.status === "success" && (
-          <span className="text-sm font-medium text-green-600">{state.message}</span>
+          <span className="text-sm font-medium text-emerald-600">{state.message}</span>
         )}
         {state.status === "error" && (
-          <span className="text-sm font-medium text-red-600">{state.message}</span>
+          <span className="text-sm font-medium text-destructive">{state.message}</span>
         )}
       </div>
     </form>

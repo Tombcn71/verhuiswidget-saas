@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 /**
  * Logo kiezen en direct naar Vercel Blob uploaden. De URL gaat via een verborgen
@@ -44,35 +46,38 @@ export function LogoUpload({
   }
 
   return (
-    <div className="block">
-      <span className="text-sm font-medium text-slate-700">Logo</span>
+    <div className="grid content-start gap-1.5">
+      <Label>Logo</Label>
       <input type="hidden" name="logoUrl" value={url} />
-      <div className="mt-1 flex items-center gap-4">
-        <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+      <div className="flex items-center gap-4">
+        <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted/50">
           {url ? (
             // eslint-disable-next-line @next/next/no-img-element -- extern Blob-adres, vaste kleine maat
             <img src={url} alt="Logo" className="max-h-14 max-w-26 object-contain" />
           ) : (
-            <span className="text-xs text-slate-400">Geen logo</span>
+            <span className="text-xs text-muted-foreground">Geen logo</span>
           )}
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => inputRef.current?.click()}
             disabled={busy}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
           >
             {busy ? "Uploaden…" : url ? "Ander logo" : "Logo uploaden"}
-          </button>
+          </Button>
           {url && !busy && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setUrl("")}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600"
+              className="text-muted-foreground hover:text-destructive"
             >
               Verwijderen
-            </button>
+            </Button>
           )}
         </div>
         <input
@@ -86,12 +91,12 @@ export function LogoUpload({
           }}
         />
       </div>
-      <span className="mt-1 block text-xs text-slate-400">
+      <span className="block text-xs text-muted-foreground">
         PNG, JPG of WebP, max. 2 MB. Bij voorkeur een liggend logo met transparante achtergrond.
         Klik daarna op Opslaan.
       </span>
       {(uploadError || error) && (
-        <span className="mt-1 block text-xs text-red-600">{uploadError ?? error}</span>
+        <span className="block text-xs text-destructive">{uploadError ?? error}</span>
       )}
     </div>
   );

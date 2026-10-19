@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { requireAdminCompany } from "@/lib/current-company";
+import { PageHeader } from "../page-header";
 import { SettingsForm } from "./settings-form";
 
 export const metadata: Metadata = { title: "Bedrijf" };
@@ -8,15 +9,12 @@ export default async function SettingsPage() {
   const company = await requireAdminCompany();
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Bedrijf</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Je bedrijfsgegevens en huisstijl. Prijzen stel je in bij{" "}
-          <span className="font-medium">Tarieven</span>.
-        </p>
-      </div>
+    <>
+      <PageHeader
+        title="Bedrijf"
+        description="Je bedrijfsgegevens en huisstijl. Prijzen stel je in bij Tarieven."
+      />
       <SettingsForm company={company} />
-    </div>
+    </>
   );
 }

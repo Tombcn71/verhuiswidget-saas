@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHeader } from "../page-header";
 import { redirect } from "next/navigation";
 import { requireCompany } from "@/lib/current-company";
 import { hasAccess } from "@/lib/plans";
@@ -17,16 +18,13 @@ export default async function ScanPage() {
   if (!hasAccess(company)) redirect("/dashboard/abonnement");
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Scannen</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Bij de klant op locatie? Maak per kamer foto&apos;s, check de inboedel en maak direct
-          de offerte. Die komt bij je leads en gaat per mail naar de klant.
-        </p>
-      </div>
+    <div>
+      <PageHeader
+        title="Scannen"
+        description="Bij de klant op locatie? Maak per kamer foto's, check de inboedel en maak direct de offerte. Die komt bij je leads en gaat per mail naar de klant."
+      />
 
-      <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
+      <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl border bg-background shadow-lg">
         <Widget
           source="onspot"
           company={{

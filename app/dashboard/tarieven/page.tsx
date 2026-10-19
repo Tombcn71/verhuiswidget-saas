@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdminCompany } from "@/lib/current-company";
 import { normalizeServiceType } from "@/lib/companies";
+import { PageHeader } from "../page-header";
 import { TariffForm } from "./tariff-form";
 
 export const metadata: Metadata = { title: "Tarieven" };
@@ -11,25 +12,27 @@ export default async function TariffPage() {
   const serviceType = normalizeServiceType(company.serviceType);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Tarieven</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Alle bedragen zijn exclusief btw. De widget rekent hiermee de offerteprijs uit.
-          Wijzigingen gelden direct voor nieuwe aanvragen.
-        </p>
-        {serviceType === "beide" && (
-          <p className="mt-2 text-sm text-slate-600">
-            Je biedt beide diensten aan, dus je stelt aparte tarieven in voor verhuizen en
-            ontruimen. Wisselen kan bij{" "}
-            <Link href="/dashboard/instellingen" className="text-brand-600 underline">
-              Bedrijf
-            </Link>
-            .
-          </p>
-        )}
-      </div>
+    <>
+      <PageHeader
+        title="Tarieven"
+        description={
+          <>
+            Alle bedragen zijn exclusief btw. De widget rekent hiermee de offerteprijs uit;
+            wijzigingen gelden direct voor nieuwe aanvragen.
+            {serviceType === "beide" && (
+              <>
+                {" "}
+                Je biedt verhuizen én ontruimen aan; dat wijzig je bij{" "}
+                <Link href="/dashboard/instellingen" className="text-primary underline">
+                  Bedrijf
+                </Link>
+                .
+              </>
+            )}
+          </>
+        }
+      />
       <TariffForm company={company} serviceType={serviceType} />
-    </div>
+    </>
   );
 }
