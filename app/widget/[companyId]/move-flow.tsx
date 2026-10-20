@@ -688,7 +688,7 @@ export function MoveFlow({
                     setCustomRoomName("");
                     setShowCustomRoom(false);
                   }}
-                  className="rounded-lg border border-slate-300 px-3 text-sm"
+                  className="rounded-full border border-slate-300 px-4 text-sm"
                 >
                   Toevoegen
                 </button>
@@ -736,7 +736,7 @@ export function MoveFlow({
               <button
                 key={t}
                 onClick={() => setMoveType(t)}
-                className={`rounded-lg border px-3 py-2 text-sm capitalize ${
+                className={`rounded-full border px-4 py-2 text-sm capitalize ${
                   moveType === t && chrome ? `${ACCENT_BG} border-transparent text-white` : ""
                 }`}
                 style={{
@@ -846,7 +846,7 @@ export function MoveFlow({
                   setCustomRoomName("");
                   setShowCustomRoom(false);
                 }}
-                className="rounded-lg border border-slate-300 px-3 text-sm"
+                className="rounded-full border border-slate-300 px-4 text-sm"
               >
                 Toevoegen
               </button>
@@ -1038,7 +1038,7 @@ export function MoveFlow({
                     setNewItemName("");
                     setNewItemFor(null);
                   }}
-                  className="rounded-lg border border-slate-300 px-3 text-sm"
+                  className="rounded-full border border-slate-300 px-4 text-sm"
                 >
                   Toevoegen
                 </button>
@@ -1070,7 +1070,7 @@ export function MoveFlow({
             addRoom(newRoomName);
             setNewRoomName("");
           }}
-          className="rounded-lg border border-slate-300 px-3 text-sm"
+          className="rounded-full border border-slate-300 px-4 text-sm"
         >
           Toevoegen
         </button>
@@ -1596,7 +1596,7 @@ export function MoveFlow({
           <button
             onClick={onNext}
             disabled={!stepValid || submitting}
-            className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50 ${fillClass} ${
+            className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50 ${fillClass} ${
               submitting ? "animate-pulse" : ""
             }`}
             style={fillStyle}

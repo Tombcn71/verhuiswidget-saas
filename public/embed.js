@@ -189,7 +189,7 @@
     btn.textContent = label;
     function styleBtn() {
       btn.style.cssText =
-        "display:inline-block;cursor:pointer;border:0;border-radius:10px;padding:13px 24px;" +
+        "display:inline-block;cursor:pointer;border:0;border-radius:999px;padding:13px 28px;" +
         "font:600 15px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#fff;" +
         "background:" + color + ";box-shadow:0 1px 2px rgba(0,0,0,.1);transition:filter .15s;";
     }

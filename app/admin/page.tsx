@@ -146,7 +146,7 @@ export default function AdminPage() {
         <button
           type="submit"
           disabled={!wachtwoord || loading}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 py-4 text-sm font-semibold text-white transition-all hover:bg-brand-700 disabled:opacity-50">
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-600 py-4 text-sm font-semibold text-white transition-all hover:bg-brand-700 disabled:opacity-50">
           {loading ? <Loader2 size={14} className="animate-spin" /> : "Inloggen"}
         </button>
       </form>

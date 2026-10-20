@@ -168,7 +168,7 @@ export function PricingCards({ primaryButton }: { primaryButton: string }) {
                 )}
                 <Link
                   href={`/kies-plan?plan=${plan.id}`}
-                  className={`mt-8 rounded-lg px-6 py-3 text-center font-semibold ${
+                  className={`mt-8 rounded-full px-6 py-3 text-center font-semibold ${
                     featured ? primaryButton : "border border-slate-300 text-slate-700 hover:bg-slate-50"
                   }`}
                 >

@@ -23,7 +23,7 @@ export function DemoModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-lg border border-slate-300 px-6 py-3 text-center font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto"
+        className="w-full rounded-full border border-slate-300 px-6 py-3 text-center font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto"
       >
         Probeer de demo
       </button>

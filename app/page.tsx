@@ -83,18 +83,18 @@ export default function HomePage() {
                 AI-software voor verhuizers en ontruimers
               </p>
               <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                Meer offertes. Minder kosten.{" "}
-                <span className="text-brand-600">Door AI.</span>
+                Offertes in 1 minuut.{" "}
+                <span className="text-brand-600">Zonder voorinspectie.</span>
               </h1>
               <p className="mt-6 text-lg text-slate-600">
-                Laat klanten hun inboedel zelf scannen. moverAI herkent meubels,
-                schat het verhuisvolume en helpt je sneller een offerte op basis
-                van je eigen tarieven te maken.
+                Je klant scant zijn inboedel met de telefoon. moverAI herkent de
+                meubels, berekent het volume en stuurt direct een offerte met
+                jouw tarieven. Jij hoeft er niet meer voor op pad.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <a
                   href="#prijzen"
-                  className={`w-full rounded-lg px-6 py-3 text-center font-semibold sm:w-auto ${aiButton}`}>
+                  className={`w-full rounded-full px-6 py-3 text-center font-semibold sm:w-auto ${aiButton}`}>
                   Probeer 14 dagen gratis
                 </a>
                 <DemoModal />
@@ -161,7 +161,7 @@ export default function HomePage() {
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <a
                   href="#prijzen"
-                  className={`rounded-lg px-6 py-3 text-center font-semibold ${aiButton}`}>
+                  className={`rounded-full px-6 py-3 text-center font-semibold ${aiButton}`}>
                   Probeer 14 dagen gratis
                 </a>
                 <DemoModal />
@@ -239,7 +239,7 @@ export default function HomePage() {
             </p>
             <a
               href="#prijzen"
-              className="mt-6 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-brand-700 shadow-sm hover:bg-slate-50">
+              className="mt-6 inline-block rounded-full bg-white px-6 py-3 font-semibold text-brand-700 shadow-sm hover:bg-slate-50">
               Gratis starten
             </a>
           </div>
