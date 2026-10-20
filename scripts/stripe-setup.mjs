@@ -1,7 +1,9 @@
-// Zet moverAI klaar in Stripe: producten + maandprijzen (met lookup keys) en
-// het klantportaal (plan wisselen, opzeggen, facturen). Geen btw-tarief: B2B
-// vanuit Spanje, de btw wordt verlegd naar de klant.
-// Veilig om vaker te draaien: bestaande onderdelen worden hergebruikt.
+// Zet moverAI klaar in Stripe: producten + maand- en jaarprijzen (met lookup
+// keys) en het klantportaal (plan/periode wisselen, opzeggen, facturen). Geen
+// btw-tarief: B2B vanuit Spanje, de btw wordt verlegd naar de klant.
+// Veilig om vaker te draaien: bestaande onderdelen worden hergebruikt. Is een
+// bedrag gewijzigd, dan komt er een nieuwe prijs die de lookup key overneemt;
+// bestaande abonnementen houden hun oude prijs.
 //
 //   node --env-file=.env.local scripts/stripe-setup.mjs
 //   node --env-file=.env.local scripts/stripe-setup.mjs https://jouwdomein.nl/api/stripe/webhook
@@ -20,13 +22,13 @@ if (!key) {
 const stripe = new Stripe(key);
 const webhookUrl = process.argv[2];
 
-// Houd gelijk met lib/plans.ts en lib/stripe.ts.
+// Houd gelijk met lib/plans.ts en lib/stripe.ts. Jaar = 10 × maand ("2 maanden gratis").
 const PLANS = [
-  { id: "moverai_basic", name: "moverAI Basic", cents: 7900 },
-  { id: "moverai_standard", name: "moverAI Standard", cents: 12900 },
-  { id: "moverai_premium", name: "moverAI Premium", cents: 19900 },
+  { id: "moverai_basic", name: "moverAI Basic", cents: 7900, yearlyCents: 79000 },
+  { id: "moverai_standard", name: "moverAI Standard", cents: 12900, yearlyCents: 129000 },
+  { id: "moverai_premium", name: "moverAI Premium", cents: 22900, yearlyCents: 229000 },
 ];
-const EXTRA_SEAT = { id: "moverai_extra_seat", name: "moverAI extra gebruiker", cents: 1500 };
+const EXTRA_SEAT = { id: "moverai_extra_seat", name: "moverAI extra gebruiker", cents: 1900 };
 
 async function ensureProduct({ id, name }) {
   try {
@@ -36,17 +38,25 @@ async function ensureProduct({ id, name }) {
   }
 }
 
-async function ensurePrice(product, { id, cents }) {
-  const { data } = await stripe.prices.list({ lookup_keys: [id], active: true });
-  if (data[0]) return data[0];
-  return stripe.prices.create({
+async function ensurePrice(product, lookupKey, cents, interval) {
+  const { data } = await stripe.prices.list({ lookup_keys: [lookupKey], active: true });
+  const existing = data[0];
+  if (existing && existing.unit_amount === cents && existing.recurring?.interval === interval) {
+    return existing;
+  }
+  // Nieuw, of bedrag gewijzigd: nieuwe prijs die de lookup key overneemt.
+  const price = await stripe.prices.create({
     product: product.id,
-    lookup_key: id,
+    lookup_key: lookupKey,
+    transfer_lookup_key: true,
     currency: "eur",
     unit_amount: cents,
-    recurring: { interval: "month" },
+    recurring: { interval },
     tax_behavior: "exclusive",
   });
+  // Oude prijs niet meer aanbieden aan nieuwe klanten (lopende abonnementen blijven).
+  if (existing) await stripe.prices.update(existing.id, { active: false });
+  return price;
 }
 
 const env = {};
@@ -54,12 +64,13 @@ const env = {};
 const planPrices = [];
 for (const plan of PLANS) {
   const product = await ensureProduct(plan);
-  const price = await ensurePrice(product, plan);
-  planPrices.push({ product: product.id, prices: [price.id] });
-  console.log(`✓ ${plan.name}: ${price.id}`);
+  const monthly = await ensurePrice(product, plan.id, plan.cents, "month");
+  const yearly = await ensurePrice(product, `${plan.id}_yearly`, plan.yearlyCents, "year");
+  planPrices.push({ product: product.id, prices: [monthly.id, yearly.id] });
+  console.log(`✓ ${plan.name}: maand ${monthly.id} · jaar ${yearly.id}`);
 }
 const seatProduct = await ensureProduct(EXTRA_SEAT);
-const seatPrice = await ensurePrice(seatProduct, EXTRA_SEAT);
+const seatPrice = await ensurePrice(seatProduct, EXTRA_SEAT.id, EXTRA_SEAT.cents, "month");
 console.log(`✓ ${EXTRA_SEAT.name}: ${seatPrice.id}`);
 
 // Klantportaal: facturen, betaalmethode, gegevens, plan wisselen en opzeggen.
@@ -75,10 +86,12 @@ const portalFeatures = {
     proration_behavior: "create_prorations",
   },
 };
+// Bestaand portaal bijwerken: eerst dat uit de env, anders het standaardportaal.
 const { data: configs } = await stripe.billingPortal.configurations.list({ is_default: true });
-if (configs[0]) {
-  await stripe.billingPortal.configurations.update(configs[0].id, { features: portalFeatures });
-  console.log(`✓ Klantportaal bijgewerkt: ${configs[0].id}`);
+const existingPortal = process.env.STRIPE_PORTAL_CONFIG_ID || configs[0]?.id;
+if (existingPortal) {
+  await stripe.billingPortal.configurations.update(existingPortal, { features: portalFeatures });
+  console.log(`✓ Klantportaal bijgewerkt: ${existingPortal}`);
 } else {
   const config = await stripe.billingPortal.configurations.create({ features: portalFeatures });
   env.STRIPE_PORTAL_CONFIG_ID = config.id;

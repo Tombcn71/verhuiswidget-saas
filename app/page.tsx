@@ -1,15 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import heroImage from "@/public/hero.jpg";
 import { DemoModal } from "@/app/_components/demo-modal";
 import { SiteHeader } from "@/app/_components/site-header";
-import {
-  CHANNEL_FEATURES,
-  PLANS,
-  PLAN_ORDER,
-  type Plan,
-  type PlanId,
-} from "@/lib/plans";
+import { PricingCards } from "@/app/_components/pricing-cards";
 import {
   Timer,
   Fuel,
@@ -74,57 +67,6 @@ const channels = [
     d: "Sta je zelf bij een groot pand of complex project? Open de moverAI web-app op je telefoon, scan de ruimtes live op locatie en zie direct het aantal kubieke meters rollen.",
   },
 ];
-
-// Teksten per plan; aantallen (gebruikers, scans, prijzen) komen uit `lib/plans.ts`.
-const PLAN_TAGLINE: Record<PlanId, string> = {
-  basic: "Voor de zelfstandige verhuizer die direct professioneel wil scannen.",
-  standard:
-    "Voor groeiende verhuisbedrijven met een kantoor- of planningsteam.",
-  premium:
-    "Voor de grotere verhuisketens met meerdere planners en taxateurs op de weg.",
-};
-
-const PLAN_EXTRA: Record<PlanId, string> = {
-  basic: "Tarieven volledig instelbaar: m³, km en toeslagen",
-  standard: "Uitgebreid dashboard voor planners",
-  premium: "Voorrang bij support",
-};
-
-function planFeatures(plan: Plan): string[] {
-  const seats =
-    plan.seats === 1
-      ? "1 actieve gebruiker (seat)"
-      : plan.extraSeatCents !== null
-        ? `Max. ${plan.seats} gebruikers inclusief (extra gebruikers los toe te voegen voor €${plan.extraSeatCents / 100}/md)`
-        : `Max. ${plan.seats} gebruikers (seats) om flexibel samen te werken`;
-  const scans =
-    plan.scans === null
-      ? "Onbeperkt aantal AI-scans per maand (geen extra kosten)"
-      : `Inclusief ${plan.scans} AI-scans per maand`;
-  return [
-    ...CHANNEL_FEATURES,
-    seats,
-    scans,
-    "White-label: je eigen logo en huisstijlkleuren",
-    PLAN_EXTRA[plan.id],
-  ];
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      aria-hidden="true"
-      className="mt-0.5 h-4 w-4 shrink-0 text-brand-600">
-      <path
-        fillRule="evenodd"
-        d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l2.8 2.79 6.8-6.79a1 1 0 0 1 1.4 0Z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
 
 export default function HomePage() {
   return (
@@ -278,69 +220,9 @@ export default function HomePage() {
             </div>
             <p className="mx-auto mt-4 max-w-2xl text-center text-slate-600">
               Elk pakket geeft je team toegang tot alle features: Onsite, Onlink
-              én Onspot. Tarieven zijn per maand, maandelijks opzegbaar en
-              exclusief btw.
+              én Onspot. Betaal per maand of per jaar; prijzen exclusief btw.
             </p>
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {PLAN_ORDER.map((id) => PLANS[id]).map((plan) => {
-                const featured = plan.id === "standard";
-                return (
-                  <div
-                    key={plan.id}
-                    className={
-                      featured ? "rounded-2xl bg-brand-600 p-0.5 shadow-xl" : ""
-                    }>
-                    <div
-                      className={`relative flex h-full flex-col bg-white p-8 ${
-                        featured
-                          ? "rounded-[15px]"
-                          : "rounded-2xl border border-slate-200 shadow-sm"
-                      }`}>
-                      {featured && (
-                        <span className="absolute -top-3 left-8 rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white">
-                          Populair
-                        </span>
-                      )}
-                      <h3 className="text-lg font-semibold">
-                        {plan.label}{" "}
-                        <span className="font-normal text-slate-500">
-                          ({plan.audience})
-                        </span>
-                      </h3>
-                      <p className="mt-1 min-h-11 text-sm text-slate-600">
-                        {PLAN_TAGLINE[plan.id]}
-                      </p>
-                      <p className="mt-5 flex items-baseline gap-1">
-                        <span className="text-4xl font-bold tracking-tight">
-                          €{plan.priceCents / 100}
-                        </span>
-                        <span className="text-sm text-slate-500">/ maand</span>
-                      </p>
-                      <p className="mt-1 text-sm font-medium text-emerald-700">
-                        Eerste 2 weken gratis, zonder betaalkaart
-                      </p>
-                      <ul className="mt-6 flex-1 space-y-3 text-sm text-slate-600">
-                        {planFeatures(plan).map((f) => (
-                          <li key={f} className="flex gap-2.5">
-                            <CheckIcon />
-                            <span>{f}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      <Link
-                        href={`/kies-plan?plan=${plan.id}`}
-                        className={`mt-8 rounded-lg px-6 py-3 text-center font-semibold ${
-                          featured
-                            ? aiButton
-                            : "border border-slate-300 text-slate-700 hover:bg-slate-50"
-                        }`}>
-                        Kies {plan.label}
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <PricingCards primaryButton={aiButton} />
           </div>
         </section>
 

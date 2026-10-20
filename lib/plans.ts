@@ -6,11 +6,27 @@ export type Plan = {
   id: PlanId;
   label: string;
   audience: string;
-  priceCents: number; // per maand, excl. btw
+  priceCents: number; // per maand, excl. btw (maandelijks betalen)
+  yearlyCents: number; // per jaar, excl. btw: 10 × maandprijs ("2 maanden gratis")
   seats: number; // inbegrepen gebruikers
-  extraSeatCents: number | null; // prijs per extra gebruiker per maand; null = niet mogelijk
-  scans: number | null; // offerteaanvragen per maand; null = onbeperkt (fair use)
+  // Prijs per extra gebruiker per maand; null = niet mogelijk. Niet meer los te
+  // koop: alleen op maat (contact), via het Stripe-abonnement. Telt wel mee in `seatLimit`.
+  extraSeatCents: number | null;
+  scans: number | null; // offerteaanvragen per maand; null = onbeperkt
+  fairUse?: boolean; // limiet is een fair-use-grens (Premium)
 };
+
+export type BillingInterval = "month" | "year";
+
+/** "jaar" / "year" → jaarlijks; al het andere maandelijks. */
+export function normalizeInterval(value: unknown): BillingInterval {
+  return value === "year" || value === "jaar" ? "year" : "month";
+}
+
+/** Prijs per maand bij jaarlijks betalen, afgerond op hele euro's (alleen voor weergave). */
+export function yearlyPerMonthEuros(plan: Plan): number {
+  return Math.round(plan.yearlyCents / 12 / 100);
+}
 
 export const PLANS: Record<PlanId, Plan> = {
   basic: {
@@ -18,6 +34,7 @@ export const PLANS: Record<PlanId, Plan> = {
     label: "Basic",
     audience: "ZZP",
     priceCents: 7900,
+    yearlyCents: 79000,
     seats: 1,
     extraSeatCents: null,
     scans: 150,
@@ -27,6 +44,7 @@ export const PLANS: Record<PlanId, Plan> = {
     label: "Standard",
     audience: "MKB",
     priceCents: 12900,
+    yearlyCents: 129000,
     seats: 3,
     extraSeatCents: null,
     scans: 500,
@@ -35,14 +53,22 @@ export const PLANS: Record<PlanId, Plan> = {
     id: "premium",
     label: "Premium",
     audience: "Enterprise",
-    priceCents: 19900,
+    priceCents: 22900,
+    yearlyCents: 229000,
     seats: 5,
-    extraSeatCents: 1500,
-    scans: null,
+    extraSeatCents: 1900,
+    scans: 2500,
+    fairUse: true,
   },
 };
 
 export const PLAN_ORDER: PlanId[] = ["basic", "standard", "premium"];
+
+/** Contact voor maatwerk (bijv. meer dan 5 gebruikers). */
+export const CONTACT_EMAIL = "info@moverai.nl";
+export const MORE_SEATS_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+  "Meer gebruikers voor moverAI",
+)}`;
 
 /** De drie kanalen; zitten in elk plan. */
 export const CHANNEL_FEATURES = [

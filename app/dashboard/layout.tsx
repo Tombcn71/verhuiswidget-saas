@@ -93,7 +93,7 @@ function planNotice(plan: Plan, usage: ScanUsage, trial: TrialState): string | n
   }
   const upgrade = nextPlan(plan);
   if (usage.over && upgrade) {
-    return `Je hebt deze maand ${usage.used} offerteaanvragen ontvangen, meer dan de ${usage.limit} van ${plan.label}. Alles blijft gewoon werken — met ${upgrade.label} heb je ${upgrade.scans === null ? "onbeperkt" : upgrade.scans} per maand.`;
+    return `Je hebt deze maand ${usage.used} offerteaanvragen ontvangen, meer dan de ${usage.limit} van ${plan.label}. Alles blijft gewoon werken — met ${upgrade.label} heb je ${upgrade.scans === null ? "onbeperkt" : upgrade.scans.toLocaleString("nl-NL")} per maand.`;
   }
   if (usage.nearLimit && upgrade) {
     return `Je zit op ${usage.used} van de ${usage.limit} offerteaanvragen deze maand. Groei je door? ${upgrade.label} geeft meer ruimte.`;

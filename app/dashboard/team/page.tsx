@@ -4,7 +4,7 @@ import { OrganizationProfile } from "@clerk/nextjs";
 import { Users } from "lucide-react";
 import { isOrgAdmin, requireCompany } from "@/lib/current-company";
 import { countMembers } from "@/lib/companies";
-import { nextPlan, planFor, seatLimit } from "@/lib/plans";
+import { MORE_SEATS_MAILTO, nextPlan, planFor, seatLimit } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -63,13 +63,17 @@ export default async function TeamPage({ searchParams }: PageProps<"/dashboard/t
               {full &&
                 (upgrade
                   ? ` — wil je collega's toevoegen? ${upgrade.label} heeft plek voor ${upgrade.seats}.`
-                  : " — extra gebruikers kun je bijkopen via je abonnement.")}
+                  : " — meer gebruikers nodig? Neem contact met ons op.")}
             </p>
             <Progress value={Math.min(100, (members / limit) * 100)} className="mt-2 h-1.5" />
           </div>
           {full && admin && (
             <Button asChild size="sm">
-              <Link href="/dashboard/abonnement">{upgrade ? "Upgraden" : "Abonnement"}</Link>
+              {upgrade ? (
+                <Link href="/dashboard/abonnement">Upgraden</Link>
+              ) : (
+                <a href={MORE_SEATS_MAILTO}>Neem contact op</a>
+              )}
             </Button>
           )}
         </CardContent>

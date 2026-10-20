@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import type { PlanId } from "@/lib/plans";
+import type { BillingInterval, PlanId } from "@/lib/plans";
 
 let _stripe: Stripe | null = null;
 
@@ -23,8 +23,14 @@ export const PLAN_LOOKUP_KEY: Record<PlanId, string> = {
 };
 export const EXTRA_SEAT_LOOKUP_KEY = "moverai_extra_seat";
 
+/** Lookup key van de maand- of jaarprijs van een plan (jaar = `…_yearly`). */
+export function lookupKeyFor(plan: PlanId, interval: BillingInterval): string {
+  return interval === "year" ? `${PLAN_LOOKUP_KEY[plan]}_yearly` : PLAN_LOOKUP_KEY[plan];
+}
+
 export function planForLookupKey(key: string | null | undefined): PlanId | null {
-  const hit = Object.entries(PLAN_LOOKUP_KEY).find(([, k]) => k === key);
+  const base = key?.replace(/_yearly$/, "");
+  const hit = Object.entries(PLAN_LOOKUP_KEY).find(([, k]) => k === base);
   return hit ? (hit[0] as PlanId) : null;
 }
 

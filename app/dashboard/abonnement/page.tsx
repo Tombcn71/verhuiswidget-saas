@@ -1,9 +1,23 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireAdminCompany } from "@/lib/current-company";
 import { refreshFromStripe } from "@/lib/billing";
 import { countMembers } from "@/lib/companies";
 import { countLeadsThisMonth } from "@/lib/leads";
-import { CHANNEL_FEATURES, PLANS, PLAN_ORDER, normalizePlan, planFor, scanUsage, seatLimit, trialState } from "@/lib/plans";
+import {
+  CHANNEL_FEATURES,
+  MORE_SEATS_MAILTO,
+  PLANS,
+  PLAN_ORDER,
+  normalizeInterval,
+  normalizePlan,
+  planFor,
+  scanUsage,
+  seatLimit,
+  trialState,
+  yearlyPerMonthEuros,
+} from "@/lib/plans";
 import { formatDate, formatEuroCents } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Check, CircleCheck, ExternalLink, TriangleAlert } from "lucide-react";
@@ -28,13 +42,14 @@ export default async function SubscriptionPage({
 }: PageProps<"/dashboard/abonnement">) {
   // Altijd de actuele stand uit Stripe, ook als de webhook nog niet binnen is.
   const company = await refreshFromStripe(await requireAdminCompany());
-  const [used, members, { fout, plan: wanted, betaald }] = await Promise.all([
+  const [used, members, { fout, plan: wanted, betaald, periode }] = await Promise.all([
     countLeadsThisMonth(company.id),
     countMembers(company),
     searchParams,
   ]);
 
   const plan = planFor(company);
+  const interval = normalizeInterval(periode);
   const usage = scanUsage(company, used);
   const trial = trialState(company);
   // Met een lopend Stripe-abonnement gaat alles (wisselen, opzeggen) via het portaal.
@@ -110,6 +125,25 @@ export default async function SubscriptionPage({
         </Card>
       </div>
 
+      {!subscribed && (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Kies je plan</h2>
+          {/* Periode via de URL (?periode=jaar), zodat de server de juiste prijs toont. */}
+          <Tabs value={interval}>
+            <TabsList>
+              <TabsTrigger value="month" asChild>
+                <Link href="/dashboard/abonnement">Maandelijks</Link>
+              </TabsTrigger>
+              <TabsTrigger value="year" asChild>
+                <Link href="/dashboard/abonnement?periode=jaar">
+                  Jaarlijks <Badge variant="secondary">2 maanden gratis</Badge>
+                </Link>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
+
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         {PLAN_ORDER.map((id) => {
           const p = PLANS[id];
@@ -117,6 +151,7 @@ export default async function SubscriptionPage({
           return (
             <form key={p.id} action={subscribed ? openBillingPortal : startCheckout}>
               <input type="hidden" name="plan" value={p.id} />
+              <input type="hidden" name="interval" value={interval} />
               <Card className={cn("h-full", current && "border-primary ring-1 ring-primary")}>
                 <CardHeader>
                   <CardTitle>{p.label}</CardTitle>
@@ -128,18 +163,28 @@ export default async function SubscriptionPage({
                   )}
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col">
-                  <p className="text-3xl font-semibold tabular-nums">
-                    {formatEuroCents(p.priceCents)}
-                    <span className="text-sm font-normal text-muted-foreground"> /mnd excl. btw</span>
-                  </p>
+                  {interval === "year" && !subscribed ? (
+                    <>
+                      <p className="text-3xl font-semibold tabular-nums">
+                        €{yearlyPerMonthEuros(p)}
+                        <span className="text-sm font-normal text-muted-foreground"> /mnd excl. btw</span>
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {formatEuroCents(p.yearlyCents)} per jaar, vooraf
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-3xl font-semibold tabular-nums">
+                      {formatEuroCents(p.priceCents)}
+                      <span className="text-sm font-normal text-muted-foreground"> /mnd excl. btw</span>
+                    </p>
+                  )}
                   <ul className="mt-4 flex-1 space-y-2 text-sm">
                     {[
-                      p.seats === 1
-                        ? "1 gebruiker"
-                        : `Tot ${p.seats} gebruikers${p.extraSeatCents !== null ? ` (extra: ${formatEuroCents(p.extraSeatCents)}/mnd)` : ""}`,
+                      p.seats === 1 ? "1 gebruiker" : `Tot ${p.seats} gebruikers`,
                       p.scans === null
-                        ? "Onbeperkt offerteaanvragen (fair use)"
-                        : `${p.scans} offerteaanvragen per maand`,
+                        ? "Onbeperkt offerteaanvragen"
+                        : `${p.scans.toLocaleString("nl-NL")} offerteaanvragen per maand${p.fairUse ? " (fair use)" : ""}`,
                       ...CHANNEL_FEATURES,
                       "Verhuizen én ontruimen",
                     ].map((f) => (
@@ -149,6 +194,14 @@ export default async function SubscriptionPage({
                       </li>
                     ))}
                   </ul>
+                  {p.id === "premium" && (
+                    <p className="mt-4 text-sm text-muted-foreground">
+                      Meer dan {p.seats} gebruikers?{" "}
+                      <a href={MORE_SEATS_MAILTO} className="font-medium text-primary underline">
+                        Neem contact op
+                      </a>
+                    </p>
+                  )}
                   <Button
                     type="submit"
                     className="mt-6 w-full"

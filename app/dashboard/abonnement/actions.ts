@@ -3,8 +3,8 @@
 import { redirect } from "next/navigation";
 import { requireAdminCompany } from "@/lib/current-company";
 import { countMembers, setStripeCustomerId } from "@/lib/companies";
-import { PLANS, normalizePlan } from "@/lib/plans";
-import { PLAN_LOOKUP_KEY, getStripe, priceIdFor } from "@/lib/stripe";
+import { PLANS, normalizeInterval, normalizePlan } from "@/lib/plans";
+import { getStripe, lookupKeyFor, priceIdFor } from "@/lib/stripe";
 import { appUrl } from "@/lib/app-url";
 
 // Stripe wil een proef-einde minstens 48 uur vooruit; daaronder rekenen we meteen af.
@@ -17,6 +17,7 @@ const MIN_TRIAL_MS = 49 * 60 * 60 * 1000;
 export async function startCheckout(formData: FormData): Promise<void> {
   const company = await requireAdminCompany();
   const plan = PLANS[normalizePlan(formData.get("plan"))];
+  const interval = normalizeInterval(formData.get("interval"));
 
   // Al een lopend abonnement: wisselen gaat via het Stripe-portaal.
   if (company.stripeSubscriptionId) await openBillingPortal();
@@ -45,7 +46,7 @@ export async function startCheckout(formData: FormData): Promise<void> {
     mode: "subscription",
     customer: customerId,
     client_reference_id: company.id,
-    line_items: [{ price: await priceIdFor(PLAN_LOOKUP_KEY[plan.id]), quantity: 1 }],
+    line_items: [{ price: await priceIdFor(lookupKeyFor(plan.id, interval)), quantity: 1 }],
     subscription_data: {
       metadata: { companyId: company.id },
       ...(trialMsLeft > MIN_TRIAL_MS
