@@ -56,7 +56,7 @@ function priceRows(lines: PriceLine[]): string {
 function baseLayout(company: Company, inner: string): string {
   return `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;color:#0f172a">
     <div style="border-top:4px solid ${esc(company.primaryColor)};padding:24px 4px">
-      ${company.logoUrl ? `<img src="${esc(company.logoUrl)}" alt="${esc(company.name)}" style="max-height:48px;margin-bottom:16px">` : `<h2 style="margin:0 0 16px">${esc(company.name)}</h2>`}
+      ${company.logoUrl ? `<img src="${esc(company.logoUrl)}" alt="${esc(company.name)}" style="max-height:72px;max-width:240px;margin-bottom:16px">` : `<h2 style="margin:0 0 16px">${esc(company.name)}</h2>`}
       ${inner}
       <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0">
       <p style="font-size:12px;color:#64748b">

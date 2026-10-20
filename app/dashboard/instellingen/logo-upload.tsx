@@ -50,10 +50,10 @@ export function LogoUpload({
       <Label>Logo</Label>
       <input type="hidden" name="logoUrl" value={url} />
       <div className="flex items-center gap-4">
-        <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted/50">
+        <div className="flex h-24 w-44 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted/50 p-2">
           {url ? (
             // eslint-disable-next-line @next/next/no-img-element -- extern Blob-adres, vaste kleine maat
-            <img src={url} alt="Logo" className="max-h-14 max-w-26 object-contain" />
+            <img src={url} alt="Logo" className="h-full w-full object-contain" />
           ) : (
             <span className="text-xs text-muted-foreground">Geen logo</span>
           )}

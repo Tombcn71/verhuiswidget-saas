@@ -1501,7 +1501,7 @@ export function MoveFlow({
             <Logo className="text-base" />
           ) : company.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- extern logo (Blob), vaste kleine maat
-            <img src={company.logoUrl} alt={company.name} className="h-8 max-w-40 object-contain" />
+            <img src={company.logoUrl} alt={company.name} className="h-12 max-w-52 object-contain" />
           ) : (
             <span className="max-w-48 truncate text-base font-bold tracking-tight">{company.name}</span>
           )}
