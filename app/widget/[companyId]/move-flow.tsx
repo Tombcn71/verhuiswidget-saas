@@ -111,6 +111,7 @@ export function MoveFlow({
   preview = false,
   appChrome = false,
   source = "onsite",
+  backUrl = null,
 }: {
   company: CompanyPublic;
   demo: boolean;
@@ -125,6 +126,8 @@ export function MoveFlow({
   appChrome?: boolean;
   /** Kanaal van de lead; bij "onspot" vult de verhuizer de flow in bij de klant. */
   source?: LeadSource;
+  /** Website van de verhuizer (losse pagina/Onlink): terugpijl op stap 1 en knop na de offerte. */
+  backUrl?: string | null;
 }) {
   const chrome = demo || appChrome;
   const onspot = source === "onspot";
@@ -1413,6 +1416,14 @@ export function MoveFlow({
               ? `De offerte staat nu in je mailbox (${email}). ${company.name} neemt binnenkort contact met je op.`
               : `Je aanvraag is ontvangen. ${company.name} neemt binnenkort contact met je op.`}
         </p>
+        {backUrl && !onspot && (
+          <a
+            href={backUrl}
+            className="mt-4 inline-block rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Terug naar de website van {company.name}
+          </a>
+        )}
       </div>
     </div>
   );
@@ -1477,14 +1488,23 @@ export function MoveFlow({
             onClick={
               step > 0
                 ? () => setStep((s) => Math.max(0, s - 1))
-                : (onBackToIntro ?? (() => window.history.back()))
+                : (onBackToIntro ??
+                  (() => (backUrl ? window.location.assign(backUrl) : window.history.back())))
             }
             aria-label="Terug"
             className="text-slate-700 hover:text-slate-900"
           >
             <CircleArrowLeft className="h-9 w-9" />
           </button>
-          <Logo className="text-base" />
+          {/* White-label: het merk van de verhuizer; alleen de demo toont moverAI. */}
+          {demo ? (
+            <Logo className="text-base" />
+          ) : company.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- extern logo (Blob), vaste kleine maat
+            <img src={company.logoUrl} alt={company.name} className="h-8 max-w-40 object-contain" />
+          ) : (
+            <span className="max-w-48 truncate text-base font-bold tracking-tight">{company.name}</span>
+          )}
           <span className="h-9 w-9" />
         </div>
 

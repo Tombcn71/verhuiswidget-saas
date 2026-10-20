@@ -1,8 +1,41 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCompanyById, normalizeServiceType } from "@/lib/companies";
 import { Widget } from "./widget";
 
 export const dynamic = "force-dynamic";
+
+/** "devries.nl" → "https://devries.nl"; null als er geen website is ingevuld. */
+function websiteUrl(website: string | null): string | null {
+  const w = website?.trim();
+  if (!w) return null;
+  return /^https?:\/\//i.test(w) ? w : `https://${w}`;
+}
+
+/**
+ * Titel en preview in de huisstijl van de verhuizer: zo ziet de klant in
+ * WhatsApp/sms "Offerte aanvragen bij …" in plaats van moverAI (Onlink).
+ */
+export async function generateMetadata({
+  params,
+}: PageProps<"/widget/[companyId]">): Promise<Metadata> {
+  const { companyId } = await params;
+  const company = await getCompanyById(companyId);
+  if (!company) return {};
+  const title = `Offerte aanvragen bij ${company.name}`;
+  const description = "Maak foto's van je kamers en ontvang binnen een minuut je offerte.";
+  return {
+    title: { absolute: title },
+    description,
+    openGraph: {
+      title,
+      description,
+      siteName: company.name,
+      ...(company.logoUrl ? { images: [{ url: company.logoUrl }] } : {}),
+    },
+    robots: { index: false },
+  };
+}
 
 export default async function WidgetPage({
   params,
@@ -13,11 +46,16 @@ export default async function WidgetPage({
   const company = await getCompanyById(companyId);
   if (!company) notFound();
 
+  // Alleen op de losse pagina terug naar de site van de verhuizer; in de
+  // pop-up/iframe sluit de klant gewoon het venster.
+  const standalone = embed === undefined;
+
   const widget = (
     <Widget
       preview={preview !== undefined}
       // `?popup`-links (ook in de embed.js-modal) en losse links = Onlink; de iframe op de site = Onsite.
-      source={popup !== undefined || embed === undefined ? "onlink" : "onsite"}
+      source={popup !== undefined || standalone ? "onlink" : "onsite"}
+      backUrl={standalone && preview === undefined ? websiteUrl(company.website) : null}
       company={{
         id: company.id,
         name: company.name,
@@ -30,7 +68,7 @@ export default async function WidgetPage({
   );
 
   // In een <iframe> (embed.js): kale widget, de host regelt de omlijsting.
-  if (embed !== undefined) return widget;
+  if (!standalone) return widget;
 
   // Directe link: exact dezelfde weergave als de demo — fullscreen, van boven tot onder.
   // Gecentreerde app-kolom; op telefoons is dat de volle breedte.

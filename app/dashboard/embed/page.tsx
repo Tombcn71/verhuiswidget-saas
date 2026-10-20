@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Info, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { Globe, Info, MessageCircle, ShieldCheck } from "lucide-react";
 import { requireCompany } from "@/lib/current-company";
 import { appUrl } from "@/lib/app-url";
 import { Badge } from "@/components/ui/badge";
@@ -25,15 +26,42 @@ export default async function EmbedPage() {
   return (
     <div className="max-w-3xl">
       <PageHeader
-        title="Widget op je website"
-        description="Twee stappen. Stap 1 doe je één keer, stap 2 zet je achter elke knop die je wilt."
+        title="Widget-link"
+        description="Zo komen klanten bij je offerte-widget: via je website (Onsite) of via een link in WhatsApp, sms of social media (Onlink)."
       />
 
       <div className="space-y-4">
+        {/* Voorkomt de klassieke fout: de deel-link op de website zetten zonder stap 1. */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Welke link gebruik je waar?</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border p-4">
+              <p className="flex items-center gap-2 font-medium">
+                <Globe className="size-4 text-primary" /> Op je website
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Gebruik <strong>Onsite</strong>: stap 1 én stap 2 hieronder. De widget opent als
+                pop-up op je eigen site; je bezoeker blijft bij jou.
+              </p>
+            </div>
+            <div className="rounded-lg border p-4">
+              <p className="flex items-center gap-2 font-medium">
+                <MessageCircle className="size-4 text-primary" /> In WhatsApp, sms of socials
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Gebruik <strong>Onlink</strong>, de directe link onderaan. Die opent een eigen
+                pagina in jouw huisstijl, met een knop terug naar je website.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Badge>Stap 1</Badge> Eenmalig: activeer de pop-up
+              <Badge>Onsite · stap 1</Badge> Eenmalig: activeer de pop-up
             </CardTitle>
             <CardDescription>
               Plak deze regel in de <strong>algemene code</strong> van je site (het veld voor
@@ -60,7 +88,7 @@ export default async function EmbedPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Badge>Stap 2</Badge> Zet deze link achter je knop
+              <Badge>Onsite · stap 2</Badge> Zet deze link achter je knop
             </CardTitle>
             <CardDescription>
               Klik erop en de widget opent in een pop-up over je site — geen code op de pagina
@@ -75,11 +103,14 @@ export default async function EmbedPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Of: deel als directe link</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Badge variant="secondary">Onlink</Badge> Directe link voor WhatsApp, sms en socials
+            </CardTitle>
             <CardDescription>
-              Geen website nodig. Zet deze link in je Instagram-bio, een Facebook-post, je
-              Google-bedrijfsprofiel, een e-mailhandtekening of stuur &apos;m via WhatsApp. Wie
-              erop klikt, krijgt de widget als eigen pagina.
+              Geen website nodig. Stuur &apos;m na een telefoontje via WhatsApp of sms, of zet &apos;m
+              in je Instagram-bio, een Facebook-post of je Google-bedrijfsprofiel. Wie erop klikt,
+              krijgt de widget als eigen pagina met jouw logo en kleur. Zet &apos;m{" "}
+              <strong>niet</strong> op je website; gebruik daar stap 1 en 2.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -89,6 +120,18 @@ export default async function EmbedPage() {
               Veilig om te delen: hiermee zijn alleen je publieke tarieven en huisstijl
               zichtbaar, geen klant- of bedrijfsgegevens.
             </p>
+            {!company.website && (
+              <p className="flex gap-2 text-sm text-muted-foreground">
+                <Info className="mt-0.5 size-4 shrink-0" />
+                <span>
+                  Tip: vul je website in bij{" "}
+                  <Link href="/dashboard/instellingen" className="text-primary underline">
+                    Bedrijf
+                  </Link>
+                  , dan krijgt je klant na de offerte een knop terug naar je site.
+                </span>
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

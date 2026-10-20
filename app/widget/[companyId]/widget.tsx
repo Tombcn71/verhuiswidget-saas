@@ -29,11 +29,14 @@ export function Widget({
   demo = false,
   preview = false,
   source = "onsite",
+  backUrl = null,
 }: {
   company: CompanyPublic;
   demo?: boolean;
   preview?: boolean;
   source?: LeadSource;
+  /** Website van de verhuizer, alleen op de losse pagina (Onlink). */
+  backUrl?: string | null;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   // Alle accenten in de widget (knoppen, toggles, koppen) in de kleur van de verhuizer.
@@ -117,6 +120,7 @@ export function Widget({
         demo={demo}
         preview={preview}
         source={source}
+        backUrl={backUrl}
         appChrome
         showToggle={showToggle}
         moveType={moveType}
