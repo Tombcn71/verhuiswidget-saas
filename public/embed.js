@@ -122,6 +122,11 @@
       if (!mobile && data.type === "verhuiswidget:height" && typeof data.height === "number") {
         iframe.style.height = Math.ceil(data.height) + "px";
       }
+      // Nieuwe stap in de widget: pop-up terug naar boven.
+      if (data.type === "verhuiswidget:top") {
+        scroller.scrollTop = 0;
+        overlay.scrollTop = 0;
+      }
     };
     window.addEventListener("message", overlay._onMessage);
 
@@ -247,6 +252,12 @@
       typeof data.height === "number"
     ) {
       inlineFrame.style.height = Math.ceil(data.height) + "px";
+    }
+    // Nieuwe stap: als de bovenkant van de widget uit beeld is, ernaartoe scrollen.
+    if (data.type === "verhuiswidget:top" && event.source === inlineFrame.contentWindow) {
+      if (inlineFrame.getBoundingClientRect().top < 0) {
+        inlineFrame.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
   });
 

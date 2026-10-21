@@ -132,6 +132,18 @@ export function MoveFlow({
   backUrl?: string | null;
 }) {
   const chrome = demo || appChrome;
+
+  // Elke nieuwe stap begint bovenaan, niet op de scrollpositie van de vorige
+  // stap (bijv. halverwege na een lange inventarislijst). In een pop-up op de
+  // site van de verhuizer scrollt embed.js het venster mee.
+  const stepScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    stepScrollRef.current?.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0 });
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: "verhuiswidget:top" }, "*");
+    }
+  }, [step]);
   const onspot = source === "onspot";
   // Stap 1 — contact
   const [name, setName] = useState(demo ? "Demo Gebruiker" : "");
@@ -1552,7 +1564,7 @@ export function MoveFlow({
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto pb-4 pt-6">
+        <div ref={stepScrollRef} className="flex-1 overflow-y-auto pb-4 pt-6">
           {step === 0 && fancyFotosBody}
           {step === 1 && inventarisBody}
           {step === 2 && adressenBody}
