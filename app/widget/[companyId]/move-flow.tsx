@@ -210,6 +210,8 @@ export function MoveFlow({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  // Demo: "boeken" zonder echte lead; toont wat er in het echt gebeurt.
+  const [demoBooked, setDemoBooked] = useState(false);
 
   const accent = company.primaryColor;
   const fillClass = ACCENT_BG;
@@ -1424,6 +1426,59 @@ export function MoveFlow({
           <p className="mt-2 text-xs text-slate-600">
             {company.name} bevestigt daarna de details.
           </p>
+        </div>
+      )}
+
+      {demo && !result.acceptUrl && (
+        // Demo (bezoeker = verhuizer): de knop doet alsof, en legt daarna uit
+        // wat er bij een echte klant gebeurt.
+        <div className="rounded-xl border border-slate-200 p-4 text-center">
+          {!demoBooked ? (
+            <>
+              <p className="text-sm font-semibold">Klopt het en wil je doorgaan?</p>
+              <button
+                type="button"
+                onClick={() => setDemoBooked(true)}
+                className={`mt-3 inline-block rounded-full px-6 py-3 text-sm font-semibold text-white shadow-md ${ACCENT_BG}`}
+              >
+                Ja, ik wil deze {isClearance ? "ontruiming" : "verhuizing"} boeken
+              </button>
+              <p className="mt-2 text-xs text-slate-600">Probeer het: dit is wat je klant ziet.</p>
+            </>
+          ) : (
+            <div className="text-left">
+              <p className="text-center text-sm font-semibold">✓ Boeking ontvangen (demo)</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Wat er nu gebeurt bij een echte klant
+              </p>
+              <ul className="mt-2 space-y-2 text-sm text-slate-700">
+                <li className="flex gap-2">
+                  <span aria-hidden="true">🎉</span>
+                  <span>
+                    <strong>Jij krijgt meteen een mail:</strong> &ldquo;{name || "Jan"} wil boeken (
+                    {fmt(result.totalCents)})&rdquo;, met telefoonnummer en voorkeursdatum.
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span aria-hidden="true">📋</span>
+                  <span>
+                    <strong>In je dashboard</strong> staat de lead op &ldquo;klant akkoord&rdquo;,
+                    met foto&apos;s, inventaris en prijsopbouw.
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span aria-hidden="true">✉️</span>
+                  <span>
+                    <strong>Je klant krijgt een bevestiging</strong> in jouw huisstijl, met jouw
+                    logo en handtekening.
+                  </span>
+                </li>
+              </ul>
+              <p className="mt-3 text-center text-xs text-slate-600">
+                Jij belt alleen nog om de datum vast te zetten.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
