@@ -191,7 +191,10 @@ export const leads = pgTable(
     totalCents: integer("total_cents").notNull().default(0),
 
     notes: text("notes"), // interne notitie van het bedrijf
-    status: text("status").notNull().default("nieuw"), // nieuw | gecontacteerd | gewonnen | verloren
+    status: text("status").notNull().default("nieuw"), // nieuw | gecontacteerd | akkoord | gewonnen | verloren
+    // Boekingslink in de offerte ("Ja, ik wil boeken"): geheime sleutel + moment van akkoord.
+    acceptToken: text("accept_token"),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("leads_company_id_created_at_idx").on(t.companyId, t.createdAt.desc())],

@@ -5,7 +5,7 @@ import { requireCompany } from "@/lib/current-company";
 import { LEAD_SOURCE_LABEL, getLeadForCompany, normalizeLeadSource } from "@/lib/leads";
 import { formatEuroCents, formatDate, formatDateTime } from "@/lib/format";
 import { isLeadLocked } from "@/lib/plans";
-import { ArrowLeft, Lock } from "lucide-react";
+import { ArrowLeft, Lock, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -23,7 +23,7 @@ import { setLeadStatus, saveLeadNotes } from "./actions";
 
 export const metadata: Metadata = { title: "Lead" };
 
-const STATUSES = ["nieuw", "gecontacteerd", "gewonnen", "verloren"] as const;
+const STATUSES = ["nieuw", "gecontacteerd", "akkoord", "gewonnen", "verloren"] as const;
 
 export default async function LeadDetailPage({
   params,
@@ -112,12 +112,23 @@ export default async function LeadDetailPage({
                 variant={lead.status === s ? "default" : "outline"}
                 className="capitalize"
               >
-                {s}
+                {s === "akkoord" ? "klant akkoord" : s}
               </Button>
             ))}
           </form>
         }
       />
+
+      {lead.acceptedAt && (
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-900">
+          <PartyPopper className="size-4 shrink-0" />
+          <span>
+            <strong>{lead.customerName}</strong> ging akkoord met de offerte op{" "}
+            {formatDateTime(lead.acceptedAt)}. Bevestig de afspraak en zet de lead op{" "}
+            <strong>gewonnen</strong>.
+          </span>
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

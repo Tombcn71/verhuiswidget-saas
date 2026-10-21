@@ -19,6 +19,8 @@ type QuoteData = {
   vatCents: number;
   totalCents: number;
   leadId: string;
+  /** Link "Ja, ik wil boeken" (zie lib/leads#bookingUrl); niet bij demo/preview. */
+  acceptUrl?: string | null;
   photoUrls?: string[];
   /** Extra antwoorden van de klant, voor in de bedrijfsmail. */
   details?: Record<string, string>;
@@ -107,11 +109,75 @@ function customerEmailHtml(d: QuoteData): string {
      ${moveSummary(d)}
      <h3 style="font-size:16px">Prijsindicatie</h3>
      ${priceBlock(d)}
+     ${d.acceptUrl ? bookButton(d) : ""}
      <p style="font-size:13px;color:#64748b">Dit is een automatische indicatie op basis van foto-analyse en geen bindende offerte. ${esc(d.company.name)} neemt binnenkort contact met je op om de details te bevestigen.</p>
      <h3 style="font-size:16px">Herkende inboedel</h3>
      ${inventoryBlock(d)}
      ${signatureBlock(d.company)}`,
   );
+}
+
+/** Grote knop "Ja, ik wil boeken" in de huisstijlkleur van de verhuizer. */
+function bookButton(d: QuoteData): string {
+  const what = d.move.type === "ontruiming" ? "ontruiming" : "verhuizing";
+  return `<div style="margin:24px 0;text-align:center">
+    <p style="font-size:14px;margin:0 0 12px">Klopt het en wil je doorgaan?</p>
+    <a href="${esc(d.acceptUrl!)}" style="display:inline-block;background:${esc(d.company.primaryColor)};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 28px;border-radius:999px">Ja, ik wil deze ${what} boeken</a>
+    <p style="font-size:12px;color:#64748b;margin:12px 0 0">${esc(d.company.name)} bevestigt daarna de details met je.</p>
+  </div>`;
+}
+
+/**
+ * Melding aan de verhuizer: een klant heeft op "Ja, ik wil boeken" gedrukt.
+ * Zonder actief plan (proef verlopen) zonder klantgegevens, net als in het dashboard.
+ */
+export async function sendBookingNotification(input: {
+  company: Company;
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string | null;
+  moveType: string;
+  moveDate?: string | null;
+  totalCents: number;
+  leadUrl: string;
+  showDetails: boolean;
+}): Promise<{ sent: boolean }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.QUOTE_FROM_EMAIL;
+  if (!apiKey || !from) return { sent: false };
+
+  const c = input.company;
+  const what = input.moveType === "ontruiming" ? "ontruiming" : "verhuizing";
+  const subject = input.showDetails
+    ? `🎉 ${input.customerName} wil boeken (${formatEuroCents(input.totalCents)})`
+    : "🎉 Een klant wil boeken";
+  const body = input.showDetails
+    ? `<h1 style="font-size:20px">${esc(input.customerName)} wil de ${what} boeken</h1>
+       <table style="font-size:14px;margin:16px 0">
+         <tr><td style="padding:2px 12px 2px 0;color:#64748b">Bedrag</td><td><strong>${formatEuroCents(input.totalCents)}</strong> incl. btw</td></tr>
+         ${input.moveDate ? `<tr><td style="padding:2px 12px 2px 0;color:#64748b">Datum</td><td>${formatDate(input.moveDate)}</td></tr>` : ""}
+         <tr><td style="padding:2px 12px 2px 0;color:#64748b">E-mail</td><td>${esc(input.customerEmail)}</td></tr>
+         ${input.customerPhone ? `<tr><td style="padding:2px 12px 2px 0;color:#64748b">Telefoon</td><td>${esc(input.customerPhone)}</td></tr>` : ""}
+       </table>
+       <p style="font-size:14px">Bevestig de afspraak met de klant en zet de lead daarna op <strong>Gewonnen</strong>.</p>`
+    : `<h1 style="font-size:20px">Een klant wil een ${what} boeken</h1>
+       <p style="font-size:14px">Je proefperiode is afgelopen. Activeer een plan om de gegevens van deze klant te zien.</p>`;
+
+  try {
+    await new Resend(apiKey).emails.send({
+      from: `moverAI <${from}>`,
+      to: c.email,
+      ...(input.showDetails ? { replyTo: input.customerEmail } : {}),
+      subject,
+      html: baseLayout(
+        c,
+        `${body}<p style="margin-top:20px"><a href="${esc(input.leadUrl)}" style="display:inline-block;background:#1a73e8;color:#fff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:999px">Bekijk in je dashboard</a></p>`,
+      ),
+    });
+    return { sent: true };
+  } catch {
+    return { sent: false };
+  }
 }
 
 /** Handtekening van de verhuizer (Dashboard → Bedrijf), of een nette standaardgroet. */

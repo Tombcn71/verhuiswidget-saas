@@ -3,6 +3,7 @@ import heroImage from "@/public/hero.jpg";
 import { DemoModal } from "@/app/_components/demo-modal";
 import { SiteHeader } from "@/app/_components/site-header";
 import { PricingCards } from "@/app/_components/pricing-cards";
+import { Globe, Link, MapPin } from "lucide-react";
 import {
   Timer,
   Fuel,
@@ -52,19 +53,19 @@ const features = [
 
 const channels = [
   {
-    emoji: "🌐",
+    Icon: Globe,
     t: "1. Onsite (De Website Widget)",
     d: "Plaats de widget met één regel code op je website. Klanten vullen hun gegevens in, uploaden foto's van hun kamers en de AI doet de rest.",
   },
   {
-    emoji: "🔗",
-    t: "2. Onlink (Het Directe Linkje)",
-    d: "Krijg je een beller of WhatsApp-bericht? Genereer in één klik een uniek linkje vanuit je dashboard en stuur deze naar de klant om direct foto's te uploaden.",
+    Icon: MapPin,
+    t: "2. Onspot (De Mobiele App-Scanner)",
+    d: "Sta je zelf bij een groot pand of complex project? Open de moverAI web-app op je telefoon, scan de ruimtes live op locatie en zie direct het aantal kubieke meters rollen.",
   },
   {
-    emoji: "📍",
-    t: "3. Onspot (De Mobiele App-Scanner)",
-    d: "Sta je zelf bij een groot pand of complex project? Open de moverAI web-app op je telefoon, scan de ruimtes live op locatie en zie direct het aantal kubieke meters rollen.",
+    Icon: Link,
+    t: "3. Onlink (Het Directe Linkje)",
+    d: "Krijg je een beller of WhatsApp-bericht? Genereer in één klik een uniek linkje vanuit je dashboard en stuur deze naar de klant om direct foto's te uploaden.",
   },
 ];
 
@@ -184,10 +185,8 @@ export default function HomePage() {
                 <div
                   key={c.t}
                   className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <div
-                    aria-hidden="true"
-                    className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-2xl">
-                    {c.emoji}
+                  <div className="inline-flex rounded-xl bg-brand-600 p-2.5 text-white">
+                    <c.Icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <h3 className="mt-4 font-semibold">{c.t}</h3>
                   <p className="mt-2 text-sm text-slate-600">{c.d}</p>

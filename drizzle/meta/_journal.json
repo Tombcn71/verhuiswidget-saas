@@ -120,6 +120,13 @@
       "when": 1792413599445,
       "tag": "0016_skinny_slipstream",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792571302312,
+      "tag": "0017_secret_lethal_legion",
+      "breakpoints": true
     }
   ]
 }

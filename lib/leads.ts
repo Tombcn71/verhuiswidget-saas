@@ -1,4 +1,6 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { appUrl } from "@/lib/app-url";
 import { db, leads, type Lead, type NewLead } from "@/lib/db";
 
 export type LeadSource = "onsite" | "onlink" | "onspot";
@@ -14,8 +16,48 @@ export function normalizeLeadSource(value: unknown): LeadSource {
 }
 
 export async function createLead(values: NewLead): Promise<Lead> {
-  const [row] = await db.insert(leads).values(values).returning();
+  const [row] = await db
+    .insert(leads)
+    .values({ acceptToken: randomUUID(), ...values })
+    .returning();
   return row;
+}
+
+/** Link waarmee de klant de offerte accepteert (zie /boeken/[leadId]). */
+export function bookingUrl(lead: Pick<Lead, "id" | "acceptToken">): string | null {
+  return lead.acceptToken ? `${appUrl()}/boeken/${lead.id}?t=${lead.acceptToken}` : null;
+}
+
+/** Lead via de boekingslink; null als id of sleutel niet klopt. */
+export async function getLeadForBooking(leadId: string, token: string): Promise<Lead | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(leadId) || !token) return null;
+  const [row] = await db
+    .select()
+    .from(leads)
+    .where(and(eq(leads.id, leadId), eq(leads.acceptToken, token)))
+    .limit(1);
+  return row ?? null;
+}
+
+/**
+ * De klant gaat akkoord met de offerte. Alleen vanuit "nieuw" of "gecontacteerd";
+ * een lead die al gewonnen/verloren is blijft staan. Geeft de bijgewerkte lead
+ * terug als het akkoord nieuw is, anders null.
+ */
+export async function acceptLead(leadId: string, token: string): Promise<Lead | null> {
+  const [row] = await db
+    .update(leads)
+    .set({ status: "akkoord", acceptedAt: new Date() })
+    .where(
+      and(
+        eq(leads.id, leadId),
+        eq(leads.acceptToken, token),
+        isNull(leads.acceptedAt),
+        inArray(leads.status, ["nieuw", "gecontacteerd"]),
+      ),
+    )
+    .returning();
+  return row ?? null;
 }
 
 export async function listLeadsForCompany(
@@ -104,7 +146,7 @@ export async function getLeadStats(companyId: string): Promise<LeadStats> {
     .select({
       total: sql<number>`count(*)::int`,
       last30Days: sql<number>`count(*) filter (where ${leads.createdAt} >= ${cutoff})::int`,
-      pipelineValueCents: sql<number>`coalesce(sum(${leads.totalCents}) filter (where ${leads.status} in ('nieuw','gecontacteerd')), 0)::int`,
+      pipelineValueCents: sql<number>`coalesce(sum(${leads.totalCents}) filter (where ${leads.status} in ('nieuw','gecontacteerd','akkoord')), 0)::int`,
       wonValueCents: sql<number>`coalesce(sum(${leads.totalCents}) filter (where ${leads.status} = 'gewonnen'), 0)::int`,
       verhuizingen: sql<number>`count(*) filter (where ${leads.moveType} = 'verhuizing')::int`,
       ontruimingen: sql<number>`count(*) filter (where ${leads.moveType} = 'ontruiming')::int`,

@@ -66,6 +66,8 @@ type Result = {
   vatCents: number;
   totalCents: number;
   emailSent: boolean;
+  /** Link "Ja, ik wil boeken" (niet bij demo/preview). */
+  acceptUrl?: string | null;
 };
 
 const STEPS = ["Foto's", "Inventaris", "Adressen", "Opties", "Contact", "Resultaat"];
@@ -1388,6 +1390,27 @@ export function MoveFlow({
           </tbody>
         </table>
       </div>
+
+      {result.acceptUrl && (
+        // Boeken op het warmste moment: direct na de prijs. Opent de bevestigingspagina
+        // in een nieuw tabblad (de widget kan in een pop-up/iframe draaien).
+        <div className="rounded-xl border border-slate-200 p-4 text-center">
+          <p className="text-sm font-semibold">
+            {onspot ? "Gaat de klant akkoord?" : "Klopt het en wil je doorgaan?"}
+          </p>
+          <a
+            href={result.acceptUrl}
+            target="_blank"
+            rel="noopener"
+            className={`mt-3 inline-block rounded-full px-6 py-3 text-sm font-semibold text-white shadow-md ${ACCENT_BG}`}
+          >
+            {onspot ? "Boeking vastleggen" : `Ja, ik wil deze ${isClearance ? "ontruiming" : "verhuizing"} boeken`}
+          </a>
+          <p className="mt-2 text-xs text-slate-600">
+            {company.name} bevestigt daarna de details.
+          </p>
+        </div>
+      )}
 
       <div>
         <h3 className="mb-1 text-sm font-semibold">Herkende inboedel</h3>

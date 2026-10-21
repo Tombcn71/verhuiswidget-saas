@@ -4,7 +4,7 @@ import { isValidPhone } from "@/lib/phone";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { hasAccess } from "@/lib/plans";
 import { isDemoCompany } from "@/lib/demo";
-import { createLead } from "@/lib/leads";
+import { bookingUrl, createLead } from "@/lib/leads";
 import { analyzePhotos, type PhotoInput } from "@/lib/gemini";
 import { calculatePrice, isRushDate } from "@/lib/pricing";
 import { approachKm } from "@/lib/route";
@@ -289,6 +289,7 @@ export async function POST(request: Request) {
       vatCents: price.vatCents,
       totalCents: price.totalCents,
       leadId: lead.id,
+      acceptUrl: bookingUrl(lead),
     },
     { customerOnly: !hasAccess(company) },
   );
@@ -303,5 +304,6 @@ export async function POST(request: Request) {
     vatCents: price.vatCents,
     totalCents: price.totalCents,
     emailSent: emailResult.sent,
+    acceptUrl: bookingUrl(lead),
   });
 }

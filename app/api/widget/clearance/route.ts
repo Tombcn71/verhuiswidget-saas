@@ -4,7 +4,7 @@ import { isValidPhone } from "@/lib/phone";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { hasAccess } from "@/lib/plans";
 import { isDemoCompany } from "@/lib/demo";
-import { createLead } from "@/lib/leads";
+import { bookingUrl, createLead } from "@/lib/leads";
 import { calculatePrice, clearanceTariffs, floorTypeRate, isRushDate } from "@/lib/pricing";
 import { sendQuoteEmails } from "@/lib/email";
 import { approachKm } from "@/lib/route";
@@ -273,10 +273,11 @@ export async function POST(request: Request) {
 
   // Proef verlopen zonder betaling: de klant krijgt z'n offerte, het bedrijf
   // krijgt de lead pas te zien na het activeren van een plan.
+  const acceptUrl = bookingUrl(lead);
   const emailResult = await sendQuoteEmails(
-    { ...emailData, leadId: lead.id },
+    { ...emailData, leadId: lead.id, acceptUrl },
     { customerOnly: !hasAccess(company) },
   );
 
-  return json({ ...responseBody, emailSent: emailResult.sent });
+  return json({ ...responseBody, emailSent: emailResult.sent, acceptUrl });
 }

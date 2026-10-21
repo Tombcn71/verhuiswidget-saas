@@ -12,7 +12,7 @@ async function canEdit(company: Company, leadId: string): Promise<boolean> {
   return lead !== null && !isLeadLocked(company, lead);
 }
 
-const ALLOWED = ["nieuw", "gecontacteerd", "gewonnen", "verloren"];
+const ALLOWED = ["nieuw", "gecontacteerd", "akkoord", "gewonnen", "verloren"];
 
 export async function setLeadStatus(formData: FormData) {
   const company = await requireCompany();
