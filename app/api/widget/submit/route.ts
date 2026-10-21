@@ -3,7 +3,9 @@ import { z } from "zod";
 import { isValidPhone } from "@/lib/phone";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { hasAccess } from "@/lib/plans";
-import { isDemoCompany } from "@/lib/demo";
+import { demoBookingUrl, isDemoCompany } from "@/lib/demo";
+import { recordDemoLead } from "@/lib/demo-leads";
+import { appUrl } from "@/lib/app-url";
 import { bookingUrl, createLead } from "@/lib/leads";
 import { analyzePhotos, type PhotoInput } from "@/lib/gemini";
 import { calculatePrice, isRushDate } from "@/lib/pricing";
@@ -33,6 +35,8 @@ const payloadSchema = z.object({
   companyId: z.uuid(),
   // Alleen een label voor de verhuizer (niet geverifieerd): widget, link of zelf gescand.
   source: z.enum(["onsite", "onlink", "onspot"]).default("onsite"),
+  // Alleen in de demo: toestemming voor één opvolgmail van moverAI.
+  demoConsent: z.boolean().optional(),
   moveType: z.enum(["verhuizing", "ontruiming"]).default("verhuizing"),
   customer: z.object({
     name: z.string().trim().min(1).max(120),
@@ -204,6 +208,17 @@ export async function POST(request: Request) {
   if (demo) {
     const fake =
       preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
+    // Demo met vinkje (en echt e-mailadres): verhuizer-lead voor moverAI.
+    const demoLead =
+      isDemo && !fake && parsed.demoConsent
+        ? await recordDemoLead({
+            name: parsed.customer.name,
+            email: parsed.customer.email,
+            phone: parsed.customer.phone,
+            moveType: parsed.moveType,
+            totalCents: price.totalCents,
+          })
+        : null;
     const demoEmail = fake
       ? { sent: false as const }
       : await sendQuoteEmails(
@@ -218,6 +233,17 @@ export async function POST(request: Request) {
             vatCents: price.vatCents,
             totalCents: price.totalCents,
             leadId: "demo",
+            // Demo-boekingslink (niets opgeslagen) zodat de knop ook in de demo-mail staat.
+            acceptUrl: demoBookingUrl(appUrl(), {
+              name: parsed.customer.name,
+              totalCents: price.totalCents,
+              moveDate: parsed.move.moveDate,
+              moveType: parsed.moveType,
+              fromAddress: parsed.move.fromAddress,
+              toAddress: parsed.move.toAddress,
+              volumeM3: price.totalVolumeM3,
+              demoLeadId: demoLead?.id,
+            }),
           },
           { customerOnly: true },
         );

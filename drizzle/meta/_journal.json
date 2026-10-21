@@ -127,6 +127,13 @@
       "when": 1792571302312,
       "tag": "0017_secret_lethal_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792574260251,
+      "tag": "0018_panoramic_morph",
+      "breakpoints": true
     }
   ]
 }

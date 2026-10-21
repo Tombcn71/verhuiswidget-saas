@@ -262,3 +262,22 @@ export type Company = typeof companies.$inferSelect;
 export type NewCompany = typeof companies.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
+
+/**
+ * Bezoekers van de demo op de homepage (meestal verhuizers) die het vinkje
+ * "moverAI mag me mailen" aanzetten. Alleen mét toestemming opgeslagen; voor
+ * de opvolgmail en het overzicht op /admin.
+ */
+export const demoLeads = pgTable("demo_leads", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  moveType: text("move_type").notNull(),
+  totalCents: integer("total_cents").notNull(),
+  // Klikte op "Ja, ik wil boeken" in de demo-mail: het warmste signaal.
+  bookedAt: timestamp("booked_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type DemoLead = typeof demoLeads.$inferSelect;

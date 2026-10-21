@@ -1,7 +1,12 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { clerkClient } from "@clerk/nextjs/server";
 import { db, companies, type Company } from "@/lib/db";
-import { DEMO_CLERK_ID, DEMO_COMPANY_ID, DEMO_COMPANY_PUBLIC } from "@/lib/demo";
+import {
+  DEMO_CLERK_ID,
+  DEMO_COMPANY_DETAILS,
+  DEMO_COMPANY_ID,
+  DEMO_COMPANY_PUBLIC,
+} from "@/lib/demo";
 import { seatLimit, type PlanId } from "@/lib/plans";
 import type { SubscriptionStatus } from "@/lib/stripe";
 
@@ -132,7 +137,16 @@ export async function ensureDemoCompany(): Promise<Company> {
   if (demoCompany) return demoCompany;
 
   const existing = await getCompanyById(DEMO_COMPANY_ID);
-  if (existing) return (demoCompany = existing);
+  if (existing) {
+    // Voorbeeldgegevens bijwerken als ze in de code zijn aangepast.
+    const d = DEMO_COMPANY_DETAILS;
+    const stale =
+      existing.email !== d.email ||
+      existing.phone !== d.phone ||
+      existing.website !== d.website ||
+      existing.emailSignature !== d.emailSignature;
+    return (demoCompany = stale ? await updateCompanySettings(existing.id, d) : existing);
+  }
 
   const [created] = await db
     .insert(companies)
@@ -140,9 +154,9 @@ export async function ensureDemoCompany(): Promise<Company> {
       id: DEMO_COMPANY_ID,
       clerkUserId: DEMO_CLERK_ID,
       name: DEMO_COMPANY_PUBLIC.name,
-      email: "demo@moverai.example",
       primaryColor: DEMO_COMPANY_PUBLIC.primaryColor,
       serviceType: "beide",
+      ...DEMO_COMPANY_DETAILS,
     })
     .onConflictDoNothing()
     .returning();

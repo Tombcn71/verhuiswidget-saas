@@ -17,9 +17,24 @@ interface FeedbackItem {
   created_at: string;
 }
 
+interface DemoLeadItem {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  moveType: string;
+  totalCents: number;
+  bookedAt: string | null;
+  createdAt: string;
+}
+
+const euro = (cents: number) =>
+  new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(cents / 100);
+
 export default function AdminPage() {
   const [wachtwoord, setWachtwoord] = useState("");
   const [items, setItems] = useState<FeedbackItem[] | null>(null);
+  const [demoLeads, setDemoLeads] = useState<DemoLeadItem[]>([]);
   const [filter, setFilter] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [fout, setFout] = useState(false);
@@ -35,6 +50,9 @@ export default function AdminPage() {
         return;
       }
       setItems(await res.json());
+      // Demo-leads (verhuizers die de demo deden en gemaild willen worden).
+      const demoRes = await fetch(`/api/demo-leads?pw=${encodeURIComponent(wachtwoord)}`);
+      if (demoRes.ok) setDemoLeads(await demoRes.json());
     } catch {
       setFout(true);
     } finally {
@@ -50,13 +68,69 @@ export default function AdminPage() {
       <div className="min-h-screen bg-slate-50 p-6 md:p-12">
         <header className="mx-auto mb-8 max-w-3xl">
           <Logo className="text-base" />
-          <h1 className="mt-6 text-2xl font-bold tracking-tight">Feedback van verhuizers</h1>
+          <h1 className="mt-6 text-2xl font-bold tracking-tight">Admin</h1>
           <p className="mt-1 text-sm text-slate-500">
-            {items.length} bericht{items.length !== 1 ? "en" : ""}
+            {demoLeads.length} demo-lead{demoLeads.length !== 1 ? "s" : ""} ·{" "}
+            {items.length} feedbackbericht{items.length !== 1 ? "en" : ""}
           </p>
         </header>
 
+        <section className="mx-auto mb-12 max-w-3xl">
+          <h2 className="text-lg font-semibold">Demo-leads</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Bezoekers die de demo afrondden en gemaild willen worden. 🔥 = klikte ook op
+            &ldquo;boeken&rdquo; in de demo-mail.
+          </p>
+          {demoLeads.length === 0 ? (
+            <p className="mt-4 rounded-2xl border-2 border-dashed border-slate-200 bg-white py-8 text-center text-sm text-slate-500">
+              Nog geen demo-leads
+            </p>
+          ) : (
+            <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+              <table className="w-full text-sm">
+                <thead className="border-b border-slate-100 text-left text-slate-500">
+                  <tr>
+                    <th className="px-4 py-2 font-medium">Naam</th>
+                    <th className="px-4 py-2 font-medium">Contact</th>
+                    <th className="px-4 py-2 font-medium">Demo</th>
+                    <th className="px-4 py-2 font-medium">Wanneer</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {demoLeads.map((d) => (
+                    <tr key={d.id}>
+                      <td className="px-4 py-2 font-medium">
+                        {d.bookedAt && <span title="Klikte op boeken">🔥 </span>}
+                        {d.name}
+                      </td>
+                      <td className="px-4 py-2">
+                        <a href={`mailto:${d.email}`} className="text-brand-600 underline">
+                          {d.email}
+                        </a>
+                        {d.phone && (
+                          <div>
+                            <a href={`tel:${d.phone}`} className="text-slate-600">
+                              {d.phone}
+                            </a>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 capitalize text-slate-600">
+                        {d.moveType} · {euro(d.totalCents)}
+                      </td>
+                      <td className="px-4 py-2 text-slate-500">
+                        {new Date(d.createdAt).toLocaleString("nl-NL")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
         <div className="mx-auto max-w-3xl">
+          <h2 className="mb-4 text-lg font-semibold">Feedback</h2>
           <div className="mb-6 flex flex-wrap gap-2 text-sm">
             <button
               type="button"

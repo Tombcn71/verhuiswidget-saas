@@ -20,6 +20,51 @@ export const DEMO_COMPANY_PUBLIC = {
   name: "Demo Verhuisbedrijf",
   logoUrl: null as string | null,
   primaryColor: "#1a73e8",
-  phone: null as string | null,
+  phone: "020 123 45 67" as string | null,
   serviceType: "beide" as const,
 };
+
+/**
+ * Voorbeeldgegevens van het demobedrijf, zodat de demo-mails er net zo compleet
+ * uitzien als bij een echte verhuizer. Antwoorden op een demo-mail komen bij
+ * moverAI binnen (info@).
+ */
+export const DEMO_COMPANY_DETAILS = {
+  email: "info@moverai.nl",
+  phone: "020 123 45 67",
+  website: "moverai.nl",
+  emailSignature:
+    "Met vriendelijke groet,\n\nSanne de Vries\nDemo Verhuisbedrijf\n020 123 45 67 · moverai.nl\n\nDit is een voorbeeld van moverAI: zo krijgen jouw klanten hun offerte.",
+};
+
+/**
+ * Boekingslink voor een demo-offerte. Er is geen lead, dus de gegevens reizen
+ * mee in de URL; /boeken/demo toont daarmee de bevestigingspagina zonder iets
+ * op te slaan.
+ */
+export function demoBookingUrl(
+  base: string,
+  input: {
+    name: string;
+    totalCents: number;
+    moveDate?: string | null;
+    moveType: string;
+    fromAddress?: string | null;
+    toAddress?: string | null;
+    volumeM3?: number;
+    /** Demo-lead (alleen met toestemming), zodat een klik op "boeken" geregistreerd wordt. */
+    demoLeadId?: string | null;
+  },
+): string {
+  const params = new URLSearchParams({
+    n: input.name,
+    b: String(Math.round(input.totalCents)),
+    s: input.moveType === "ontruiming" ? "ontruiming" : "verhuizing",
+  });
+  if (input.moveDate) params.set("d", input.moveDate);
+  if (input.fromAddress) params.set("van", input.fromAddress);
+  if (input.toAddress) params.set("naar", input.toAddress);
+  if (input.volumeM3) params.set("m3", input.volumeM3.toFixed(1));
+  if (input.demoLeadId) params.set("dl", input.demoLeadId);
+  return `${base}/boeken/demo?${params}`;
+}

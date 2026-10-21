@@ -149,6 +149,8 @@ export function MoveFlow({
   const [name, setName] = useState(demo ? "Demo Gebruiker" : "");
   const [email, setEmail] = useState(demo ? "demo@voorbeeld.nl" : "");
   const [phone, setPhone] = useState(demo ? "06 12345678" : "");
+  // Alleen in de demo (bezoeker = verhuizer): toestemming voor één opvolgmail van moverAI.
+  const [demoConsent, setDemoConsent] = useState(false);
 
   // Stap 2 — adressen
   const [from, setFrom] = useState<AddressValue>(EMPTY_ADDRESS);
@@ -464,6 +466,7 @@ export function MoveFlow({
             companyId: company.id,
             source,
             customer: { name, email, phone },
+            ...(demo ? { demoConsent } : {}),
             details,
             works: {
               floorRemoval: floorRemoval
@@ -484,6 +487,7 @@ export function MoveFlow({
             source,
             moveType,
             customer: { name, email, phone },
+            ...(demo ? { demoConsent } : {}),
             move: {
               fromAddress,
               toAddress,
@@ -949,6 +953,19 @@ export function MoveFlow({
           </span>
         )}
       </label>
+      {demo && (
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3">
+          <input
+            type="checkbox"
+            checked={demoConsent}
+            onChange={(e) => setDemoConsent(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0"
+          />
+          <span className="text-sm text-slate-700">
+            moverAI mag me één keer mailen met een uitnodiging voor een kort adviesgesprek.
+          </span>
+        </label>
+      )}
     </div>
   );
 

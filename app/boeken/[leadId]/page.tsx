@@ -4,6 +4,7 @@ import { getCompanyById } from "@/lib/companies";
 import { getLeadForBooking } from "@/lib/leads";
 import { formatDate, formatDateTime, formatEuroCents } from "@/lib/format";
 import { confirmBooking } from "./actions";
+import { DemoBooking } from "./demo-booking";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Boeking bevestigen", robots: { index: false } };
@@ -16,7 +17,10 @@ export default async function BookingPage({
   params,
   searchParams,
 }: PageProps<"/boeken/[leadId]">) {
-  const [{ leadId }, { t }] = await Promise.all([params, searchParams]);
+  const [{ leadId }, query] = await Promise.all([params, searchParams]);
+  // Demo-offerte: geen lead, gegevens in de URL (zie lib/demo#demoBookingUrl).
+  if (leadId === "demo") return <DemoBooking query={query} />;
+  const { t } = query;
   const token = typeof t === "string" ? t : "";
   const lead = await getLeadForBooking(leadId, token);
   if (!lead) notFound();
@@ -73,6 +77,10 @@ export default async function BookingPage({
             </p>
 
             <dl className="mt-6 space-y-2 rounded-2xl bg-slate-50 p-4 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-slate-500">Naam</dt>
+                <dd className="text-right font-medium">{lead.customerName}</dd>
+              </div>
               {lead.fromAddress && (
                 <div className="flex justify-between gap-4">
                   <dt className="text-slate-500">{lead.toAddress ? "Van" : "Adres"}</dt>
@@ -83,6 +91,14 @@ export default async function BookingPage({
                 <div className="flex justify-between gap-4">
                   <dt className="text-slate-500">Naar</dt>
                   <dd className="text-right font-medium">{lead.toAddress}</dd>
+                </div>
+              )}
+              {Number(lead.totalVolumeM3) > 0 && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-slate-500">Volume</dt>
+                  <dd className="font-medium">
+                    {Number(lead.totalVolumeM3).toLocaleString("nl-NL")} m³
+                  </dd>
                 </div>
               )}
               {lead.moveDate && (

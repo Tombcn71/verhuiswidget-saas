@@ -3,7 +3,9 @@ import { z } from "zod";
 import { isValidPhone } from "@/lib/phone";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { hasAccess } from "@/lib/plans";
-import { isDemoCompany } from "@/lib/demo";
+import { demoBookingUrl, isDemoCompany } from "@/lib/demo";
+import { recordDemoLead } from "@/lib/demo-leads";
+import { appUrl } from "@/lib/app-url";
 import { bookingUrl, createLead } from "@/lib/leads";
 import { calculatePrice, clearanceTariffs, floorTypeRate, isRushDate } from "@/lib/pricing";
 import { sendQuoteEmails } from "@/lib/email";
@@ -29,6 +31,8 @@ const payloadSchema = z.object({
   companyId: z.uuid(),
   // Alleen een label voor de verhuizer (niet geverifieerd): widget, link of zelf gescand.
   source: z.enum(["onsite", "onlink", "onspot"]).default("onsite"),
+  // Alleen in de demo: toestemming voor één opvolgmail van moverAI.
+  demoConsent: z.boolean().optional(),
   customer: z.object({
     name: z.string().trim().min(1).max(120),
     email: z.email(),
@@ -240,7 +244,30 @@ export async function POST(request: Request) {
   if (demo) {
     const fake =
       preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
-    const sent = fake ? { sent: false as const } : await sendQuoteEmails(emailData, { customerOnly: true });
+    // Demo met vinkje (en echt e-mailadres): verhuizer-lead voor moverAI.
+    const demoLead =
+      isDemo && !fake && parsed.demoConsent
+        ? await recordDemoLead({
+            name: parsed.customer.name,
+            email: parsed.customer.email,
+            phone: parsed.customer.phone,
+            moveType: "ontruiming",
+            totalCents,
+          })
+        : null;
+    // Demo-boekingslink (niets opgeslagen) zodat de knop ook in de demo-mail staat.
+    const acceptUrl = demoBookingUrl(appUrl(), {
+      name: parsed.customer.name,
+      totalCents,
+      moveDate: parsed.details.moveDate,
+      moveType: "ontruiming",
+      fromAddress: parsed.details.address,
+      volumeM3: base.totalVolumeM3,
+      demoLeadId: demoLead?.id,
+    });
+    const sent = fake
+      ? { sent: false as const }
+      : await sendQuoteEmails({ ...emailData, acceptUrl }, { customerOnly: true });
     return json({ ...responseBody, emailSent: sent.sent });
   }
 
