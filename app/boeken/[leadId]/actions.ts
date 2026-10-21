@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getCompanyById } from "@/lib/companies";
 import { acceptLead } from "@/lib/leads";
 import { hasAccess } from "@/lib/plans";
-import { sendBookingNotification } from "@/lib/email";
+import { sendBookingConfirmation, sendBookingNotification } from "@/lib/email";
 import { appUrl } from "@/lib/app-url";
 
 /**
@@ -19,17 +19,30 @@ export async function confirmBooking(formData: FormData): Promise<void> {
   if (lead) {
     const company = await getCompanyById(lead.companyId);
     if (company) {
-      await sendBookingNotification({
-        company,
-        customerName: lead.customerName,
-        customerEmail: lead.customerEmail,
-        customerPhone: lead.customerPhone,
-        moveType: lead.moveType,
-        moveDate: lead.moveDate,
-        totalCents: lead.totalCents,
-        leadUrl: `${appUrl()}/dashboard/leads/${lead.id}`,
-        showDetails: hasAccess(company),
-      });
+      // Verhuizer een seintje, klant een bevestiging van z'n verzoek.
+      await Promise.all([
+        sendBookingNotification({
+          company,
+          customerName: lead.customerName,
+          customerEmail: lead.customerEmail,
+          customerPhone: lead.customerPhone,
+          moveType: lead.moveType,
+          moveDate: lead.moveDate,
+          totalCents: lead.totalCents,
+          leadUrl: `${appUrl()}/dashboard/leads/${lead.id}`,
+          showDetails: hasAccess(company),
+        }),
+        sendBookingConfirmation({
+          company,
+          customerName: lead.customerName,
+          customerEmail: lead.customerEmail,
+          moveType: lead.moveType,
+          moveDate: lead.moveDate,
+          fromAddress: lead.fromAddress,
+          toAddress: lead.toAddress,
+          totalCents: lead.totalCents,
+        }),
+      ]);
     }
   }
 

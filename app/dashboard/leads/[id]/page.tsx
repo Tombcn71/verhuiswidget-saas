@@ -80,7 +80,7 @@ export default async function LeadDetailPage({
     ...(roomCount ? ([["Aantal kamers", String(roomCount)]] as Array<[string, string]>) : []),
     ["Lift aanwezig", yesNo(hasElevator)],
     ["Bereikbaar voor de wagen", yesNo(streetAccessible)],
-    [isClearance ? "Gewenste datum" : "Verhuisdatum", formatDate(lead.moveDate)],
+    ["Voorkeursdatum", formatDate(lead.moveDate)],
     ...(isClearance ? [] : ([["Afstand", `${Math.round(Number(lead.distanceKm))} km`]] as Array<[string, string]>)),
     ["Totaal volume", `${Number(lead.totalVolumeM3).toFixed(1)} m³`],
     ["Geschat aantal ritten", `${estimatedTrips}× (wagen ${company.truckCapacityM3} m³)`],

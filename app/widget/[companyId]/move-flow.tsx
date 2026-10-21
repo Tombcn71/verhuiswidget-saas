@@ -1164,7 +1164,10 @@ export function MoveFlow({
 
       <label className="block">
         <span className="text-sm font-semibold">
-          {isClearance ? "Wanneer wil je de ontruiming?" : "Wanneer ga je verhuizen?"}
+          Wat is je voorkeursdatum?
+        </span>
+        <span className="mt-0.5 block text-xs text-slate-600">
+          We stemmen de definitieve datum met je af.
         </span>
         <input
           className={`${inputCls} mt-2`}

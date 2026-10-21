@@ -87,7 +87,7 @@ export default async function BookingPage({
               )}
               {lead.moveDate && (
                 <div className="flex justify-between gap-4">
-                  <dt className="text-slate-500">Datum</dt>
+                  <dt className="text-slate-500">Voorkeursdatum</dt>
                   <dd className="font-medium">{formatDate(lead.moveDate)}</dd>
                 </div>
               )}

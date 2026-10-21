@@ -74,7 +74,7 @@ function moveSummary(d: QuoteData): string {
     <tr><td style="padding:2px 0;color:#64748b">Type</td><td>${esc(d.move.type)}</td></tr>
     ${d.move.fromAddress ? `<tr><td style="padding:2px 0;color:#64748b">${isClearance ? "Adres" : "Van"}</td><td>${esc(d.move.fromAddress)}</td></tr>` : ""}
     ${d.move.toAddress ? `<tr><td style="padding:2px 0;color:#64748b">Naar</td><td>${esc(d.move.toAddress)}</td></tr>` : ""}
-    ${d.move.moveDate ? `<tr><td style="padding:2px 0;color:#64748b">Datum</td><td>${formatDate(d.move.moveDate)}</td></tr>` : ""}
+    ${d.move.moveDate ? `<tr><td style="padding:2px 0;color:#64748b">Voorkeursdatum</td><td>${formatDate(d.move.moveDate)}</td></tr>` : ""}
     ${!isClearance ? `<tr><td style="padding:2px 0;color:#64748b">Afstand</td><td>${Math.round(d.move.distanceKm)} km</td></tr>` : ""}
     <tr><td style="padding:2px 0;color:#64748b">Volume</td><td>${d.totalVolumeM3.toFixed(1)} m³</td></tr>
   </table>`;
@@ -155,7 +155,7 @@ export async function sendBookingNotification(input: {
     ? `<h1 style="font-size:20px">${esc(input.customerName)} wil de ${what} boeken</h1>
        <table style="font-size:14px;margin:16px 0">
          <tr><td style="padding:2px 12px 2px 0;color:#64748b">Bedrag</td><td><strong>${formatEuroCents(input.totalCents)}</strong> incl. btw</td></tr>
-         ${input.moveDate ? `<tr><td style="padding:2px 12px 2px 0;color:#64748b">Datum</td><td>${formatDate(input.moveDate)}</td></tr>` : ""}
+         ${input.moveDate ? `<tr><td style="padding:2px 12px 2px 0;color:#64748b">Voorkeursdatum</td><td>${formatDate(input.moveDate)}</td></tr>` : ""}
          <tr><td style="padding:2px 12px 2px 0;color:#64748b">E-mail</td><td>${esc(input.customerEmail)}</td></tr>
          ${input.customerPhone ? `<tr><td style="padding:2px 12px 2px 0;color:#64748b">Telefoon</td><td>${esc(input.customerPhone)}</td></tr>` : ""}
        </table>
@@ -172,6 +172,62 @@ export async function sendBookingNotification(input: {
       html: baseLayout(
         c,
         `${body}<p style="margin-top:20px"><a href="${esc(input.leadUrl)}" style="display:inline-block;background:#1a73e8;color:#fff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:999px">Bekijk in je dashboard</a></p>`,
+      ),
+    });
+    return { sent: true };
+  } catch {
+    return { sent: false };
+  }
+}
+
+/**
+ * Bevestiging aan de klant na "Bevestig mijn boeking". Bewust "boekingsverzoek"
+ * en "voorkeursdatum": de verhuizer moet de afspraak nog definitief maken.
+ */
+export async function sendBookingConfirmation(input: {
+  company: Company;
+  customerName: string;
+  customerEmail: string;
+  moveType: string;
+  /** Voorkeursdatum uit de widget (optioneel); zonder datum geen datum in de mail. */
+  moveDate?: string | null;
+  fromAddress?: string | null;
+  toAddress?: string | null;
+  totalCents: number;
+}): Promise<{ sent: boolean }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.QUOTE_FROM_EMAIL;
+  if (!apiKey || !from) return { sent: false };
+
+  const c = input.company;
+  const what = input.moveType === "ontruiming" ? "ontruiming" : "verhuizing";
+  const when = input.moveDate ? `, met als voorkeursdatum ${formatDate(input.moveDate)}` : "";
+  const contact = c.phone
+    ? `Vragen? Bel ${esc(c.phone)} of antwoord op deze mail.`
+    : "Vragen? Antwoord gewoon op deze mail.";
+  const addressRows = [
+    input.fromAddress
+      ? `<tr><td style="padding:2px 12px 2px 0;color:#64748b">${input.toAddress ? "Van" : "Adres"}</td><td>${esc(input.fromAddress)}</td></tr>`
+      : "",
+    input.toAddress
+      ? `<tr><td style="padding:2px 12px 2px 0;color:#64748b">Naar</td><td>${esc(input.toAddress)}</td></tr>`
+      : "",
+  ].join("");
+
+  try {
+    await new Resend(apiKey).emails.send({
+      from: `${c.name} <${from}>`,
+      to: input.customerEmail,
+      replyTo: c.email,
+      subject: `Je boekingsverzoek is ontvangen — ${c.name}`,
+      html: baseLayout(
+        c,
+        `<h1 style="font-size:20px">Je boekingsverzoek is ontvangen</h1>
+         <p style="font-size:14px">Beste ${esc(input.customerName)},</p>
+         <p style="font-size:14px">Bedankt! ${esc(c.name)} heeft je verzoek ontvangen om je ${what} te boeken${when} (${formatEuroCents(input.totalCents)} incl. btw). We nemen binnenkort contact met je op om de datum en de details definitief te maken.</p>
+         ${addressRows ? `<table style="font-size:14px;margin:16px 0">${addressRows}</table>` : ""}
+         <p style="font-size:14px">${contact}</p>
+         ${signatureBlock(c)}`,
       ),
     });
     return { sent: true };

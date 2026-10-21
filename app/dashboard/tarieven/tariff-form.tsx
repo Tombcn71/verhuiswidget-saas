@@ -120,7 +120,7 @@ function BaseTariffs({
         <Field label="Toeslag per verdieping" name="moveFloorSurcharge" defaultValue={money(company.moveFloorSurchargeCents)} error={errors.moveFloorSurcharge} />
         <Field label="Verhuislift" name="liftFee" defaultValue={money(company.liftFeeCents)} hint="Ook automatisch bij etage 3+ zonder lift." error={errors.liftFee} />
         <Field label="Slechte bereikbaarheid" name="truckAccess" defaultValue={money(company.truckAccessSurchargeCents)} hint="Wagen kan niet voor de deur." error={errors.truckAccess} />
-        <Field label="Spoedtoeslag" name="rushSurcharge" defaultValue={money(company.rushSurchargeCents)} hint="Gewenste datum binnen 48 uur." error={errors.rushSurcharge} />
+        <Field label="Spoedtoeslag" name="rushSurcharge" defaultValue={money(company.rushSurchargeCents)} hint="Voorkeursdatum binnen 48 uur." error={errors.rushSurcharge} />
       </Group>
 
       <Group title="Extra opties">
