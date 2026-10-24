@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ADD COLUMN "clerk_seat_limit" integer;

@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/app/_components/logo";
 import { MobileMenu } from "./mobile-menu";
+import { ThemeToggle } from "@/components/theme";
 
 /** Ankers op de homepage; gedeeld met het mobiele menu. */
 export const NAV_LINKS = [
@@ -36,6 +37,7 @@ export async function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <ThemeToggle />
           {signedIn ? (
             <Button asChild size="lg">
               <Link href="/dashboard">Naar dashboard</Link>
@@ -52,7 +54,10 @@ export async function SiteHeader() {
           )}
         </div>
 
-        <MobileMenu signedIn={signedIn} links={NAV_LINKS} />
+        <div className="flex items-center md:hidden">
+          <ThemeToggle />
+          <MobileMenu signedIn={signedIn} links={NAV_LINKS} />
+        </div>
       </div>
     </header>
   );

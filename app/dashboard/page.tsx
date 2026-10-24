@@ -26,6 +26,7 @@ import {
 import { PageHeader } from "./page-header";
 import { StatusBadge } from "./status-badge";
 import { UsageBar } from "./usage-bar";
+import { ScanInfo } from "@/app/_components/scan-info";
 
 export const metadata: Metadata = { title: "Overzicht" };
 
@@ -79,7 +80,10 @@ export default async function DashboardOverviewPage() {
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <Card className="gap-3">
           <CardHeader>
-            <CardTitle>Offerteaanvragen deze maand</CardTitle>
+            <CardTitle>
+              Inboedelscans deze maand
+              <ScanInfo />
+            </CardTitle>
             <CardDescription>Plan {planFor(company).label}</CardDescription>
           </CardHeader>
           <CardContent>

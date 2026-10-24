@@ -43,6 +43,30 @@ type CompanyPublic = {
   primaryColor: string;
 };
 
+/** Gegevens van een verhuisbedrijf dat de demo via een persoonlijke link opent. */
+export type DemoContact = { name?: string | null; email?: string | null; phone?: string | null };
+
+// Demo-voorbeeldadressen (PDOK-coördinaten), zodat de adresstap meteen klopt.
+const DEMO_FROM: AddressValue = {
+  postcode: "3511 AR",
+  houseNumber: "50",
+  addition: "",
+  resolved: { label: "Oudegracht 50, 3511AR Utrecht", lat: 52.09503549, lon: 5.11688839 },
+};
+const DEMO_TO: AddressValue = {
+  postcode: "1012 LG",
+  houseNumber: "1",
+  addition: "",
+  resolved: { label: "Damrak 1, 1012LG Amsterdam", lat: 52.37714446, lon: 4.89803846 },
+};
+
+/** Voorkeursdatum in de demo: drie weken vanaf vandaag. */
+function demoMoveDate(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 21);
+  return d.toLocaleDateString("sv-SE");
+}
+
 type Photo = { id: string; file: Blob; url: string; room: string; blobUrl?: string };
 
 type PriceLine = { label: string; amountCents: number };
@@ -114,6 +138,8 @@ export function MoveFlow({
   appChrome = false,
   source = "onsite",
   backUrl = null,
+  demoContact,
+  prospect,
 }: {
   company: CompanyPublic;
   demo: boolean;
@@ -130,6 +156,10 @@ export function MoveFlow({
   source?: LeadSource;
   /** Website van de verhuizer (losse pagina/Onlink): terugpijl op stap 1 en knop na de offerte. */
   backUrl?: string | null;
+  /** Demo via persoonlijke link: gegevens van het benaderde verhuisbedrijf alvast ingevuld. */
+  demoContact?: DemoContact;
+  /** Slug in de verkoop-CRM van moverAI; reist mee zodat "demo gedaan/boeken" bijgehouden wordt. */
+  prospect?: string;
 }) {
   const chrome = demo || appChrome;
 
@@ -146,15 +176,19 @@ export function MoveFlow({
   }, [step]);
   const onspot = source === "onspot";
   // Stap 1 — contact
-  const [name, setName] = useState(demo ? "Demo Gebruiker" : "");
-  const [email, setEmail] = useState(demo ? "demo@voorbeeld.nl" : "");
-  const [phone, setPhone] = useState(demo ? "06 12345678" : "");
+  const [name, setName] = useState(demo ? demoContact?.name || "Demo Gebruiker" : "");
+  // Zonder e-mailadres een voorbeeldadres: dan gaat er geen mail uit, maar kan de demo door.
+  const [email, setEmail] = useState(demo ? demoContact?.email || "demo@voorbeeld.nl" : "");
+  const [phone, setPhone] = useState(
+    demo ? (demoContact?.phone && isValidPhone(demoContact.phone) ? demoContact.phone : "06 12345678") : "",
+  );
   // Alleen in de demo (bezoeker = verhuizer): toestemming voor één opvolgmail van moverAI.
   const [demoConsent, setDemoConsent] = useState(false);
 
   // Stap 2 — adressen
-  const [from, setFrom] = useState<AddressValue>(EMPTY_ADDRESS);
-  const [to, setTo] = useState<AddressValue>(EMPTY_ADDRESS);
+  // Demo: voorbeeldadressen alvast gevonden, zodat de bezoeker alleen op "Volgende" hoeft.
+  const [from, setFrom] = useState<AddressValue>(demo ? DEMO_FROM : EMPTY_ADDRESS);
+  const [to, setTo] = useState<AddressValue>(demo ? DEMO_TO : EMPTY_ADDRESS);
   // Afstand ophaal → bezorg; automatisch berekend, door de klant aan te passen.
   const [distanceKm, setDistanceKm] = useState("");
   const [distanceStatus, setDistanceStatus] = useState<"idle" | "loading" | "auto" | "manual">(
@@ -164,7 +198,7 @@ export function MoveFlow({
   const toAddress = addressText(to);
   const [propertyType, setPropertyType] = useState<"huis" | "appartement">("huis");
   const [fromFloor, setFromFloor] = useState("");
-  const [moveDate, setMoveDate] = useState("");
+  const [moveDate, setMoveDate] = useState(demo ? demoMoveDate() : "");
   // Vandaag als JJJJ-MM-DD in de tijdzone van de klant: eerder kiezen kan niet.
   const todayIso = new Date().toLocaleDateString("sv-SE");
   const [roomCount, setRoomCount] = useState("1");
@@ -466,7 +500,7 @@ export function MoveFlow({
             companyId: company.id,
             source,
             customer: { name, email, phone },
-            ...(demo ? { demoConsent } : {}),
+            ...(demo ? { demoConsent, prospect } : {}),
             details,
             works: {
               floorRemoval: floorRemoval
@@ -487,7 +521,7 @@ export function MoveFlow({
             source,
             moveType,
             customer: { name, email, phone },
-            ...(demo ? { demoConsent } : {}),
+            ...(demo ? { demoConsent, prospect } : {}),
             move: {
               fromAddress,
               toAddress,
@@ -1455,7 +1489,17 @@ export function MoveFlow({
               <p className="text-sm font-semibold">Klopt het en wil je doorgaan?</p>
               <button
                 type="button"
-                onClick={() => setDemoBooked(true)}
+                onClick={() => {
+                  setDemoBooked(true);
+                  // Persoonlijke demolink: 🔥 in de verkoop-CRM van moverAI.
+                  if (prospect) {
+                    void fetch("/api/widget/demo-event", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ prospect }),
+                    }).catch(() => {});
+                  }
+                }}
                 className={`mt-3 inline-block rounded-full px-6 py-3 text-sm font-semibold text-white shadow-md ${ACCENT_BG}`}
               >
                 Ja, ik wil deze {isClearance ? "ontruiming" : "verhuizing"} boeken

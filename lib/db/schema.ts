@@ -10,6 +10,7 @@ import {
   jsonb,
   index,
   doublePrecision,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -77,6 +78,9 @@ export const companies = pgTable("companies", {
   // "trialing" (proef, nog niet betaald) | "active" | "past_due" | "canceled" — bijgewerkt door de Stripe-webhook.
   subscriptionStatus: text("subscription_status").notNull().default("trialing"),
   extraSeats: integer("extra_seats").notNull().default(0), // alleen Premium
+  // Laatst in Clerk gezette gebruikerslimiet; wijkt die af van het plan, dan
+  // werkt de app 'm bij (zie lib/current-company#requireCompany).
+  clerkSeatLimit: integer("clerk_seat_limit"),
   stripeCustomerId: text("stripe_customer_id").unique(),
   stripeSubscriptionId: text("stripe_subscription_id"),
 
@@ -281,3 +285,59 @@ export const demoLeads = pgTable("demo_leads", {
 });
 
 export type DemoLead = typeof demoLeads.$inferSelect;
+
+/**
+ * Verkoop-CRM van moverAI zelf (/admin): verhuisbedrijven die moverAI klant wil
+ * maken. Elk krijgt een eigen demolink (/demo/<slug>); openen, afronden en
+ * "boeken" in de demo worden automatisch bijgehouden.
+ */
+export const prospects = pgTable("prospects", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(), // in de demolink, bijv. "jansen-verhuizingen"
+  companyName: text("company_name").notNull(),
+  contactName: text("contact_name"),
+  phone: text("phone"), // vast nummer (o.a. via Google), om te bellen
+  mobile: text("mobile"), // optioneel 06-nummer uit het gesprek (om te bellen)
+  email: text("email"),
+  website: text("website"),
+  city: text("city"),
+  address: text("address"),
+  // Gevonden via Google Places: ID (om dubbelen over te slaan) en beoordeling.
+  placeId: text("place_id").unique(),
+  rating: doublePrecision("rating"),
+  reviewCount: integer("review_count"),
+  notes: text("notes"),
+  // nieuw | gebeld | demo_gestuurd | demo_gedaan | proef | klant | afgevallen
+  stage: text("stage").notNull().default("nieuw"),
+  lostReason: text("lost_reason"),
+  nextAction: text("next_action"),
+  nextActionOn: date("next_action_on"),
+  // Automatisch bijgehouden via de demolink.
+  demoSentAt: timestamp("demo_sent_at", { withTimezone: true }),
+  demoOpenedAt: timestamp("demo_opened_at", { withTimezone: true }),
+  demoCompletedAt: timestamp("demo_completed_at", { withTimezone: true }),
+  demoBookedAt: timestamp("demo_booked_at", { withTimezone: true }),
+  // Klikte op "Plan een adviesgesprek" (Calendly) in de opvolgmail.
+  meetingClickedAt: timestamp("meeting_clicked_at", { withTimezone: true }),
+  // Automatische opvolgmails via Resend (ingepland; ID's om te kunnen annuleren).
+  reminderEmailId: text("reminder_email_id"), // "Even de demo bekijken?" (+3 dagen)
+  reminderAt: timestamp("reminder_at", { withTimezone: true }),
+  followUpEmailId: text("follow_up_email_id"), // "Wat vond je ervan?" (dag na de demo)
+  followUpAt: timestamp("follow_up_at", { withTimezone: true }),
+  autoMailOff: boolean("auto_mail_off").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type Prospect = typeof prospects.$inferSelect;
+export type NewProspect = typeof prospects.$inferInsert;
+
+/**
+ * Kleine sleutel/waarde-opslag voor moverAI-beheer, bijv. waar het ophalen van
+ * nieuwe verhuisbedrijven via Google Places is gebleven ("places_cursor").
+ */
+export const adminState = pgTable("admin_state", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

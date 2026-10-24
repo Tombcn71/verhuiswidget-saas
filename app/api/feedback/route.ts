@@ -57,15 +57,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ success: true });
 }
-
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const pw = searchParams.get("pw");
-  if (!pw || pw !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Geen toegang" }, { status: 403 });
-  }
-
-  const sql = await getDb();
-  const rows = await sql`SELECT * FROM feedback ORDER BY created_at DESC`;
-  return NextResponse.json(rows);
-}

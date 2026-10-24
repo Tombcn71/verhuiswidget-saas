@@ -85,7 +85,7 @@ async function sendFollowUp(lead: DemoLead): Promise<void> {
           ? button(calendly, "Plan een adviesgesprek")
           : `Antwoord gewoon op deze mail met een moment dat jou uitkomt.`
       }</p>
-      <p>Of begin direct zelf: <a href="${esc(appUrl())}/#prijzen" style="color:#1a73e8">14 dagen gratis, zonder betaalkaart</a>.</p>
+      <p>Of begin direct zelf: <a href="${esc(appUrl())}/#prijzen" style="color:#1a73e8">14 dagen gratis, zonder betaalgegevens</a>.</p>
       <p>Groet,<br>Tom<br>moverAI</p>
       <p style="font-size:12px;color:#64748b;margin-top:32px">Je krijgt deze mail omdat je in de demo aangaf dat we je mochten mailen. Geen interesse? Dan hoor je niets meer van ons.</p>
     </div>`,

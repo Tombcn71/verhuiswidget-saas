@@ -54,6 +54,8 @@ export function demoBookingUrl(
     volumeM3?: number;
     /** Demo-lead (alleen met toestemming), zodat een klik op "boeken" geregistreerd wordt. */
     demoLeadId?: string | null;
+    /** Prospect in de verkoop-CRM (persoonlijke demolink). */
+    prospect?: string | null;
   },
 ): string {
   const params = new URLSearchParams({
@@ -66,5 +68,6 @@ export function demoBookingUrl(
   if (input.toAddress) params.set("naar", input.toAddress);
   if (input.volumeM3) params.set("m3", input.volumeM3.toFixed(1));
   if (input.demoLeadId) params.set("dl", input.demoLeadId);
+  if (input.prospect) params.set("p", input.prospect);
   return `${base}/boeken/demo?${params}`;
 }

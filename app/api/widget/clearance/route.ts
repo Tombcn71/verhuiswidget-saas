@@ -5,6 +5,7 @@ import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { hasAccess } from "@/lib/plans";
 import { demoBookingUrl, isDemoCompany } from "@/lib/demo";
 import { recordDemoLead } from "@/lib/demo-leads";
+import { handleDemoCompleted } from "@/lib/prospect-mails";
 import { appUrl } from "@/lib/app-url";
 import { bookingUrl, createLead } from "@/lib/leads";
 import { calculatePrice, clearanceTariffs, floorTypeRate, isRushDate } from "@/lib/pricing";
@@ -33,6 +34,8 @@ const payloadSchema = z.object({
   source: z.enum(["onsite", "onlink", "onspot"]).default("onsite"),
   // Alleen in de demo: toestemming voor één opvolgmail van moverAI.
   demoConsent: z.boolean().optional(),
+  // Alleen in de demo: slug van de prospect (persoonlijke demolink in de verkoop-CRM).
+  prospect: z.string().trim().max(60).optional(),
   customer: z.object({
     name: z.string().trim().min(1).max(120),
     email: z.email(),
@@ -244,6 +247,8 @@ export async function POST(request: Request) {
   if (demo) {
     const fake =
       preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
+    // Persoonlijke demolink: in de verkoop-CRM op "Demo gedaan" zetten.
+    if (isDemo && !preview && parsed.prospect) await handleDemoCompleted(parsed.prospect);
     // Demo met vinkje (en echt e-mailadres): verhuizer-lead voor moverAI.
     const demoLead =
       isDemo && !fake && parsed.demoConsent
@@ -264,6 +269,7 @@ export async function POST(request: Request) {
       fromAddress: parsed.details.address,
       volumeM3: base.totalVolumeM3,
       demoLeadId: demoLead?.id,
+      prospect: parsed.prospect,
     });
     const sent = fake
       ? { sent: false as const }

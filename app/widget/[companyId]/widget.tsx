@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { LeadSource } from "@/lib/leads";
-import { MoveFlow } from "./move-flow";
+import { MoveFlow, type DemoContact } from "./move-flow";
 
 type CompanyPublic = {
   id: string;
@@ -30,6 +30,8 @@ export function Widget({
   preview = false,
   source = "onsite",
   backUrl = null,
+  demoContact,
+  prospect,
 }: {
   company: CompanyPublic;
   demo?: boolean;
@@ -37,6 +39,10 @@ export function Widget({
   source?: LeadSource;
   /** Website van de verhuizer, alleen op de losse pagina (Onlink). */
   backUrl?: string | null;
+  /** Persoonlijke demolink (/demo/<slug>): gegevens van het benaderde verhuisbedrijf. */
+  demoContact?: DemoContact;
+  /** Slug van de prospect in de verkoop-CRM, voor het bijhouden van de demo. */
+  prospect?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   // Alle accenten in de widget (knoppen, toggles, koppen) in de kleur van de verhuizer.
@@ -79,6 +85,9 @@ export function Widget({
         style={accentStyle}
         className="flex h-full min-h-dvh flex-col justify-center bg-white px-6 py-10 text-center text-slate-900"
       >
+        {demoContact?.name && (
+          <p className="mb-3 text-sm font-medium text-slate-600">Hoi {demoContact.name}! 👋</p>
+        )}
         <h2 className="text-3xl font-bold tracking-tight">
           Zo ziet{" "}
           <span className="text-(--accent)">
@@ -121,6 +130,8 @@ export function Widget({
         preview={preview}
         source={source}
         backUrl={backUrl}
+        demoContact={demoContact}
+        prospect={prospect}
         appChrome
         showToggle={showToggle}
         moveType={moveType}

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "@clerk/themes/shadcn.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -104,18 +105,19 @@ body {
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: #8ab4f8;
+  --primary-foreground: #202124;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  /* Bijna wit: geen grijze, slecht leesbare tekst in de donkere modus. */
+  --muted-foreground: oklch(0.93 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: #8ab4f8;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -123,10 +125,10 @@ body {
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #8ab4f8;
+  --sidebar-primary-foreground: #202124;
+  --sidebar-accent: rgb(138 180 248 / 0.14);
+  --sidebar-accent-foreground: #8ab4f8;
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
@@ -145,3 +147,47 @@ body {
     @apply font-sans;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Donkere modus (alleen dashboard en /admin zetten .dark op <html>; homepage en
+ * widget blijven licht). Lichte statuskleuren (bijv. bg-amber-50 + text-amber-900)
+ * worden hier op één plek omgezet naar een donkere variant.
+ * ------------------------------------------------------------------------- */
+.dark {
+  color-scheme: dark;
+}
+/* Doorschijnende tekstkleuren (…/60, …/80) worden in het donker grijs: volle kleur. */
+.dark .text-muted-foreground\/60,
+.dark .text-muted-foreground\/80 { color: var(--muted-foreground); }
+.dark .text-foreground\/60,
+.dark .text-foreground\/80 { color: var(--foreground); }
+.dark .text-sidebar-foreground\/70 { color: var(--sidebar-foreground); }
+.dark .bg-amber-50,
+.dark .bg-amber-50\/60 { background-color: rgb(245 158 11 / 0.12); }
+.dark .bg-emerald-50 { background-color: rgb(16 185 129 / 0.12); }
+.dark .bg-blue-50 { background-color: rgb(59 130 246 / 0.14); }
+.dark .bg-violet-50 { background-color: rgb(139 92 246 / 0.14); }
+.dark .bg-sky-50 { background-color: rgb(14 165 233 / 0.14); }
+.dark .border-amber-200 { border-color: rgb(245 158 11 / 0.35); }
+.dark .border-emerald-200,
+.dark .border-emerald-300 { border-color: rgb(16 185 129 / 0.35); }
+.dark .border-blue-200 { border-color: rgb(59 130 246 / 0.4); }
+.dark .border-violet-200 { border-color: rgb(139 92 246 / 0.4); }
+.dark .border-sky-200 { border-color: rgb(14 165 233 / 0.4); }
+.dark .text-amber-700,
+.dark .text-amber-800,
+.dark .text-amber-900 { color: var(--color-amber-300); }
+.dark .text-emerald-600,
+.dark .text-emerald-700,
+.dark .text-emerald-900 { color: var(--color-emerald-300); }
+.dark .text-blue-700 { color: var(--color-blue-300); }
+.dark .text-violet-700,
+.dark .text-violet-900 { color: var(--color-violet-300); }
+.dark .text-sky-700 { color: var(--color-sky-300); }
+/* Merkblauw (homepage): in het donker het lichtere Google-blauw. */
+.dark .bg-brand-50 { background-color: rgb(138 180 248 / 0.12); }
+.dark .ring-brand-100 { --tw-ring-color: rgb(138 180 248 / 0.3); }
+.dark .text-brand-600,
+.dark .text-brand-700 { color: #8ab4f8; }
+.dark .ring-emerald-200 { --tw-ring-color: rgb(16 185 129 / 0.35); }
+.dark .text-emerald-800 { color: var(--color-emerald-300); }

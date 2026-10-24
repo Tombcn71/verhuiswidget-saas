@@ -83,11 +83,11 @@ export default function HomePage() {
                 <Sparkles className="h-3.5 w-3.5" />
                 AI-software voor verhuizers en ontruimers
               </p>
-              <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
                 Offertes in 1 minuut.{" "}
                 <span className="text-brand-600">Zonder voorinspectie.</span>
               </h1>
-              <p className="mt-6 text-lg text-slate-600">
+              <p className="mt-6 text-lg text-muted-foreground">
                 Je klant scant zijn inboedel met de telefoon. moverAI herkent de
                 meubels, berekent het volume en stuurt direct een offerte met
                 jouw tarieven. Jij hoeft er niet meer voor op pad.
@@ -100,12 +100,12 @@ export default function HomePage() {
                 </a>
                 <DemoModal />
               </div>
-              <p className="mt-3 text-sm text-slate-400">
+              <p className="mt-3 text-sm text-muted-foreground/80">
                 Geen betaalgegevens nodig
               </p>
             </div>
 
-            <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl shadow-xl ring-1 ring-slate-200 lg:order-last">
+            <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl shadow-xl ring-1 ring-border lg:order-last">
               <Image
                 src={heroImage}
                 alt="Telefoon scant een woonkamer; moverAI herkent de meubels en toont een offerte-indicatie."
@@ -122,7 +122,7 @@ export default function HomePage() {
         {/* Features */}
         <section
           id="voordelen"
-          className="scroll-mt-20 border-t border-slate-100 bg-slate-50 py-20">
+          className="scroll-mt-20 border-t border-border bg-muted py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
               Waarom verhuizen naar AI offertes?
@@ -131,31 +131,31 @@ export default function HomePage() {
               {features.map((f) => (
                 <div
                   key={f.title}
-                  className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                  className="rounded-xl border border-border bg-background p-6 shadow-sm">
                   <div className="inline-flex rounded-xl bg-brand-600 p-2.5 text-white">
                     <f.Icon className="h-6 w-6" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
-                  <p className="mt-2 text-sm text-slate-600">{f.body}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{f.body}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mx-auto mt-16 max-w-3xl rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200 sm:p-10 sm:text-center">
+            <div className="mx-auto mt-16 max-w-3xl rounded-2xl bg-background p-8 shadow-sm ring-1 ring-border sm:p-10 sm:text-center">
               <h3 className="text-2xl font-bold tracking-tight">
                 Bespaar tot 80% tijd op administratie en taxatie
               </h3>
-              <p className="mt-4 text-slate-600">
+              <p className="mt-4 text-muted-foreground">
                 Een traditioneel offerteproces kost al snel meer dan twee uur
                 per klant: bellen voor een afspraak, op en neer rijden naar de
                 woning, door het huis lopen om meubels te noteren, en &apos;s
                 avonds op kantoor alles handmatig verwerken.
               </p>
-              <p className="mt-4 text-slate-600">
+              <p className="mt-4 text-muted-foreground">
                 Met moverAI automatiseer je dit hele proces. Of de klant nu zelf
-                foto&apos;s uploadt via je site (Onsite), je een linkje stuurt
-                na een telefoontje (Onlink), of je planner zelf ter plaatse de
-                app opent (Onspot): onze geavanceerde AI doet binnen een minuut
+                foto&apos;s uploadt via je site (Onsite), je planner zelf ter
+                plaatse de app opent (Onspot), of je een linkje stuurt na een
+                telefoontje (Onlink): onze geavanceerde AI doet binnen een minuut
                 de volumeberekening. Zo reduceer je het administratieve proces
                 met maar liefst 80 procent.
               </p>
@@ -167,7 +167,7 @@ export default function HomePage() {
                 </a>
                 <DemoModal />
               </div>
-              <p className="mt-3 text-sm text-slate-400">
+              <p className="mt-3 text-sm text-muted-foreground/80">
                 Geen betaalgegevens nodig
               </p>
             </div>
@@ -184,12 +184,12 @@ export default function HomePage() {
               {channels.map((c) => (
                 <div
                   key={c.t}
-                  className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                  className="rounded-xl border border-border bg-background p-6 shadow-sm">
                   <div className="inline-flex rounded-xl bg-brand-600 p-2.5 text-white">
                     <c.Icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <h3 className="mt-4 font-semibold">{c.t}</h3>
-                  <p className="mt-2 text-sm text-slate-600">{c.d}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{c.d}</p>
                 </div>
               ))}
             </div>
@@ -199,7 +199,7 @@ export default function HomePage() {
         {/* Prijzen */}
         <section
           id="prijzen"
-          className="scroll-mt-20 border-t border-slate-100 bg-slate-50 py-20">
+          className="scroll-mt-20 border-t border-border bg-muted py-20">
           <div className="mx-auto w-full max-w-5xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
               Kies je prijsplan
@@ -210,14 +210,14 @@ export default function HomePage() {
                 <span aria-hidden="true" className="text-emerald-300">
                   ·
                 </span>
-                <span>Geen betaalkaart nodig</span>
+                <span>Geen betaalgegevens nodig</span>
                 <span aria-hidden="true" className="text-emerald-300">
                   ·
                 </span>
                 <span>Niets wordt automatisch afgeschreven</span>
               </p>
             </div>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-slate-600">
+            <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
               Elk pakket geeft je team toegang tot alle features: Onsite, Onlink
               én Onspot. Betaal per maand of per jaar; prijzen exclusief btw.
             </p>
@@ -238,14 +238,14 @@ export default function HomePage() {
             </p>
             <a
               href="#prijzen"
-              className="mt-6 inline-block rounded-full bg-white px-6 py-3 font-semibold text-brand-700 shadow-sm hover:bg-slate-50">
+              className="mt-6 inline-block rounded-full bg-background px-6 py-3 font-semibold text-brand-700 shadow-sm hover:bg-muted">
               Gratis starten
             </a>
           </div>
         </section>
       </main>
 
-      <footer className="mx-auto w-full max-w-6xl px-6 py-8 text-sm text-slate-500">
+      <footer className="mx-auto w-full max-w-6xl px-6 py-8 text-sm text-muted-foreground">
         © {new Date().getFullYear()} moverAI · White-label AI-widget voor
         verhuizers en ontruimers
       </footer>

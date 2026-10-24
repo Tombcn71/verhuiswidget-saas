@@ -110,10 +110,15 @@ export async function ensureLegacyOrganization(clerkUserId: string): Promise<voi
  */
 export async function syncSeatLimit(company: Company): Promise<void> {
   if (!company.clerkOrgId) return;
+  const limit = seatLimit(company);
   const client = await clerkClient();
   await client.organizations.updateOrganization(company.clerkOrgId, {
-    maxAllowedMemberships: seatLimit(company),
+    maxAllowedMemberships: limit,
   });
+  await db
+    .update(companies)
+    .set({ clerkSeatLimit: limit })
+    .where(eq(companies.id, company.id));
 }
 
 /** Aantal teamleden van de organisatie (voor "2 / 3 gebruikers"). */

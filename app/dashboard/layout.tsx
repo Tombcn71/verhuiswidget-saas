@@ -17,6 +17,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { AppSidebar } from "./app-sidebar";
+import { ThemeToggle } from "@/components/theme";
 import { FeedbackButton } from "@/app/_components/FeedbackButton";
 
 export default async function DashboardLayout({
@@ -54,6 +55,7 @@ export default async function DashboardLayout({
                 organizationProfileMode="navigation"
                 organizationProfileUrl="/dashboard/team"
               />
+              <ThemeToggle />
               <UserButton />
             </div>
           </header>
@@ -93,10 +95,10 @@ function planNotice(plan: Plan, usage: ScanUsage, trial: TrialState): string | n
   }
   const upgrade = nextPlan(plan);
   if (usage.over && upgrade) {
-    return `Je hebt deze maand ${usage.used} offerteaanvragen ontvangen, meer dan de ${usage.limit} van ${plan.label}. Alles blijft gewoon werken — met ${upgrade.label} heb je ${upgrade.scans === null ? "onbeperkt" : upgrade.scans.toLocaleString("nl-NL")} per maand.`;
+    return `Je hebt deze maand ${usage.used} inboedelscans gebruikt, meer dan de ${usage.limit} van ${plan.label}. Alles blijft gewoon werken — met ${upgrade.label} heb je ${upgrade.scans === null ? "onbeperkt" : upgrade.scans.toLocaleString("nl-NL")} inboedelscans per maand.`;
   }
   if (usage.nearLimit && upgrade) {
-    return `Je zit op ${usage.used} van de ${usage.limit} offerteaanvragen deze maand. Groei je door? ${upgrade.label} geeft meer ruimte.`;
+    return `Je zit op ${usage.used} van de ${usage.limit} inboedelscans deze maand. Groei je door? ${upgrade.label} geeft meer ruimte.`;
   }
   if (trial.kind === "trial" && trial.daysLeft <= 3) {
     return `Je proefperiode loopt over ${trial.daysLeft} ${trial.daysLeft === 1 ? "dag" : "dagen"} af.`;

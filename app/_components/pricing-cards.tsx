@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ScanInfo } from "@/app/_components/scan-info";
 import {
   CHANNEL_FEATURES,
   MORE_SEATS_MAILTO,
@@ -20,28 +21,46 @@ const PLAN_TAGLINE: Record<PlanId, string> = {
   premium: "Voor de grotere verhuisketens met meerdere planners en taxateurs op de weg.",
 };
 
-const PLAN_EXTRA: Record<PlanId, string> = {
-  basic: "Tarieven volledig instelbaar: m³, km en toeslagen",
-  standard: "Uitgebreid dashboard voor planners",
-  premium: "Voorrang bij support",
+type Feature = {
+  text: string;
+  /** Verschilt per plan: blauw en vet, zodat je kaarten horizontaal vergelijkt. */
+  highlight?: boolean;
+  /** Niet in dit plan: grijs met een streepje (de regel blijft staan voor de uitlijning). */
+  missing?: boolean;
+  scanInfo?: boolean;
 };
 
-function planFeatures(plan: Plan): string[] {
-  const seats =
-    plan.seats === 1
-      ? "1 actieve gebruiker (seat)"
-      : `Max. ${plan.seats} gebruikers (seats) om flexibel samen te werken`;
-  const scans =
-    plan.scans === null
-      ? "Onbeperkt aantal AI-scans per maand"
-      : `Inclusief ${plan.scans.toLocaleString("nl-NL")} AI-scans per maand${plan.fairUse ? " (fair use)" : ""}`;
+/**
+ * Volledige lijst per plan, in dezelfde volgorde in elke kaart: eerst de
+ * verschillen (gebruikers, scans), dan wat overal in zit, dan de extra's.
+ * Zo lijnen de regels uit en hoef je niet tussen kaarten te puzzelen.
+ */
+function planFeatures(plan: Plan): Feature[] {
+  const has = (ids: PlanId[]) => ids.includes(plan.id);
   return [
-    ...CHANNEL_FEATURES,
-    seats,
-    scans,
-    "White-label: je eigen logo en huisstijlkleuren",
-    PLAN_EXTRA[plan.id],
+    {
+      text: `${plan.seats} gebruikers${plan.id === "standard" ? " om flexibel samen te werken" : ""}`,
+      highlight: true,
+    },
+    {
+      text: `${plan.scans === null ? "Onbeperkt" : plan.scans.toLocaleString("nl-NL")} inboedelscans per maand${plan.fairUse ? " (fair use)" : ""}`,
+      highlight: true,
+      scanInfo: true,
+    },
+    ...CHANNEL_FEATURES.map((text) => ({ text })),
+    { text: "White-label: je eigen logo en huisstijlkleuren" },
+    { text: "Tarieven volledig instelbaar: m³, km en toeslagen" },
+    { text: "Uitgebreid dashboard voor planners", missing: !has(["standard", "premium"]) },
+    { text: "Voorrang bij support", missing: !has(["premium"]) },
   ];
+}
+
+function DashIcon() {
+  return (
+    <span aria-hidden="true" className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center text-muted-foreground/60">
+      —
+    </span>
+  );
 }
 
 function CheckIcon() {
@@ -76,7 +95,7 @@ export function PricingCards({ primaryButton }: { primaryButton: string }) {
         <div
           role="radiogroup"
           aria-label="Betaalperiode"
-          className="inline-flex items-center rounded-full border border-slate-200 bg-white p-1 text-sm font-medium shadow-sm"
+          className="inline-flex items-center rounded-full border border-border bg-background p-1 text-sm font-medium shadow-sm"
         >
           {(
             [
@@ -91,7 +110,7 @@ export function PricingCards({ primaryButton }: { primaryButton: string }) {
               aria-checked={interval === o.key}
               onClick={() => setInterval(o.key)}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 transition ${
-                interval === o.key ? "bg-brand-600 text-white" : "text-slate-600 hover:text-slate-900"
+                interval === o.key ? "bg-brand-600 text-white" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {o.label}
@@ -118,8 +137,8 @@ export function PricingCards({ primaryButton }: { primaryButton: string }) {
               className={featured ? "rounded-2xl bg-brand-600 p-0.5 shadow-xl" : ""}
             >
               <div
-                className={`relative flex h-full flex-col bg-white p-8 ${
-                  featured ? "rounded-[15px]" : "rounded-2xl border border-slate-200 shadow-sm"
+                className={`relative flex h-full flex-col bg-background p-8 ${
+                  featured ? "rounded-[15px]" : "rounded-2xl border border-border shadow-sm"
                 }`}
               >
                 {featured && (
@@ -128,38 +147,47 @@ export function PricingCards({ primaryButton }: { primaryButton: string }) {
                   </span>
                 )}
                 <h3 className="text-lg font-semibold">
-                  {plan.label} <span className="font-normal text-slate-500">({plan.audience})</span>
+                  {plan.label} <span className="font-normal text-muted-foreground">({plan.audience})</span>
                 </h3>
-                <p className="mt-1 min-h-11 text-sm text-slate-600">{PLAN_TAGLINE[plan.id]}</p>
+                <p className="mt-1 min-h-11 text-sm text-muted-foreground">{PLAN_TAGLINE[plan.id]}</p>
                 <p className="mt-5 flex items-baseline gap-1">
                   <span className="text-4xl font-bold tracking-tight">
                     €{interval === "year" ? yearlyPerMonthEuros(plan) : plan.priceCents / 100}
                   </span>
-                  <span className="text-sm text-slate-500">/ maand</span>
+                  <span className="text-sm text-muted-foreground">/ maand</span>
                 </p>
-                <p className="mt-1 min-h-5 text-sm text-slate-500">
+                <p className="mt-1 min-h-5 text-sm text-muted-foreground">
                   {interval === "year" ? (
                     <>
                       {euro(plan.yearlyCents)} per jaar ·{" "}
-                      <span className="text-slate-400 line-through">{euro(plan.priceCents * 12)}</span>
+                      <span className="text-muted-foreground/80 line-through">{euro(plan.priceCents * 12)}</span>
                     </>
                   ) : (
                     "Maandelijks opzegbaar"
                   )}
                 </p>
                 <p className="mt-1 text-sm font-medium text-emerald-700">
-                  Eerste 2 weken gratis, zonder betaalkaart
+                  Eerste 2 weken gratis, zonder betaalgegevens
                 </p>
-                <ul className="mt-6 flex-1 space-y-3 text-sm text-slate-600">
+                <ul className="mt-6 flex-1 space-y-3 text-sm text-muted-foreground">
                   {planFeatures(plan).map((f) => (
-                    <li key={f} className="flex gap-2.5">
-                      <CheckIcon />
-                      <span>{f}</span>
+                    <li
+                      key={f.text}
+                      className={`flex gap-2.5 ${f.missing ? "text-muted-foreground/80" : ""} ${
+                        f.highlight ? "font-semibold text-brand-700" : ""
+                      }`}
+                    >
+                      {f.missing ? <DashIcon /> : <CheckIcon />}
+                      <span>
+                        {f.missing && <span className="sr-only">Niet inbegrepen: </span>}
+                        {f.text}
+                        {f.scanInfo && <ScanInfo />}
+                      </span>
                     </li>
                   ))}
                 </ul>
                 {plan.id === "premium" && (
-                  <p className="mt-4 text-sm text-slate-600">
+                  <p className="mt-4 text-sm text-muted-foreground">
                     Meer dan {plan.seats} gebruikers?{" "}
                     <a href={MORE_SEATS_MAILTO} className="font-medium text-brand-600 underline">
                       Neem contact op
@@ -169,7 +197,7 @@ export function PricingCards({ primaryButton }: { primaryButton: string }) {
                 <Link
                   href={`/kies-plan?plan=${plan.id}`}
                   className={`mt-8 rounded-full px-6 py-3 text-center font-semibold ${
-                    featured ? primaryButton : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+                    featured ? primaryButton : "border border-border text-foreground/80 hover:bg-muted"
                   }`}
                 >
                   Kies {plan.label}

@@ -40,16 +40,16 @@ export function FeedbackButton() {
   };
 
   const formHeader = (
-    <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+    <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
       <div>
-        <p className="text-sm font-semibold text-slate-900">Feedback over moverAI</p>
-        <p className="mt-0.5 text-xs text-slate-500">Gaat direct naar ons team.</p>
+        <p className="text-sm font-semibold text-foreground">Feedback over moverAI</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">Gaat direct naar ons team.</p>
       </div>
       <button
         type="button"
         aria-label="Feedbackformulier sluiten"
         onClick={() => setOpen(false)}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-all hover:bg-red-100 hover:text-red-500">
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground/80 transition-all hover:bg-red-100 hover:text-red-500">
         <X size={14} strokeWidth={2.5} />
       </button>
     </div>
@@ -59,7 +59,7 @@ export function FeedbackButton() {
     <div className="flex flex-col items-center justify-center gap-2 px-5 py-10 text-center text-brand-600">
       <CheckCircle size={32} />
       <p className="text-sm font-semibold">Bedankt!</p>
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-muted-foreground">
         {magReageren
           ? "We kijken ernaar en nemen contact met je op als we vragen hebben."
           : "We kijken ernaar."}
@@ -68,7 +68,7 @@ export function FeedbackButton() {
   ) : (
     <div className="space-y-4 p-5">
       <div>
-        <p className="mb-2 text-xs font-medium text-slate-600">Waar gaat het over?</p>
+        <p className="mb-2 text-xs font-medium text-muted-foreground">Waar gaat het over?</p>
         <div className="grid grid-cols-2 gap-2">
           {CATEGORIEEN.map((c, i) => (
             <button
@@ -80,8 +80,8 @@ export function FeedbackButton() {
                 i === CATEGORIEEN.length - 1 ? "col-span-2" : ""
               } ${
                 categorie === c.value
-                  ? "border-brand-600 bg-brand-50 text-slate-900"
-                  : "border-slate-100 text-slate-500 hover:border-slate-200"
+                  ? "border-brand-600 bg-brand-50 text-foreground"
+                  : "border-border text-muted-foreground hover:border-border"
               }`}>
               {c.label}
             </button>
@@ -94,7 +94,7 @@ export function FeedbackButton() {
         placeholder={gekozen.vraag}
         aria-label="Je feedback"
         rows={5}
-        className="w-full resize-none rounded-2xl border-2 border-slate-100 bg-slate-50 p-4 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-brand-600"
+        className="w-full resize-none rounded-2xl border-2 border-border bg-muted p-4 text-sm outline-none transition-all placeholder:text-muted-foreground/80 focus:border-brand-600"
       />
       <label className="flex cursor-pointer items-start gap-3">
         <input
@@ -103,7 +103,7 @@ export function FeedbackButton() {
           onChange={(e) => setMagReageren(e.target.checked)}
           className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
         />
-        <span className="text-xs leading-tight text-slate-600">
+        <span className="text-xs leading-tight text-muted-foreground">
           Jullie mogen me hierover mailen of bellen
         </span>
       </label>
@@ -145,7 +145,7 @@ export function FeedbackButton() {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:hidden">
-          <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          <div className="w-full max-w-sm rounded-3xl border border-border bg-background shadow-2xl">
             {formHeader}
             {formInhoud}
           </div>
@@ -157,7 +157,7 @@ export function FeedbackButton() {
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
             open ? "w-80 opacity-100" : "w-0 opacity-0"
           }`}>
-          <div className="w-80 rounded-l-3xl border border-slate-200 bg-white shadow-xl">
+          <div className="w-80 rounded-l-3xl border border-border bg-background shadow-xl">
             {formHeader}
             {formInhoud}
           </div>

@@ -134,6 +134,41 @@
       "when": 1792574260251,
       "tag": "0018_panoramic_morph",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792828760224,
+      "tag": "0019_jazzy_black_crow",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792830045175,
+      "tag": "0020_first_proudstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792834667190,
+      "tag": "0021_plain_iron_lad",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792837822582,
+      "tag": "0022_plain_thunderbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792841316478,
+      "tag": "0023_spooky_night_thrasher",
+      "breakpoints": true
     }
   ]
 }

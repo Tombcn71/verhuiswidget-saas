@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { nlNL } from "@clerk/localizations";
+// Clerk-onderdelen volgen de shadcn-kleuren, ook in de donkere modus van het dashboard.
+import { shadcn } from "@clerk/themes";
 import "./globals.css";
+import { THEME_SCRIPT } from "@/components/theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,9 +23,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <ClerkProvider localization={nlNL}>
-      <html lang="nl" className={`${geistSans.variable} h-full antialiased`}>
-        <body className="min-h-full bg-white text-slate-900">{children}</body>
+    <ClerkProvider localization={nlNL} appearance={{ theme: shadcn }}>
+      <html lang="nl" suppressHydrationWarning className={`${geistSans.variable} h-full antialiased`}>
+        <body className="min-h-full bg-background text-foreground">
+          {/* Licht of donker zoals het systeem staat, vóór de eerste weergave (geen flits). */}
+          <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />{children}</body>
       </html>
     </ClerkProvider>
   );

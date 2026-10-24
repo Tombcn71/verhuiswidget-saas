@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 // In Next.js 16 heet de "middleware" conventie nu "proxy". Clerk's `clerkMiddleware`
 // is runtime-onafhankelijk en werkt hier als default export.
-const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/organisatie(.*)"]);
+const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/organisatie(.*)", "/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {

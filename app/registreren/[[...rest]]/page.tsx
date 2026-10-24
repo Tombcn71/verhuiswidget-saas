@@ -23,13 +23,13 @@ export default async function SignUpPage({
   const redirectUrl = plan ? `/kies-plan?plan=${plan.id}` : "/dashboard";
 
   return (
-    <div className="flex min-h-full flex-col items-center justify-center bg-slate-50 px-6 py-16">
+    <div className="flex min-h-full flex-col items-center justify-center bg-muted px-6 py-16">
       <Link href="/" className="mb-8">
         <Logo />
       </Link>
       {plan && (
-        <p className="mb-6 text-center text-sm text-slate-600">
-          Je start met <strong>{plan.label}</strong>: 14 dagen gratis, geen betaalkaart
+        <p className="mb-6 text-center text-sm text-muted-foreground">
+          Je start met <strong>{plan.label}</strong>: 14 dagen gratis, geen betaalgegevens
           nodig.
         </p>
       )}

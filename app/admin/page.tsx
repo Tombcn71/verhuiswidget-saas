@@ -1,229 +1,317 @@
-"use client";
+import Link from "next/link";
+import { Plus, Upload } from "lucide-react";
+import {
+  STAGES,
+  isStage,
+  listProspects,
+  nextPlacesCity,
+} from "@/lib/prospects";
+import type { Prospect } from "@/lib/db";
+import { formatDate, formatDateTime } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { createAction } from "./actions";
+import { ImportForm } from "./import-form";
+import { FetchForm } from "./fetch-form";
+import { ContactButtons } from "./contact-buttons";
+import { StageBadge } from "./stage-badge";
 
-import { useState } from "react";
-import { Loader2, MessageSquare, Lock, Mail } from "lucide-react";
-import { CATEGORIEEN, categorieLabel } from "@/lib/feedback";
-import { Logo } from "@/app/_components/logo";
-
-interface FeedbackItem {
-  id: number;
-  user_email: string | null;
-  categorie: string;
-  bericht: string;
-  mag_reageren: boolean;
-  company_name: string | null;
-  plan: string | null;
-  pagina: string | null;
-  created_at: string;
+/** Wat het bedrijf met de demolink deed (automatisch bijgehouden). */
+function DemoSignals({ p }: { p: Prospect }) {
+  const items = [
+    p.meetingClickedAt && { icon: "📅", label: "Klikte op adviesgesprek", at: p.meetingClickedAt },
+    p.demoBookedAt && { icon: "🔥", label: "Wil boeken", at: p.demoBookedAt },
+    p.demoCompletedAt && { icon: "✅", label: "Demo gedaan", at: p.demoCompletedAt },
+    p.demoOpenedAt && { icon: "👀", label: "Geopend", at: p.demoOpenedAt },
+    p.demoSentAt && { icon: "📤", label: "Gestuurd", at: p.demoSentAt },
+  ].filter(Boolean) as { icon: string; label: string; at: Date }[];
+  if (items.length === 0) return <span className="text-muted-foreground">—</span>;
+  const latest = items[0];
+  return (
+    <span title={items.map((i) => `${i.label}: ${formatDateTime(i.at)}`).join("\n")}>
+      {latest.icon} {latest.label}
+      <span className="block text-xs text-muted-foreground">{formatDateTime(latest.at)}</span>
+    </span>
+  );
 }
 
-interface DemoLeadItem {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  moveType: string;
-  totalCents: number;
-  bookedAt: string | null;
-  createdAt: string;
-}
+const today = () => new Date().toLocaleDateString("sv-SE");
 
-const euro = (cents: number) =>
-  new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(cents / 100);
-
-export default function AdminPage() {
-  const [wachtwoord, setWachtwoord] = useState("");
-  const [items, setItems] = useState<FeedbackItem[] | null>(null);
-  const [demoLeads, setDemoLeads] = useState<DemoLeadItem[]>([]);
-  const [filter, setFilter] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const [fout, setFout] = useState(false);
-
-  const login = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setFout(false);
-    try {
-      const res = await fetch(`/api/feedback?pw=${encodeURIComponent(wachtwoord)}`);
-      if (!res.ok) {
-        setFout(true);
-        return;
-      }
-      setItems(await res.json());
-      // Demo-leads (verhuizers die de demo deden en gemaild willen worden).
-      const demoRes = await fetch(`/api/demo-leads?pw=${encodeURIComponent(wachtwoord)}`);
-      if (demoRes.ok) setDemoLeads(await demoRes.json());
-    } catch {
-      setFout(true);
-    } finally {
-      setLoading(false);
-    }
+export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
+  const { fase, q, pagina } = await searchParams;
+  const [all, nextCity] = await Promise.all([listProspects(), nextPlacesCity()]);
+  const active = isStage(fase) ? fase : null;
+  // Zoeken (naam, contact, plaats, telefoon, e-mail) en 100 per pagina: werkbaar met grote lijsten.
+  const query = typeof q === "string" ? q.trim().toLowerCase() : "";
+  const filtered = (active ? all.filter((p) => p.stage === active) : all.filter((p) => p.stage !== "afgevallen"))
+    .filter(
+      (p) =>
+        !query ||
+        [p.companyName, p.contactName, p.city, p.phone, p.email]
+          .filter(Boolean)
+          .some((v) => v!.toLowerCase().includes(query)),
+    );
+  const PAGE_SIZE = 100;
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const page = Math.min(pages, Math.max(1, Number(pagina) || 1));
+  const shown = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pageHref = (n: number) => {
+    const params = new URLSearchParams();
+    if (active) params.set("fase", active);
+    if (query) params.set("q", query);
+    if (n > 1) params.set("pagina", String(n));
+    const qs = params.toString();
+    return qs ? `/admin?${qs}` : "/admin";
   };
 
-  if (items) {
-    const zichtbaar = filter ? items.filter((i) => i.categorie === filter) : items;
-    const aantal = (cat: string) => items.filter((i) => i.categorie === cat).length;
+  // Opvolgen: demo gedaan/geopend maar nog geen proef, of de volgende actie is vandaag of eerder.
+  const followUp = all.filter(
+    (p) =>
+      !["proef", "klant", "afgevallen"].includes(p.stage) &&
+      (p.meetingClickedAt ||
+        p.demoBookedAt ||
+        p.demoCompletedAt ||
+        p.demoOpenedAt ||
+        (p.nextActionOn && p.nextActionOn <= today())),
+  );
 
-    return (
-      <div className="min-h-screen bg-slate-50 p-6 md:p-12">
-        <header className="mx-auto mb-8 max-w-3xl">
-          <Logo className="text-base" />
-          <h1 className="mt-6 text-2xl font-bold tracking-tight">Admin</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {demoLeads.length} demo-lead{demoLeads.length !== 1 ? "s" : ""} ·{" "}
-            {items.length} feedbackbericht{items.length !== 1 ? "en" : ""}
-          </p>
-        </header>
-
-        <section className="mx-auto mb-12 max-w-3xl">
-          <h2 className="text-lg font-semibold">Demo-leads</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Bezoekers die de demo afrondden en gemaild willen worden. 🔥 = klikte ook op
-            &ldquo;boeken&rdquo; in de demo-mail.
-          </p>
-          {demoLeads.length === 0 ? (
-            <p className="mt-4 rounded-2xl border-2 border-dashed border-slate-200 bg-white py-8 text-center text-sm text-slate-500">
-              Nog geen demo-leads
-            </p>
-          ) : (
-            <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-              <table className="w-full text-sm">
-                <thead className="border-b border-slate-100 text-left text-slate-500">
-                  <tr>
-                    <th className="px-4 py-2 font-medium">Naam</th>
-                    <th className="px-4 py-2 font-medium">Contact</th>
-                    <th className="px-4 py-2 font-medium">Demo</th>
-                    <th className="px-4 py-2 font-medium">Wanneer</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {demoLeads.map((d) => (
-                    <tr key={d.id}>
-                      <td className="px-4 py-2 font-medium">
-                        {d.bookedAt && <span title="Klikte op boeken">🔥 </span>}
-                        {d.name}
-                      </td>
-                      <td className="px-4 py-2">
-                        <a href={`mailto:${d.email}`} className="text-brand-600 underline">
-                          {d.email}
-                        </a>
-                        {d.phone && (
-                          <div>
-                            <a href={`tel:${d.phone}`} className="text-slate-600">
-                              {d.phone}
-                            </a>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 capitalize text-slate-600">
-                        {d.moveType} · {euro(d.totalCents)}
-                      </td>
-                      <td className="px-4 py-2 text-slate-500">
-                        {new Date(d.createdAt).toLocaleString("nl-NL")}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        <div className="mx-auto max-w-3xl">
-          <h2 className="mb-4 text-lg font-semibold">Feedback</h2>
-          <div className="mb-6 flex flex-wrap gap-2 text-sm">
-            <button
-              type="button"
-              onClick={() => setFilter("")}
-              className={`rounded-full border px-3 py-1 ${
-                filter === "" ? "border-brand-600 bg-brand-50" : "border-slate-200 bg-white"
-              }`}>
-              Alles ({items.length})
-            </button>
-            {CATEGORIEEN.map((c) => (
-              <button
-                type="button"
-                key={c.value}
-                onClick={() => setFilter(c.value)}
-                className={`rounded-full border px-3 py-1 ${
-                  filter === c.value ? "border-brand-600 bg-brand-50" : "border-slate-200 bg-white"
-                }`}>
-                {c.label} ({aantal(c.value)})
-              </button>
-            ))}
-          </div>
-
-          {zichtbaar.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white py-16 text-center">
-              <MessageSquare className="mx-auto mb-3 text-slate-300" size={32} />
-              <p className="text-sm text-slate-500">Nog geen feedback in deze categorie</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {zichtbaar.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-sm font-semibold">{categorieLabel(item.categorie)}</span>
-                    <span className="text-xs text-slate-400">
-                      {new Date(item.created_at).toLocaleString("nl-NL")}
-                    </span>
-                  </div>
-                  <p className="whitespace-pre-line text-sm leading-relaxed text-slate-800">
-                    {item.bericht}
-                  </p>
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-500">
-                    <span>
-                      {item.company_name ?? "Onbekend bedrijf"}
-                      {item.plan && ` · ${item.plan}`}
-                      {item.pagina && ` · ${item.pagina}`}
-                      {item.user_email && ` · ${item.user_email}`}
-                    </span>
-                    {item.mag_reageren && item.user_email && (
-                      <a
-                        href={`mailto:${item.user_email}?subject=${encodeURIComponent(
-                          "Je feedback over moverAI",
-                        )}&body=${encodeURIComponent(
-                          `Hoi,\n\nBedankt voor je feedback!\n\n\n---\nJouw bericht:\n"${item.bericht}"`,
-                        )}`}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1.5 font-semibold text-brand-700 hover:bg-brand-100">
-                        <Mail size={12} /> Reageren
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  const count = (key: string) => all.filter((p) => p.stage === key).length;
+  const withDemo = all.filter((p) => p.demoSentAt).length;
+  const demoDone = all.filter((p) => p.demoCompletedAt).length;
+  const customers = count("klant");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
-      <form onSubmit={login} className="w-full max-w-sm space-y-4 p-8">
-        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50">
-          <Lock size={24} className="text-brand-600" />
+    <>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Verkoop-CRM</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Verhuisbedrijven die je klant wilt maken. Openen, afronden en &ldquo;boeken&rdquo; in
+            de demo worden automatisch bijgehouden.
+          </p>
         </div>
-        <h1 className="text-center text-2xl font-bold tracking-tight">Admin</h1>
-        <input
-          type="password"
-          value={wachtwoord}
-          onChange={(e) => setWachtwoord(e.target.value)}
-          placeholder="Wachtwoord"
-          className="w-full rounded-2xl border-2 border-slate-200 bg-white p-4 outline-none transition-all focus:border-brand-600"
-          autoFocus
+        <p className="text-sm text-muted-foreground">
+          {withDemo} demo&apos;s gestuurd · {demoDone} gedaan · {customers}{" "}
+          {customers === 1 ? "klant" : "klanten"}
+        </p>
+      </div>
+
+      {followUp.length > 0 && (
+        <Card className="mb-4 border-amber-200 bg-amber-50/60">
+          <CardHeader>
+            <CardTitle>Opvolgen ({followUp.length})</CardTitle>
+            <CardDescription>
+              Demo bekeken of gedaan, of je volgende actie staat voor vandaag.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {followUp.slice(0, 9).map((p) => (
+              <Link
+                key={p.id}
+                href={`/admin/prospects/${p.id}`}
+                className="rounded-lg border bg-background p-3 text-sm transition hover:border-primary"
+              >
+                <span className="font-medium">{p.companyName}</span>
+                <span className="mt-1 block text-muted-foreground">
+                  <DemoSignals p={p} />
+                </span>
+                {p.nextAction && (
+                  <span className="mt-1 block text-xs">
+                    ➜ {p.nextAction}
+                    {p.nextActionOn && ` · ${formatDate(p.nextActionOn)}`}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">Nieuwe verhuisbedrijven ophalen</CardTitle>
+          <CardDescription>Via Google: naam, telefoon, website en beoordeling.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FetchForm nextCity={nextCity} />
+        </CardContent>
+      </Card>
+
+      <form action="/admin" className="mb-3 flex max-w-md gap-2">
+        {active && <input type="hidden" name="fase" value={active} />}
+        <Input
+          name="q"
+          defaultValue={query}
+          placeholder="Zoek op naam, plaats, telefoon…"
+          aria-label="Zoeken"
         />
-        {fout && <p className="text-center text-sm text-red-500">Wachtwoord onjuist</p>}
-        <button
-          type="submit"
-          disabled={!wachtwoord || loading}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-600 py-4 text-sm font-semibold text-white transition-all hover:bg-brand-700 disabled:opacity-50">
-          {loading ? <Loader2 size={14} className="animate-spin" /> : "Inloggen"}
-        </button>
+        <Button type="submit" variant="outline">
+          Zoeken
+        </Button>
       </form>
-    </div>
+
+      <div className="mb-4 flex flex-wrap gap-1.5">
+        <Button asChild size="sm" variant={active ? "outline" : "default"}>
+          <Link href="/admin">Actief ({all.length - count("afgevallen")})</Link>
+        </Button>
+        {STAGES.map((s) => (
+          <Button key={s.key} asChild size="sm" variant={active === s.key ? "default" : "outline"}>
+            <Link href={`/admin?fase=${s.key}`}>
+              {s.label} ({count(s.key)})
+            </Link>
+          </Button>
+        ))}
+      </div>
+
+      <Card className="py-0">
+        <CardContent className="px-0">
+          {filtered.length > 0 && (
+            <p className="border-b px-6 py-2 text-xs text-muted-foreground">
+              {filtered.length} {filtered.length === 1 ? "bedrijf" : "bedrijven"}
+              {query && ` voor "${query}"`}
+              {pages > 1 && ` · pagina ${page} van ${pages}`}
+            </p>
+          )}
+          {shown.length === 0 ? (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              {all.length === 0
+                ? "Nog geen bedrijven. Plak hieronder je lijst of voeg er één toe."
+                : "Geen bedrijven in deze fase."}
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-6">Bedrijf</TableHead>
+                  <TableHead>Fase</TableHead>
+                  <TableHead className="hidden md:table-cell">Demo</TableHead>
+                  <TableHead className="hidden lg:table-cell">Volgende actie</TableHead>
+                  <TableHead className="pr-6 text-right">Contact</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {shown.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="pl-6">
+                      <Link
+                        href={`/admin/prospects/${p.id}`}
+                        className="font-medium hover:text-primary hover:underline"
+                      >
+                        {p.companyName}
+                      </Link>
+                      <div className="text-xs text-muted-foreground">
+                        {[
+                          p.contactName,
+                          p.city,
+                          p.rating != null &&
+                            `${p.rating.toLocaleString("nl-NL")}★${p.reviewCount ? ` (${p.reviewCount})` : ""}`,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <StageBadge stage={p.stage} />
+                    </TableCell>
+                    <TableCell className="hidden text-sm md:table-cell">
+                      <DemoSignals p={p} />
+                    </TableCell>
+                    <TableCell className="hidden text-sm lg:table-cell">
+                      {p.nextAction || p.nextActionOn ? (
+                        <>
+                          {p.nextAction ?? "—"}
+                          {p.nextActionOn && (
+                            <span
+                              className={cn(
+                                "block text-xs",
+                                p.nextActionOn <= today() ? "font-medium text-amber-700" : "text-muted-foreground",
+                              )}
+                            >
+                              {formatDate(p.nextActionOn)}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="pr-6 text-right">
+                      <ContactButtons
+                        id={p.id}
+                        phone={p.phone ?? p.mobile}
+                        email={p.email}
+                        sent={!!p.demoSentAt}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+          {pages > 1 && (
+            <div className="flex items-center justify-between border-t px-6 py-3">
+              <Button asChild size="sm" variant="outline" className={page <= 1 ? "pointer-events-none opacity-40" : ""}>
+                <Link href={pageHref(page - 1)}>← Vorige</Link>
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Pagina {page} van {pages}
+              </span>
+              <Button asChild size="sm" variant="outline" className={page >= pages ? "pointer-events-none opacity-40" : ""}>
+                <Link href={pageHref(page + 1)}>Volgende →</Link>
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="size-4" /> Lijst plakken
+            </CardTitle>
+            <CardDescription>Meerdere bedrijven tegelijk, uit Excel of Google Sheets.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ImportForm />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="size-4" /> Eén bedrijf toevoegen
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form action={createAction} className="grid gap-3 sm:grid-cols-2">
+              <Input name="companyName" placeholder="Bedrijfsnaam *" required className="sm:col-span-2" />
+              <Input name="contactName" placeholder="Contactpersoon" />
+              <Input name="phone" placeholder="Telefoon" inputMode="tel" />
+              <Input name="email" type="email" placeholder="E-mail" />
+              <Input name="city" placeholder="Plaats" />
+              <Button type="submit" className="sm:col-span-2">
+                Toevoegen
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }

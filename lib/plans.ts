@@ -12,7 +12,7 @@ export type Plan = {
   // Prijs per extra gebruiker per maand; null = niet mogelijk. Niet meer los te
   // koop: alleen op maat (contact), via het Stripe-abonnement. Telt wel mee in `seatLimit`.
   extraSeatCents: number | null;
-  scans: number | null; // offerteaanvragen per maand; null = onbeperkt
+  scans: number | null; // inboedelscans (= afgeronde aanvragen) per maand; null = onbeperkt
   fairUse?: boolean; // limiet is een fair-use-grens (Premium)
 };
 
@@ -35,7 +35,7 @@ export const PLANS: Record<PlanId, Plan> = {
     audience: "ZZP",
     priceCents: 7900,
     yearlyCents: 79000,
-    seats: 1,
+    seats: 2,
     extraSeatCents: null,
     scans: 150,
   },
@@ -45,7 +45,7 @@ export const PLANS: Record<PlanId, Plan> = {
     audience: "MKB",
     priceCents: 12900,
     yearlyCents: 129000,
-    seats: 3,
+    seats: 5,
     extraSeatCents: null,
     scans: 500,
   },
@@ -55,7 +55,7 @@ export const PLANS: Record<PlanId, Plan> = {
     audience: "Enterprise",
     priceCents: 22900,
     yearlyCents: 229000,
-    seats: 5,
+    seats: 10,
     extraSeatCents: 1900,
     scans: 2500,
     fairUse: true,
@@ -73,8 +73,8 @@ export const MORE_SEATS_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURICom
 /** De drie kanalen; zitten in elk plan. */
 export const CHANNEL_FEATURES = [
   "Onsite: de widget op je website",
-  "Onlink: direct linkje via sms of WhatsApp",
   "Onspot: zelf scannen op locatie",
+  "Onlink: direct linkje via sms of WhatsApp",
 ];
 
 export function normalizePlan(value: unknown): PlanId {
@@ -103,7 +103,7 @@ export type TrialState =
   | { kind: "active" };
 
 /**
- * Proefperiode (14 dagen, zonder betaalkaart; default van `companies.trial_ends_at`)
+ * Proefperiode (14 dagen, zonder betaalgegevens; default van `companies.trial_ends_at`)
  * zolang er geen betaald abonnement is. Een mislukte betaling (`past_due`) houdt
  * toegang; Stripe probeert het zelf opnieuw en de melding vraagt om actie.
  */

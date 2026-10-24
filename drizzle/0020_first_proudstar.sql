@@ -1,0 +1,22 @@
+CREATE TABLE "prospects" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"slug" text NOT NULL,
+	"company_name" text NOT NULL,
+	"contact_name" text,
+	"phone" text,
+	"email" text,
+	"website" text,
+	"city" text,
+	"notes" text,
+	"stage" text DEFAULT 'nieuw' NOT NULL,
+	"lost_reason" text,
+	"next_action" text,
+	"next_action_on" date,
+	"demo_sent_at" timestamp with time zone,
+	"demo_opened_at" timestamp with time zone,
+	"demo_completed_at" timestamp with time zone,
+	"demo_booked_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "prospects_slug_unique" UNIQUE("slug")
+);

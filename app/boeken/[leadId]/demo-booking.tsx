@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DEMO_COMPANY_PUBLIC } from "@/lib/demo";
 import { markDemoLeadBooked } from "@/lib/demo-leads";
+import { markDemoBooked } from "@/lib/prospects";
 import { formatDate, formatEuroCents } from "@/lib/format";
 
 /**
@@ -24,6 +25,7 @@ export async function DemoBooking({
   const volume = Number(get("m3")) || 0;
   // Bevestigd vanuit de demo-mail: warmste signaal voor moverAI (alleen met toestemming).
   if (confirmed && get("dl")) await markDemoLeadBooked(get("dl"));
+  if (confirmed && get("p")) await markDemoBooked(get("p"));
   const c = DEMO_COMPANY_PUBLIC;
 
   return (
@@ -94,6 +96,7 @@ export async function DemoBooking({
                 naar: get("naar"),
                 m3: get("m3"),
                 dl: get("dl"),
+                p: get("p"),
               }).map(
                 ([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null),
               )}

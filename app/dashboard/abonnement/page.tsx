@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/card";
 import { PageHeader } from "../page-header";
 import { UsageBar } from "../usage-bar";
+import { ScanInfo } from "@/app/_components/scan-info";
 import { openBillingPortal, startCheckout } from "./actions";
 
 export const metadata: Metadata = { title: "Abonnement" };
@@ -107,7 +108,10 @@ export default async function SubscriptionPage({
       <div className="grid gap-4 sm:grid-cols-2">
         <Card className="gap-3">
           <CardHeader>
-            <CardDescription>Offerteaanvragen deze maand</CardDescription>
+            <CardDescription>
+              Inboedelscans deze maand
+              <ScanInfo />
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <UsageBar usage={usage} />
@@ -181,10 +185,10 @@ export default async function SubscriptionPage({
                   )}
                   <ul className="mt-4 flex-1 space-y-2 text-sm">
                     {[
-                      p.seats === 1 ? "1 gebruiker" : `Tot ${p.seats} gebruikers`,
+                      `${p.seats} gebruikers`,
                       p.scans === null
-                        ? "Onbeperkt offerteaanvragen"
-                        : `${p.scans.toLocaleString("nl-NL")} offerteaanvragen per maand${p.fairUse ? " (fair use)" : ""}`,
+                        ? "Onbeperkt inboedelscans"
+                        : `${p.scans.toLocaleString("nl-NL")} inboedelscans per maand${p.fairUse ? " (fair use)" : ""}`,
                       ...CHANNEL_FEATURES,
                       "Verhuizen én ontruimen",
                     ].map((f) => (
