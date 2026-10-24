@@ -169,6 +169,20 @@
       "when": 1792841316478,
       "tag": "0023_spooky_night_thrasher",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792856220660,
+      "tag": "0024_motionless_stepford_cuckoos",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792857661666,
+      "tag": "0025_melodic_silvermane",
+      "breakpoints": true
     }
   ]
 }

@@ -111,7 +111,7 @@ function BaseTariffs({
           label="Laadsnelheid"
           name="m3PerHourPerMover"
           defaultValue={String(company.m3PerHourPerMover)}
-          hint="m³ per verhuizer per uur — bepaalt de geschatte uren."
+          hint="m³ per verhuizer per uur, inladen én uitladen samen — bepaalt de geschatte uren."
           error={errors.m3PerHourPerMover}
         />
       </Group>

@@ -181,10 +181,12 @@ export function calculatePrice(
     });
   }
 
-  let subtotal = lines.reduce((sum, l) => sum + l.amountCents, 0);
+  // Regels van €0 (bijv. prijs per m³ bij een uurtarief) niet tonen.
+  const shown = lines.filter((l) => l.amountCents > 0);
+  let subtotal = shown.reduce((sum, l) => sum + l.amountCents, 0);
 
   if (subtotal < company.minPriceCents) {
-    lines.push({
+    shown.push({
       label: "Toeslag minimumtarief",
       amountCents: company.minPriceCents - subtotal,
     });
@@ -194,7 +196,7 @@ export function calculatePrice(
   const vat = Math.round(subtotal * Number(company.vatRate));
 
   return {
-    breakdown: lines,
+    breakdown: shown,
     totalVolumeM3: volume,
     trips,
     subtotalCents: subtotal,

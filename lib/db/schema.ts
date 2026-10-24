@@ -106,8 +106,9 @@ export const companies = pgTable("companies", {
 
   // Tarieven (eurocenten, excl. btw). Bij serviceType "beide" gelden deze voor
   // verhuizen; ontruimen krijgt een eigen set in `ontruimenTariffs`.
-  baseFeeCents: integer("base_fee_cents").notNull().default(35000), // voorrijkosten
-  pricePerM3Cents: integer("price_per_m3_cents").notNull().default(4500), // per m³ inboedel
+  baseFeeCents: integer("base_fee_cents").notNull().default(7500), // voorrijkosten
+  // Per m³ inboedel. Standaard €0: mankracht (uren) dekt het sjouwen al.
+  pricePerM3Cents: integer("price_per_m3_cents").notNull().default(0),
   pricePerKmCents: integer("price_per_km_cents").notNull().default(150), // per km enkele reis
   packingFeeCents: integer("packing_fee_cents").notNull().default(12000), // inpakservice
   assemblyFeeCents: integer("assembly_fee_cents").notNull().default(8000), // (de)montage
