@@ -229,17 +229,17 @@ export default function HomePage() {
         <section className="bg-brand-600 py-16">
           <div className="mx-auto w-full max-w-3xl px-6 text-center text-white">
             <h2 className="text-3xl font-bold tracking-tight">
-              Klaar om meer leads te converteren?
+              Nooit meer langs voor een offerte?
             </h2>
             <p className="mt-3 text-white/80">
-              Maak binnen 2 minuten een account aan, nodig eventueel je
-              teamleden uit, stel je m³-tarieven in en begin vandaag nog met
-              slim scannen.
+              Maak binnen 2 minuten een account aan, sleep een oude factuur
+              in de app zodat je tarieven vanzelf worden ingevuld, en stuur
+              vandaag nog je eerste offerte.
             </p>
             <a
               href="#prijzen"
               className="mt-6 inline-block rounded-full bg-background px-6 py-3 font-semibold text-brand-700 shadow-sm hover:bg-muted">
-              Gratis starten
+              Probeer 14 dagen gratis
             </a>
           </div>
         </section>
