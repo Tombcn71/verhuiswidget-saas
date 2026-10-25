@@ -3,12 +3,11 @@ import heroImage from "@/public/hero.jpg";
 import { DemoModal } from "@/app/_components/demo-modal";
 import { SiteHeader } from "@/app/_components/site-header";
 import { PricingCards } from "@/app/_components/pricing-cards";
-import { Globe, Link, MapPin } from "lucide-react";
+import { Globe, Link, MapPin, Star } from "lucide-react";
 import {
   Timer,
   Fuel,
   Truck,
-  TrendingDown,
   Zap,
   Monitor,
   Sparkles,
@@ -21,55 +20,71 @@ const aiButton =
 const features = [
   {
     Icon: Timer,
-    title: "Personeelsuren",
-    body: "Geen reistijd en fysieke voorinspecties; je behoudt dure uren op de werkvloer of op kantoor.",
+    title: "Minder personeelsuren",
+    body: "Niemand hoeft meer langs voor een opname. Je mensen blijven aan het werk: op de wagen of op kantoor.",
   },
   {
     Icon: Fuel,
-    title: "Brandstofkosten",
-    body: "Geen onnodige voorrijkilometers met personenwagens om alleen maar een inboedel te bekijken.",
+    title: "Minder brandstofkosten",
+    body: "Geen kilometers meer om alleen een inboedel te bekijken, ook niet voor klanten die nooit boeken.",
   },
   {
     Icon: Truck,
-    title: "Geen halflege ritten",
-    body: "Exacte volumeberekening vooraf zorgt dat je planners altijd de juiste wagenmaat inzetten.",
+    title: "Minder halflege ritten",
+    body: "Je weet vooraf hoeveel m³ het is, dus je stuurt meteen de juiste wagen en de juiste ploeg.",
   },
   {
-    Icon: TrendingDown,
-    title: "Lagere uitstoot",
-    body: "Minder loze kilometers op de teller voor een kleinere ecologische voetafdruk.",
+    Icon: Star,
+    title: "Meer Google-reviews",
+    body: "Na de verhuizing vragen we je klant automatisch om een review. Meer sterren betekent meer nieuwe klanten.",
   },
   {
     Icon: Zap,
-    title: "Snellere offertes",
-    body: "Geen handmatig telwerk of ingewikkelde Excel-sheets; offertes gaan direct automatisch de deur uit.",
+    title: "Minder typewerk",
+    body: "Geen meubels tellen of Excel-sheets invullen. De offerte gaat binnen een minuut de deur uit, met jouw logo en tarieven.",
   },
   {
     Icon: Monitor,
-    title: "24/7 leads & scans",
-    body: "Je software verzamelt ook 's avonds en in het weekend automatisch aanvragen en inboedellijsten.",
+    title: "Meer aanvragen",
+    body: "Klanten scannen wanneer het hun uitkomt, ook 's avonds en in het weekend. Jij krijgt de aanvraag met foto's en inventarislijst.",
   },
 ];
 
 const channels = [
   {
     Icon: Globe,
-    t: "1. Onsite (De Website Widget)",
-    d: "Plaats de widget met één regel code op je website. Klanten vullen hun gegevens in, uploaden foto's van hun kamers en de AI doet de rest.",
-  },
-  {
-    Icon: MapPin,
-    t: "2. Onspot (De Mobiele App-Scanner)",
-    d: "Sta je zelf bij een groot pand of complex project? Open de moverAI web-app op je telefoon, scan de ruimtes live op locatie en zie direct het aantal kubieke meters rollen.",
+    t: "1. Via je website",
+    d: "Plaats de widget met één regel code op je site. Je klant vult zijn gegevens in, maakt foto’s van de kamers en krijgt direct een offerte met jouw tarieven.",
   },
   {
     Icon: Link,
-    t: "3. Onlink (Het Directe Linkje)",
-    d: "Krijg je een beller of WhatsApp-bericht? Genereer in één klik een uniek linkje vanuit je dashboard en stuur deze naar de klant om direct foto's te uploaden.",
+    t: "2. Via een linkje",
+    d: "Belt er iemand of krijg je een WhatsApp-bericht? Maak in je dashboard met één klik een persoonlijk linkje en stuur het door. Je klant uploadt zijn foto’s, jij krijgt de inventaris en het volume binnen.",
+  },
+  {
+    Icon: MapPin,
+    t: "3. Zelf op locatie",
+    d: "Sta je bij een groot pand of een lastige klus? Open moverAI in de browser op je telefoon, scan de ruimtes ter plekke en zie de kubieke meters direct oplopen. Geen app nodig.",
+  },
+];
+
+const startSteps = [
+  {
+    t: "Start je proefperiode",
+    d: "Maak in 2 minuten een account aan. 14 dagen gratis, zonder betaalgegevens.",
+  },
+  {
+    t: "Upload een oude factuur",
+    d: "De AI leest je uurtarief, voorrijkosten en kilometerprijs en vult je tarieven voor je in.",
+  },
+  {
+    t: "Ontvang je eerste aanvraag",
+    d: "Zet de widget op je website, of stuur klanten gewoon een link via WhatsApp of mail. Werkt meteen.",
   },
 ];
 
 export default function HomePage() {
+  const calendlyUrl = process.env.CALENDLY_URL;
   return (
     <div className="flex min-h-full flex-col">
       <SiteHeader />
@@ -125,7 +140,7 @@ export default function HomePage() {
           className="scroll-mt-20 border-t border-border bg-muted py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Waarom verhuizen naar AI offertes?
+              Wat win je met <span className="text-primary">AI</span>-offertes?
             </h2>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {features.map((f) => (
@@ -140,37 +155,32 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
 
-            <div className="mx-auto mt-16 max-w-3xl rounded-2xl bg-background p-8 shadow-sm ring-1 ring-border sm:p-10 sm:text-center">
-              <h3 className="text-2xl font-bold tracking-tight">
-                Bespaar tot 80% tijd op administratie en taxatie
-              </h3>
-              <p className="mt-4 text-muted-foreground">
-                Een traditioneel offerteproces kost al snel meer dan twee uur
-                per klant: bellen voor een afspraak, op en neer rijden naar de
-                woning, door het huis lopen om meubels te noteren, en &apos;s
-                avonds op kantoor alles handmatig verwerken.
-              </p>
-              <p className="mt-4 text-muted-foreground">
-                Met moverAI automatiseer je dit hele proces. Of de klant nu zelf
-                foto&apos;s uploadt via je site (Onsite), je planner zelf ter
-                plaatse de app opent (Onspot), of je een linkje stuurt na een
-                telefoontje (Onlink): onze geavanceerde AI doet binnen een minuut
-                de volumeberekening. Zo reduceer je het administratieve proces
-                met maar liefst 80 procent.
-              </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-                <a
-                  href="#prijzen"
-                  className={`rounded-full px-6 py-3 text-center font-semibold ${aiButton}`}>
-                  Probeer 14 dagen gratis
-                </a>
-                <DemoModal />
-              </div>
-              <p className="mt-3 text-sm text-muted-foreground/80">
-                Geen betaalgegevens nodig
-              </p>
-            </div>
+        {/* CTA: besparing */}
+        <section className="bg-brand-600 py-16">
+          <div className="mx-auto w-full max-w-3xl px-6 text-center text-white">
+            <h2 className="text-3xl font-bold tracking-tight">
+              Klaar om te besparen op uren en brandstof?
+            </h2>
+            <p className="mt-3">
+              Elke opname bij een klant thuis kost al snel anderhalf uur, met
+              rijden, parkeren en rondlopen, ook als de klant uiteindelijk niet
+              boekt. Met moverAI maakt de klant zelf de foto&apos;s en krijgt hij
+              binnen een minuut jouw offerte. Jij rijdt alleen nog voor klussen
+              die doorgaan.
+            </p>
+            <p className="mt-4 text-sm italic">
+              Stel: 5 opnames per week van 1,5 uur, 10 km per rit. Dat is ruim
+              30 uur en 200 km per maand, al snel €1.500. moverAI kost vanaf €79
+              per maand.
+            </p>
+            <a
+              href="#prijzen"
+              className="mt-6 inline-block rounded-full bg-background px-6 py-3 font-semibold text-brand-700 shadow-sm hover:bg-muted">
+              Probeer 14 dagen gratis
+            </a>
           </div>
         </section>
 
@@ -178,7 +188,7 @@ export default function HomePage() {
         <section id="hoe-het-werkt" className="scroll-mt-20 py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Hoe het werkt: 3 manieren om te scannen
+              Hoe het werkt: 3 manieren om mover<span className="text-primary">AI</span> in te zetten
             </h2>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {channels.map((c) => (
@@ -192,6 +202,40 @@ export default function HomePage() {
                   <p className="mt-2 text-sm text-muted-foreground">{c.d}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Zo begin je */}
+        <section id="zo-begin-je" className="scroll-mt-20 border-t border-border py-20">
+          <div className="mx-auto w-full max-w-5xl px-6">
+            <h2 className="text-center text-3xl font-bold tracking-tight">Zo begin je</h2>
+            <ol className="mt-12 grid gap-8 md:grid-cols-3">
+              {startSteps.map((s, i) => (
+                <li key={s.t} className="text-center">
+                  <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-white">
+                    {i + 1}
+                  </span>
+                  <h3 className="mt-4 font-semibold">{s.t}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{s.d}</p>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a
+                href="#prijzen"
+                className={`w-full rounded-full px-6 py-3 text-center font-semibold sm:w-auto ${aiButton}`}>
+                Probeer 14 dagen gratis
+              </a>
+              {calendlyUrl && (
+                <a
+                  href={calendlyUrl}
+                  target="_blank"
+                  rel="noopener"
+                  className="w-full rounded-full border border-border bg-background px-6 py-3 text-center font-semibold shadow-sm transition hover:bg-muted sm:w-auto">
+                  Plan een gratis adviesgesprek
+                </a>
+              )}
             </div>
           </div>
         </section>
@@ -225,24 +269,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="bg-brand-600 py-16">
-          <div className="mx-auto w-full max-w-3xl px-6 text-center text-white">
-            <h2 className="text-3xl font-bold tracking-tight">
-              Nooit meer langs voor een offerte?
-            </h2>
-            <p className="mt-3 text-white/80">
-              Maak binnen 2 minuten een account aan, sleep een oude factuur
-              in de app zodat je tarieven vanzelf worden ingevuld, en stuur
-              vandaag nog je eerste offerte.
-            </p>
-            <a
-              href="#prijzen"
-              className="mt-6 inline-block rounded-full bg-background px-6 py-3 font-semibold text-brand-700 shadow-sm hover:bg-muted">
-              Probeer 14 dagen gratis
-            </a>
-          </div>
-        </section>
       </main>
 
       <footer className="mx-auto w-full max-w-6xl px-6 py-8 text-sm text-muted-foreground">
