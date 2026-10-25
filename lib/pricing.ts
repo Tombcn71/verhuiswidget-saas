@@ -28,6 +28,7 @@ export function totalVolume(inventory: InventoryItem[]): number {
 type MoveTariffFields = Pick<
   Company,
   | "baseFeeCents"
+  | "pricingMode"
   | "pricePerM3Cents"
   | "pricePerKmCents"
   | "packingFeeCents"
@@ -40,6 +41,7 @@ type MoveTariffFields = Pick<
   | "rushSurchargeCents"
   | "hourlyRatePerMoverCents"
   | "m3PerHourPerMover"
+  | "stairMinutesPerFloor"
   | "truckCapacityM3"
   | "vatRate"
 >;
@@ -96,23 +98,27 @@ export function calculatePrice(
 
   const lines: PriceLine[] = [
     { label: "Voorrijkosten", amountCents: company.baseFeeCents },
-    {
-      label: `Inboedel (${billableVolume} m³)`,
-      amountCents: billableVolume * company.pricePerM3Cents,
-    },
   ];
 
-  // --- Arbeid: aantal verhuizers × geschatte uren × uurtarief -----------------
-  const movers = moversForVolume(volume);
-  const throughput = Math.max(0.5, Number(company.m3PerHourPerMover) || 1.8);
-  let hours = volume / (movers * throughput); // laden + lossen
-  if (floors > 0 && !input.hasElevator) hours += floors * 0.4; // trappen
-  hours += (km / 45) * 2 * trips; // reistijd heen + terug per rit (~45 km/u)
-  hours = Math.max(2, Math.ceil(hours * 2) / 2); // afronden op halve uren, min. 2u
-  lines.push({
-    label: `Mankracht (${movers} × ${hours.toLocaleString("nl-NL")} uur)`,
-    amountCents: Math.round(hours * movers * company.hourlyRatePerMoverCents),
-  });
+  if (company.pricingMode === "m3") {
+    // --- Per m³: mankracht zit in de m³-prijs -----------------------------------
+    lines.push({
+      label: `Inboedel (${billableVolume} m³)`,
+      amountCents: billableVolume * company.pricePerM3Cents,
+    });
+  } else {
+    // --- Per uur: aantal verhuizers × geschatte uren × uurtarief ---------------
+    const movers = moversForVolume(volume);
+    const throughput = Math.max(0.5, Number(company.m3PerHourPerMover) || 1.8);
+    let hours = volume / (movers * throughput); // laden + lossen
+    if (floors > 0 && !input.hasElevator) hours += (floors * company.stairMinutesPerFloor) / 60; // trappen
+    hours += (km / 45) * 2 * trips; // reistijd heen + terug per rit (~45 km/u)
+    hours = Math.max(2, Math.ceil(hours * 2) / 2); // afronden op halve uren, min. 2u
+    lines.push({
+      label: `Mankracht (${movers} × ${hours.toLocaleString("nl-NL")} uur)`,
+      amountCents: Math.round(hours * movers * company.hourlyRatePerMoverCents),
+    });
+  }
 
   if (km > 0) {
     const drivenKm = km * (2 * trips - 1); // heen vol, leeg terug, opnieuw…

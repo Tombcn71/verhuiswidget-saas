@@ -18,6 +18,12 @@ const schema = z.object({
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/, "Gebruik een hex-kleur zoals #1a73e8"),
   emailSignature: z.string().trim().max(1000, "Maximaal 1000 tekens").optional().or(z.literal("")),
+  quoteFollowUp: z.literal("on").optional(),
+  googleReviewUrl: z
+    .url({ protocol: /^https$/, error: "Plak de volledige link, beginnend met https://" })
+    .max(500)
+    .optional()
+    .or(z.literal("")),
   basePostcode: z.string().trim().max(10).optional().or(z.literal("")),
   baseHouseNumber: z.string().trim().max(10).optional().or(z.literal("")),
 });
@@ -82,6 +88,8 @@ export async function updateCompany(
     phone: d.phone || null,
     website: d.website || null,
     emailSignature: d.emailSignature || null,
+    quoteFollowUp: d.quoteFollowUp === "on",
+    googleReviewUrl: d.googleReviewUrl || null,
     logoUrl: d.logoUrl || null,
     primaryColor: d.primaryColor,
   });

@@ -32,10 +32,12 @@ const euros = num(100000);
 const schema = z.object({
   // Basis (gedeeld door verhuizen en ontruimen)
   baseFee: euros,
+  pricingMode: z.enum(["uur", "m3"]).optional(),
   pricePerM3: euros,
   pricePerKm: euros,
   hourlyRatePerMover: euros,
   m3PerHourPerMover: num(20),
+  stairMinutesPerFloor: num(240),
   truckCapacityM3: num(120),
   packingFee: euros,
   assemblyFee: euros,
@@ -89,10 +91,12 @@ export async function updateTariffs(
 
   if (d.baseFee !== undefined) {
     update.baseFeeCents = toCents(d.baseFee);
+    update.pricingMode = d.pricingMode ?? "uur";
     update.pricePerM3Cents = toCents(d.pricePerM3 ?? 0);
     update.pricePerKmCents = toCents(d.pricePerKm ?? 0);
     update.hourlyRatePerMoverCents = toCents(d.hourlyRatePerMover ?? 0);
     update.m3PerHourPerMover = String(d.m3PerHourPerMover ?? 1.8);
+    update.stairMinutesPerFloor = Math.round(d.stairMinutesPerFloor ?? 45);
     update.truckCapacityM3 = Math.round(d.truckCapacityM3 ?? 20);
     update.packingFeeCents = toCents(d.packingFee ?? 0);
     update.assemblyFeeCents = toCents(d.assemblyFee ?? 0);

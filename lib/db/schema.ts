@@ -107,8 +107,10 @@ export const companies = pgTable("companies", {
   // Tarieven (eurocenten, excl. btw). Bij serviceType "beide" gelden deze voor
   // verhuizen; ontruimen krijgt een eigen set in `ontruimenTariffs`.
   baseFeeCents: integer("base_fee_cents").notNull().default(7500), // voorrijkosten
-  // Per m³ inboedel. Standaard €0: mankracht (uren) dekt het sjouwen al.
-  pricePerM3Cents: integer("price_per_m3_cents").notNull().default(0),
+  // Rekenmethode: "uur" (verhuizers × uren × uurtarief) of "m3" (prijs per m³,
+  // mankracht inbegrepen). Nooit allebei, anders telt het sjouwen dubbel.
+  pricingMode: text("pricing_mode").notNull().default("uur"),
+  pricePerM3Cents: integer("price_per_m3_cents").notNull().default(0), // alleen bij pricingMode "m3"
   pricePerKmCents: integer("price_per_km_cents").notNull().default(150), // per km enkele reis
   packingFeeCents: integer("packing_fee_cents").notNull().default(12000), // inpakservice
   assemblyFeeCents: integer("assembly_fee_cents").notNull().default(8000), // (de)montage
@@ -126,9 +128,12 @@ export const companies = pgTable("companies", {
   truckCapacityM3: integer("truck_capacity_m3").notNull().default(20), // laadvermogen wagen; bepaalt aantal ritten
 
   // Verhuizen: extra toeslagen
+  // Trappen tellen standaard als extra tijd (rekenmethode "uur"); de vaste
+  // toeslag staat op €0, anders rekenen ze dubbel.
+  stairMinutesPerFloor: integer("stair_minutes_per_floor").notNull().default(45),
   moveFloorSurchargeCents: integer("move_floor_surcharge_cents")
     .notNull()
-    .default(2500), // per verdieping (zonder lift), per adres
+    .default(0), // per verdieping (zonder lift), per adres
   liftFeeCents: integer("lift_fee_cents").notNull().default(15000), // verhuislift per adres
   truckAccessSurchargeCents: integer("truck_access_surcharge_cents")
     .notNull()
@@ -136,6 +141,10 @@ export const companies = pgTable("companies", {
   rushSurchargeCents: integer("rush_surcharge_cents").notNull().default(10000), // gewenste datum binnen 48 uur
   weekdayDiscountPct: integer("weekday_discount_pct").notNull().default(10), // ongebruikt
   moveDiscounts: jsonb("move_discounts"), // legacy, ongebruikt
+
+  // Automatische mails aan klanten (zie lib/lead-mails.ts).
+  quoteFollowUp: boolean("quote_follow_up").notNull().default(true), // herinnering als de klant niet boekt
+  googleReviewUrl: text("google_review_url"), // reviewverzoek na de verhuisdatum; leeg = uit
 
   // Ontruimings-tarieven (m²-model). Gebruikt zodra het bedrijf ontruimt.
   ontruimenTariffs: jsonb("ontruimen_tariffs").$type<ClearanceTariffs>(),
@@ -200,6 +209,9 @@ export const leads = pgTable(
     // Boekingslink in de offerte ("Ja, ik wil boeken"): geheime sleutel + moment van akkoord.
     acceptToken: text("accept_token"),
     acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    // Automatische mails aan de klant (elk hooguit één keer).
+    followUpSentAt: timestamp("follow_up_sent_at", { withTimezone: true }),
+    reviewRequestSentAt: timestamp("review_request_sent_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("leads_company_id_created_at_idx").on(t.companyId, t.createdAt.desc())],

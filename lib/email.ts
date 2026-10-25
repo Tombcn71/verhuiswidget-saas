@@ -119,12 +119,94 @@ function customerEmailHtml(d: QuoteData): string {
 
 /** Grote knop "Ja, ik wil boeken" in de huisstijlkleur van de verhuizer. */
 function bookButton(d: QuoteData): string {
-  const what = d.move.type === "ontruiming" ? "ontruiming" : "verhuizing";
+  return bookButtonHtml(d.company, d.acceptUrl!, d.move.type);
+}
+
+function bookButtonHtml(company: Company, acceptUrl: string, moveType: string): string {
+  const what = moveType === "ontruiming" ? "ontruiming" : "verhuizing";
   return `<div style="margin:24px 0;text-align:center">
     <p style="font-size:14px;margin:0 0 12px">Klopt het en wil je doorgaan?</p>
-    <a href="${esc(d.acceptUrl!)}" style="display:inline-block;background:${esc(d.company.primaryColor)};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 28px;border-radius:999px">Ja, ik wil deze ${what} boeken</a>
-    <p style="font-size:12px;color:#64748b;margin:12px 0 0">${esc(d.company.name)} bevestigt daarna de details met je.</p>
+    ${brandButton(company, acceptUrl, `Ja, ik wil deze ${what} boeken`)}
+    <p style="font-size:12px;color:#64748b;margin:12px 0 0">${esc(company.name)} bevestigt daarna de details met je.</p>
   </div>`;
+}
+
+function brandButton(company: Company, href: string, label: string): string {
+  return `<a href="${esc(href)}" style="display:inline-block;background:${esc(company.primaryColor)};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 28px;border-radius:999px">${esc(label)}</a>`;
+}
+
+/**
+ * Herinnering aan de klant als die een paar dagen na de offerte nog niet heeft
+ * geboekt. Eén keer per lead (zie lib/lead-mails.ts).
+ */
+export async function sendQuoteFollowUp(input: {
+  company: Company;
+  customerName: string;
+  customerEmail: string;
+  moveType: string;
+  moveDate?: string | null;
+  totalCents: number;
+  acceptUrl: string;
+}): Promise<{ sent: boolean }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.QUOTE_FROM_EMAIL;
+  if (!apiKey || !from) return { sent: false };
+
+  const c = input.company;
+  const what = input.moveType === "ontruiming" ? "ontruiming" : "verhuizing";
+  const when = input.moveDate ? ` op ${formatDate(input.moveDate)}` : "";
+  const contact = c.phone
+    ? `Heb je nog vragen? Antwoord gewoon op deze mail of bel ${esc(c.phone)}.`
+    : "Heb je nog vragen? Antwoord gewoon op deze mail.";
+
+  const res = await new Resend(apiKey).emails.send({
+    from: `${c.name} <${from}>`,
+    to: input.customerEmail,
+    replyTo: c.email,
+    subject: `Nog vragen over je offerte? — ${c.name}`,
+    html: baseLayout(
+      c,
+      `<p style="font-size:14px">Beste ${esc(input.customerName)},</p>
+       <p style="font-size:14px">Een paar dagen geleden kreeg je van ons een offerte-indicatie voor je ${what}${when}: <strong>${formatEuroCents(input.totalCents)}</strong> incl. btw.</p>
+       <p style="font-size:14px">${contact}</p>
+       ${bookButtonHtml(c, input.acceptUrl, input.moveType)}
+       ${signatureBlock(c)}`,
+    ),
+  });
+  return { sent: !res.error };
+}
+
+/** Na de verhuisdatum: vraag de klant om een review (link uit Dashboard → Bedrijf). */
+export async function sendReviewRequest(input: {
+  company: Company;
+  customerName: string;
+  customerEmail: string;
+  moveType: string;
+  reviewUrl: string;
+}): Promise<{ sent: boolean }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.QUOTE_FROM_EMAIL;
+  if (!apiKey || !from) return { sent: false };
+
+  const c = input.company;
+  const what = input.moveType === "ontruiming" ? "ontruiming" : "verhuizing";
+
+  const res = await new Resend(apiKey).emails.send({
+    from: `${c.name} <${from}>`,
+    to: input.customerEmail,
+    replyTo: c.email,
+    subject: `Hoe is je ${what} gegaan? — ${c.name}`,
+    html: baseLayout(
+      c,
+      `<p style="font-size:14px">Beste ${esc(input.customerName)},</p>
+       <p style="font-size:14px">Bedankt dat je voor ${esc(c.name)} hebt gekozen. We hopen dat je ${what} goed is verlopen!</p>
+       <p style="font-size:14px">Wil je ons helpen met een korte review? Het kost maar een minuut en helpt anderen bij het kiezen van een verhuizer.</p>
+       <div style="margin:24px 0;text-align:center">${brandButton(c, input.reviewUrl, "Schrijf een review")}</div>
+       <p style="font-size:14px">Ging er iets niet goed? Antwoord dan op deze mail, dan horen we het graag.</p>
+       ${signatureBlock(c)}`,
+    ),
+  });
+  return { sent: !res.error };
 }
 
 /**

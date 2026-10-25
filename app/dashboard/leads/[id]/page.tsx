@@ -130,6 +130,13 @@ export default async function LeadDetailPage({
         </div>
       )}
 
+      {(lead.followUpSentAt || lead.reviewRequestSentAt) && (
+        <p className="mb-4 text-sm text-muted-foreground">
+          {lead.followUpSentAt && <>Herinnering verstuurd op {formatDateTime(lead.followUpSentAt)}. </>}
+          {lead.reviewRequestSentAt && <>Reviewverzoek verstuurd op {formatDateTime(lead.reviewRequestSentAt)}.</>}
+        </p>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>

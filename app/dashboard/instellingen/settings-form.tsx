@@ -164,6 +164,41 @@ export function SettingsForm({ company }: { company: Company }) {
 
       <Card>
         <CardHeader>
+          <CardTitle>Automatische opvolging</CardTitle>
+          <CardDescription>
+            Mails die moverAI namens jou aan je klanten stuurt, met jouw logo en handtekening.
+            Elke mail hooguit één keer per klant.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <label className="flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              name="quoteFollowUp"
+              defaultChecked={company.quoteFollowUp}
+              className="mt-0.5 size-4"
+            />
+            <span>
+              <span className="font-medium">Offertes opvolgen</span>
+              <span className="block text-muted-foreground">
+                Heeft een klant na 2 dagen nog niet geboekt, dan krijgt die een vriendelijke
+                herinnering met de boekknop.
+              </span>
+            </span>
+          </label>
+          <Field
+            label="Link naar je reviews"
+            name="googleReviewUrl"
+            type="url"
+            defaultValue={company.googleReviewUrl ?? ""}
+            error={e.googleReviewUrl}
+            hint="Bijv. je Google-reviewlink (Google Bedrijfsprofiel → Vraag om reviews). De dag na de verhuisdatum vragen we geboekte klanten om een review. Leeg laten = uit."
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Vestigingsadres</CardTitle>
           <CardDescription>
             Waar je wagens vertrekken. Hiermee rekent de offerte ook de aan- en afrijkilometers

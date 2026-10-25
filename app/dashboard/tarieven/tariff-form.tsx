@@ -1,7 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { updateTariffs, type TariffFormState } from "./actions";
+import { IMPORT_FIELDS, TariffImport } from "./tariff-import";
+import type { ExtractedTariffs } from "@/lib/gemini";
 import type { Company } from "@/lib/db";
 import { CLEARANCE_TARIFF_DEFAULTS } from "@/lib/db/schema";
 import type { ServiceType } from "@/lib/companies";
@@ -72,20 +74,75 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
+type PricingMode = "uur" | "m3";
+
 function BaseTariffs({
   company,
   errors,
   withMoveExtras,
+  mode,
+  setMode,
 }: {
   company: Company;
   errors: Record<string, string>;
   withMoveExtras: boolean;
+  mode: PricingMode;
+  setMode: (m: PricingMode) => void;
 }) {
   return (
     <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Hoe reken jij?</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <input type="hidden" name="pricingMode" value={mode} />
+          <div
+            role="radiogroup"
+            aria-label="Rekenmethode"
+            className="inline-flex items-center rounded-full border border-border bg-background p-1 text-sm font-medium shadow-sm"
+          >
+            {(
+              [
+                { key: "uur", label: "Per uur" },
+                { key: "m3", label: "Per m³" },
+              ] as const
+            ).map((o) => (
+              <button
+                key={o.key}
+                type="button"
+                role="radio"
+                aria-checked={mode === o.key}
+                onClick={() => setMode(o.key)}
+                className={cn(
+                  "rounded-full px-4 py-1.5 transition",
+                  mode === o.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {mode === "uur"
+              ? "De app rekent uit hoeveel verhuizers en uren de inboedel uit de scan kost, tegen jouw uurtarief."
+              : "De app rekent het volume uit de scan × jouw prijs per m³. Mankracht zit daarin."}
+          </p>
+        </CardContent>
+      </Card>
+
       <Group title="Basis">
         <Field label="Voorrijkosten / basistarief" name="baseFee" defaultValue={money(company.baseFeeCents)} error={errors.baseFee} />
-        <Field label="Prijs per m³ inboedel" name="pricePerM3" defaultValue={money(company.pricePerM3Cents)} error={errors.pricePerM3} />
+        {/* Verborgen i.p.v. weggelaten, zodat de waarde bewaard blijft bij wisselen. */}
+        <div className={cn(mode !== "m3" && "hidden")}>
+          <Field
+            label="Prijs per m³ inboedel"
+            name="pricePerM3"
+            defaultValue={money(company.pricePerM3Cents)}
+            hint="Alles inbegrepen: mankracht, laden en lossen."
+            error={errors.pricePerM3}
+          />
+        </div>
         <Field
           label="Prijs per km"
           name="pricePerKm"
@@ -105,19 +162,40 @@ function BaseTariffs({
         <Field label="Minimale offerteprijs" name="minPrice" defaultValue={money(company.minPriceCents)} error={errors.minPrice} />
       </Group>
 
-      <Group title="Arbeid">
-        <Field label="Uurtarief per verhuizer" name="hourlyRatePerMover" defaultValue={money(company.hourlyRatePerMoverCents)} error={errors.hourlyRatePerMover} />
-        <Field
-          label="Laadsnelheid"
-          name="m3PerHourPerMover"
-          defaultValue={String(company.m3PerHourPerMover)}
-          hint="m³ per verhuizer per uur, inladen én uitladen samen — bepaalt de geschatte uren."
-          error={errors.m3PerHourPerMover}
-        />
-      </Group>
+      <div className={cn(mode !== "uur" && "hidden")}>
+        <Group title="Arbeid">
+          <Field label="Uurtarief per verhuizer" name="hourlyRatePerMover" defaultValue={money(company.hourlyRatePerMoverCents)} error={errors.hourlyRatePerMover} />
+          <Field
+            label="Laadsnelheid"
+            name="m3PerHourPerMover"
+            defaultValue={String(company.m3PerHourPerMover)}
+            hint="m³ per verhuizer per uur, inladen én uitladen samen — bepaalt de geschatte uren."
+            error={errors.m3PerHourPerMover}
+          />
+          <Field
+            label="Extra tijd per verdieping zonder lift"
+            name="stairMinutesPerFloor"
+            unit="none"
+            suffix="min"
+            defaultValue={String(company.stairMinutesPerFloor)}
+            hint="Per verdieping, bij ophalen én afleveren. Komt bij de geschatte uren."
+            error={errors.stairMinutesPerFloor}
+          />
+        </Group>
+      </div>
 
       <Group title="Toeslagen">
-        <Field label="Toeslag per verdieping" name="moveFloorSurcharge" defaultValue={money(company.moveFloorSurchargeCents)} error={errors.moveFloorSurcharge} />
+        <Field
+          label="Toeslag per verdieping"
+          name="moveFloorSurcharge"
+          defaultValue={money(company.moveFloorSurchargeCents)}
+          hint={
+            mode === "uur"
+              ? "Optioneel vast bedrag. Trappen tellen al mee als extra tijd (zie Arbeid)."
+              : "Vast bedrag per verdieping zonder lift."
+          }
+          error={errors.moveFloorSurcharge}
+        />
         <Field label="Verhuislift" name="liftFee" defaultValue={money(company.liftFeeCents)} hint="Ook automatisch bij etage 3+ zonder lift." error={errors.liftFee} />
         <Field label="Slechte bereikbaarheid" name="truckAccess" defaultValue={money(company.truckAccessSurchargeCents)} hint="Wagen kan niet voor de deur." error={errors.truckAccess} />
         <Field label="Spoedtoeslag" name="rushSurcharge" defaultValue={money(company.rushSurchargeCents)} hint="Voorkeursdatum binnen 48 uur." error={errors.rushSurcharge} />
@@ -146,13 +224,17 @@ function BaseTariffs({
 function MoveTariffs({
   company,
   errors,
+  mode,
+  setMode,
 }: {
   company: Company;
   errors: Record<string, string>;
+  mode: PricingMode;
+  setMode: (m: PricingMode) => void;
 }) {
   return (
     <div className="space-y-8">
-      <BaseTariffs company={company} errors={errors} withMoveExtras />
+      <BaseTariffs company={company} errors={errors} withMoveExtras mode={mode} setMode={setMode} />
     </div>
   );
 }
@@ -198,13 +280,17 @@ function ClearanceExtras({
 function ClearanceTariffsFields({
   company,
   errors,
+  mode,
+  setMode,
 }: {
   company: Company;
   errors: Record<string, string>;
+  mode: PricingMode;
+  setMode: (m: PricingMode) => void;
 }) {
   return (
     <div className="space-y-4">
-      <BaseTariffs company={company} errors={errors} withMoveExtras={false} />
+      <BaseTariffs company={company} errors={errors} withMoveExtras={false} mode={mode} setMode={setMode} />
       <Group title="Extra werkzaamheden">
         <ClearanceExtras company={company} errors={errors} />
       </Group>
@@ -222,21 +308,38 @@ export function TariffForm({
   const [state, formAction, pending] = useActionState(updateTariffs, initialState);
   const e = state.errors ?? {};
   const combi = serviceType === "beide";
+  const [mode, setMode] = useState<PricingMode>(company.pricingMode === "m3" ? "m3" : "uur");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  /** Vult het formulier met tarieven uit een factuur; geeft de ingevulde velden terug. */
+  function applyImport(t: ExtractedTariffs): string[] {
+    if (t.pricingMode) setMode(t.pricingMode);
+    const filled: string[] = [];
+    for (const [name, label] of IMPORT_FIELDS) {
+      const value = t[name];
+      const input = formRef.current?.elements.namedItem(name);
+      if (typeof value !== "number" || !(input instanceof HTMLInputElement)) continue;
+      input.value = name === "m3PerHourPerMover" ? String(value) : value.toFixed(2);
+      filled.push(label);
+    }
+    return filled;
+  }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form ref={formRef} action={formAction} className="space-y-4">
+      <TariffImport onResult={applyImport} />
       <div className="space-y-4">
         {combi ? (
           <div className="space-y-4">
-            <BaseTariffs company={company} errors={e} withMoveExtras />
+            <BaseTariffs company={company} errors={e} withMoveExtras mode={mode} setMode={setMode} />
             <Group title="Ontruiming — extra werkzaamheden">
               <ClearanceExtras company={company} errors={e} />
             </Group>
           </div>
         ) : serviceType === "ontruimen" ? (
-          <ClearanceTariffsFields company={company} errors={e} />
+          <ClearanceTariffsFields company={company} errors={e} mode={mode} setMode={setMode} />
         ) : (
-          <MoveTariffs company={company} errors={e} />
+          <MoveTariffs company={company} errors={e} mode={mode} setMode={setMode} />
         )}
       </div>
 

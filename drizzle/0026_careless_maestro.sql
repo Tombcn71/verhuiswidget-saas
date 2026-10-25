@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ADD COLUMN "pricing_mode" text DEFAULT 'uur' NOT NULL;
