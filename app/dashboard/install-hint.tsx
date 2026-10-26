@@ -99,7 +99,12 @@ export function InstallHint() {
                 <strong>Toevoegen aan startscherm</strong>.
               </li>
               <li>
-                <strong>Computer:</strong> klik in Chrome of Edge op het installeer-icoon rechts in
+                <strong>Mac met Safari:</strong> kies bovenaan in de menubalk{" "}
+                <strong>Archief</strong> (of <strong>File</strong>) en dan{" "}
+                <strong>Voeg toe aan Dock</strong>. moverAI staat daarna als app in je Dock.
+              </li>
+              <li>
+                <strong>Computer met Chrome of Edge:</strong> klik op het installeer-icoon rechts in
                 de adresbalk.
               </li>
             </ul>
