@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { PageHeader } from "../page-header";
 import { redirect } from "next/navigation";
 import { requireCompany } from "@/lib/current-company";
 import { hasAccess } from "@/lib/plans";
@@ -11,20 +10,17 @@ export const metadata: Metadata = { title: "Scannen" };
 /**
  * Onspot: de verhuizer loopt zelf met de telefoon door de woning van de klant.
  * Dezelfde flow als de widget, maar de lead krijgt het kanaal "onspot" en telt
- * gewoon mee als offerteaanvraag.
+ * gewoon mee als offerteaanvraag. Schermvullend over het dashboard heen (geen
+ * zijbalk, WhatsApp- of feedbackknop), zodat de knop onderin altijd in beeld is;
+ * het terugpijltje gaat naar het dashboard.
  */
 export default async function ScanPage() {
   const company = await requireCompany();
   if (!hasAccess(company)) redirect("/dashboard/abonnement");
 
   return (
-    <div>
-      <PageHeader
-        title="Scannen"
-        description="Bij de klant op locatie? Maak per kamer foto's, check de inboedel en maak direct de offerte. Die komt bij je leads en gaat per mail naar de klant."
-      />
-
-      <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl border bg-background shadow-lg">
+    <div className="fixed inset-0 z-[60] overflow-hidden overscroll-none bg-white">
+      <div className="mx-auto h-dvh w-full max-w-md sm:shadow-xl sm:ring-1 sm:ring-slate-200">
         <Widget
           source="onspot"
           company={{

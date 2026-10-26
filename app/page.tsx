@@ -42,7 +42,7 @@ const features = [
   {
     Icon: Zap,
     title: "Minder typewerk",
-    body: "Geen meubels tellen of Excel-sheets invullen. De offerte gaat binnen een minuut de deur uit, met jouw logo en tarieven.",
+    body: "Geen meubels tellen of Excel-sheets invullen. De offerte gaat binnen een minuut de deur uit, met jouw naam en tarieven.",
   },
   {
     Icon: Monitor,
@@ -103,7 +103,7 @@ const faqs = [
   },
   {
     q: "Ziet mijn klant moverAI, of mijn eigen merk?",
-    a: "Je eigen merk. De widget en de offertemail hebben jouw logo, kleuren en contactgegevens. Je klant ziet nergens moverAI.",
+    a: "Je eigen merk. De widget en de offertemail tonen jouw bedrijfsnaam, kleur en contactgegevens. Je klant ziet nergens moverAI.",
   },
   {
     q: "Wat gebeurt er met de foto's en klantgegevens (AVG)?",

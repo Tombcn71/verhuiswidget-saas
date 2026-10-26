@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { LogoUpload } from "./logo-upload";
 
 const initialState: SettingsFormState = { status: "idle" };
 
@@ -108,14 +107,9 @@ export function SettingsForm({ company }: { company: Company }) {
       <Card>
         <CardHeader>
           <CardTitle>Huisstijl</CardTitle>
-          <CardDescription>Je klanten zien je logo en kleur in de widget en de e-mails.</CardDescription>
+          <CardDescription>Je klanten zien je bedrijfsnaam in deze kleur, in de widget en in de e-mails.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-5 sm:grid-cols-2">
-          <LogoUpload
-            companyId={company.id}
-            defaultValue={company.logoUrl ?? ""}
-            error={e.logoUrl}
-          />
           <div className="grid content-start gap-1.5">
             <Label htmlFor="primaryColor">Huisstijlkleur</Label>
             <div className="flex items-center gap-2">

@@ -31,7 +31,6 @@ export async function generateMetadata({
       title,
       description,
       siteName: company.name,
-      ...(company.logoUrl ? { images: [{ url: company.logoUrl }] } : {}),
     },
     robots: { index: false },
   };
@@ -56,6 +55,8 @@ export default async function WidgetPage({
       // `?popup`-links (ook in de embed.js-modal) en losse links = Onlink; de iframe op de site = Onsite.
       source={popup !== undefined || standalone ? "onlink" : "onsite"}
       backUrl={standalone && preview === undefined ? websiteUrl(company.website) : null}
+      // Losse pagina (linkje): de klant zit niet op de site van de verhuizer, dus de naam erbij.
+      showName={standalone}
       company={{
         id: company.id,
         name: company.name,

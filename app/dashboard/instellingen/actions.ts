@@ -12,7 +12,6 @@ const schema = z.object({
   email: z.email("Ongeldig e-mailadres"),
   phone: z.string().trim().max(40).optional().or(z.literal("")),
   website: z.string().trim().max(200).optional().or(z.literal("")),
-  logoUrl: z.url("Ongeldige URL").optional().or(z.literal("")),
   primaryColor: z
     .string()
     .trim()
@@ -90,7 +89,6 @@ export async function updateCompany(
     emailSignature: d.emailSignature || null,
     quoteFollowUp: d.quoteFollowUp === "on",
     googleReviewUrl: d.googleReviewUrl || null,
-    logoUrl: d.logoUrl || null,
     primaryColor: d.primaryColor,
   });
 

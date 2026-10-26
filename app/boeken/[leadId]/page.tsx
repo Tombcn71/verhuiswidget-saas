@@ -38,12 +38,7 @@ export default async function BookingPage({
     >
       <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl ring-1 ring-slate-200 sm:p-8">
         <div className="flex justify-center">
-          {company.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- extern logo (Blob)
-            <img src={company.logoUrl} alt={company.name} className="h-12 max-w-52 object-contain" />
-          ) : (
-            <p className="text-lg font-bold">{company.name}</p>
-          )}
+          <p className="text-lg font-bold">{company.name}</p>
         </div>
 
         {closed ? (

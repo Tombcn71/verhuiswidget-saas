@@ -23,6 +23,7 @@ import {
 } from "@/app/_components/icons";
 import { FLOOR_TYPES, totalVolume } from "@/lib/pricing";
 import { upload } from "@vercel/blob/client";
+import { useRouter } from "next/navigation";
 import { Logo } from "@/app/_components/logo";
 import { AddressInput, EMPTY_ADDRESS, addressText, type AddressValue } from "./address-input";
 import { InAppCamera, canUseInAppCamera } from "./in-app-camera";
@@ -138,6 +139,7 @@ export function MoveFlow({
   appChrome = false,
   source = "onsite",
   backUrl = null,
+  showName = false,
   demoContact,
   prospect,
 }: {
@@ -156,6 +158,8 @@ export function MoveFlow({
   source?: LeadSource;
   /** Website van de verhuizer (losse pagina/Onlink): terugpijl op stap 1 en knop na de offerte. */
   backUrl?: string | null;
+  /** Bedrijfsnaam bovenin (alleen de losse pagina via het linkje). */
+  showName?: boolean;
   /** Demo via persoonlijke link: gegevens van het benaderde verhuisbedrijf alvast ingevuld. */
   demoContact?: DemoContact;
   /** Slug in de verkoop-CRM van moverAI; reist mee zodat "demo gedaan/boeken" bijgehouden wordt. */
@@ -175,6 +179,7 @@ export function MoveFlow({
     }
   }, [step]);
   const onspot = source === "onspot";
+  const router = useRouter();
   // Stap 1 — contact
   const [name, setName] = useState(demo ? demoContact?.name || "Demo Gebruiker" : "");
   // Zonder e-mailadres een voorbeeldadres: dan gaat er geen mail uit, maar kan de demo door.
@@ -1651,22 +1656,25 @@ export function MoveFlow({
               step > 0
                 ? () => setStep((s) => Math.max(0, s - 1))
                 : (onBackToIntro ??
-                  (() => (backUrl ? window.location.assign(backUrl) : window.history.back())))
+                  (() =>
+                    backUrl
+                      ? window.location.assign(backUrl)
+                      : onspot
+                        ? router.push("/dashboard")
+                        : window.history.back()))
             }
             aria-label="Terug"
             className="text-slate-700 hover:text-slate-900"
           >
             <CircleArrowLeft className="h-9 w-9" />
           </button>
-          {/* White-label: het merk van de verhuizer; alleen de demo toont moverAI. */}
+          {/* White-label: in de pop-up en bij zelf scannen niets (de klant zit al op hun site);
+              via het linkje de naam van de verhuizer. Alleen de demo toont moverAI. */}
           {demo ? (
             <Logo className="text-base" />
-          ) : company.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- extern logo (Blob), vaste kleine maat
-            <img src={company.logoUrl} alt={company.name} className="h-12 max-w-52 object-contain" />
-          ) : (
+          ) : showName ? (
             <span className="max-w-48 truncate text-base font-bold tracking-tight">{company.name}</span>
-          )}
+          ) : null}
           <span className="h-9 w-9" />
         </div>
 

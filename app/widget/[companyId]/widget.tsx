@@ -30,6 +30,7 @@ export function Widget({
   preview = false,
   source = "onsite",
   backUrl = null,
+  showName = false,
   demoContact,
   prospect,
 }: {
@@ -39,6 +40,8 @@ export function Widget({
   source?: LeadSource;
   /** Website van de verhuizer, alleen op de losse pagina (Onlink). */
   backUrl?: string | null;
+  /** Bedrijfsnaam bovenin; alleen op de losse pagina (in de pop-up zit de klant al op hun site). */
+  showName?: boolean;
   /** Persoonlijke demolink (/demo/<slug>): gegevens van het benaderde verhuisbedrijf. */
   demoContact?: DemoContact;
   /** Slug van de prospect in de verkoop-CRM, voor het bijhouden van de demo. */
@@ -130,6 +133,7 @@ export function Widget({
         preview={preview}
         source={source}
         backUrl={backUrl}
+        showName={showName}
         demoContact={demoContact}
         prospect={prospect}
         appChrome

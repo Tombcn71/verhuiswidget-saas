@@ -48,7 +48,7 @@ function planFeatures(plan: Plan): Feature[] {
       scanInfo: true,
     },
     ...CHANNEL_FEATURES.map((text) => ({ text })),
-    { text: "White-label: je eigen logo en huisstijlkleuren" },
+    { text: "White-label: je eigen bedrijfsnaam en huisstijlkleur" },
     { text: "Tarieven volledig instelbaar: m³, km en toeslagen" },
     { text: "Automatische herinnering bij openstaande offertes" },
     { text: "Automatisch reviewverzoek na de verhuizing" },
