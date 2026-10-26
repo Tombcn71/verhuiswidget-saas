@@ -26,6 +26,7 @@ import {
 import { PageHeader } from "./page-header";
 import { StatusBadge } from "./status-badge";
 import { UsageBar } from "./usage-bar";
+import { InstallHint } from "./install-hint";
 import { ScanInfo } from "@/app/_components/scan-info";
 
 export const metadata: Metadata = { title: "Overzicht" };
@@ -60,6 +61,8 @@ export default async function DashboardOverviewPage() {
           </Button>
         }
       />
+
+      <InstallHint />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((k) => (

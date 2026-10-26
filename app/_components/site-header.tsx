@@ -10,6 +10,7 @@ export const NAV_LINKS = [
   { href: "#voordelen", label: "Voordelen" },
   { href: "#hoe-het-werkt", label: "Hoe het werkt" },
   { href: "#prijzen", label: "Prijzen" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 /**

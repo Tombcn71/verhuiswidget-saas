@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { nlNL } from "@clerk/localizations";
@@ -19,7 +19,11 @@ export const metadata: Metadata = {
   },
   description:
     "White-label AI-widget voor verhuis- en ontruimingsbedrijven. Klanten uploaden foto's, de AI berekent het volume en de prijs, jij ontvangt een complete offerteaanvraag.",
+  // Op het iPhone-startscherm: schermvullend, met de naam moverAI onder het icoon.
+  appleWebApp: { capable: true, title: "moverAI", statusBarStyle: "default" },
 };
+
+export const viewport: Viewport = { themeColor: "#1a73e8" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

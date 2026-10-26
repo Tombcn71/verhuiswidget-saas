@@ -84,6 +84,60 @@ const startSteps = [
   },
 ];
 
+const faqs = [
+  {
+    q: "Hoe nauwkeurig is het volume van de AI?",
+    a: "De AI herkent de meubels op de foto's en rekent per item met vaste volumes, zoals een bank, kast of bed. Losse spullen telt hij als verhuisdozen. Je klant ziet de lijst en kan aantallen aanpassen of items toevoegen voordat de offerte wordt gemaakt. Jij krijgt de foto's en de volledige inventaris erbij, zodat je het altijd kunt controleren.",
+  },
+  {
+    q: "Wat als de foto's van de klant slecht zijn of er kamers ontbreken?",
+    a: "De klant kan per kamer extra foto's toevoegen en ontbrekende spullen zelf invullen. Jij ziet bij elke aanvraag de foto's. Twijfel je, dan bel je even of stuur je een linkje om een kamer opnieuw te scannen.",
+  },
+  {
+    q: "Kan ik mijn eigen tarieven en manier van rekenen gebruiken?",
+    a: "Ja. Je kiest of je per uur of per m³ rekent. Daarnaast stel je je uurtarief, laadsnelheid, voorrijkosten, kilometerprijs, traptijd, verhuislift en extra's in. Nog sneller: upload een oude factuur en de AI vult je tarieven voor je in.",
+  },
+  {
+    q: "Hoe snel ben ik live, en moet ik iets technisch doen?",
+    a: "Binnen een kwartier. Via een linkje werkt het meteen, zonder website. Wil je de widget op je site, dan plak je één regel code in je website-instellingen. In het dashboard staat stap voor stap waar dat zit.",
+  },
+  {
+    q: "Ziet mijn klant moverAI, of mijn eigen merk?",
+    a: "Je eigen merk. De widget en de offertemail hebben jouw logo, kleuren en contactgegevens. Je klant ziet nergens moverAI.",
+  },
+  {
+    q: "Wat gebeurt er met de foto's en klantgegevens (AVG)?",
+    a: "De foto's worden alleen gebruikt om de inboedel te herkennen en een offerte te maken. Ze worden bewaard bij de aanvraag, zodat jij ze kunt bekijken. Na 3 maanden worden ze automatisch verwijderd. De AI gebruikt de foto's niet om van te leren. Gegevens worden nooit gedeeld of verkocht.",
+  },
+  {
+    q: "Wat gebeurt er na de proefperiode?",
+    a: "De eerste 14 dagen zijn gratis en je geeft geen betaalgegevens op. Na de proefperiode wordt er niets automatisch afgeschreven. Wil je doorgaan, dan kies je zelf een pakket.",
+  },
+  {
+    q: "Wat als ik meer scans nodig heb dan in mijn pakket?",
+    a: "Dan blijft alles gewoon werken; we blokkeren nooit een aanvraag. Je krijgt een melding en kunt overstappen naar een groter pakket als je wilt.",
+  },
+  {
+    q: "Kan ik op elk moment opzeggen?",
+    a: "Een maandabonnement zeg je per maand op, via \"Abonnement beheren\" in je dashboard. Een jaarabonnement loopt tot het einde van het jaar dat je hebt betaald.",
+  },
+  {
+    q: "Werkt het met mijn website?",
+    a: "Ja, met elke website waar je code kunt toevoegen: WordPress, Wix, Squarespace, Shopify en andere. Heb je geen website, gebruik dan het linkje.",
+  },
+];
+
+// Zodat Google de vragen als FAQ kan tonen.
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
 export default function HomePage() {
   const calendlyUrl = process.env.CALENDLY_URL;
   return (
@@ -269,6 +323,34 @@ export default function HomePage() {
             </p>
             <PricingCards primaryButton={aiButton} />
           </div>
+        </section>
+
+        {/* Veelgestelde vragen */}
+        <section id="faq" className="scroll-mt-20 border-t border-border py-20">
+          <div className="mx-auto w-full max-w-3xl px-6">
+            <h2 className="text-center text-3xl font-bold tracking-tight">
+              Veelgestelde vragen
+            </h2>
+            <div className="mt-10 divide-y divide-border rounded-xl border border-border bg-background">
+              {faqs.map((f) => (
+                <details key={f.q} className="group px-5 py-4">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <span
+                      aria-hidden="true"
+                      className="shrink-0 text-xl leading-none text-brand-600 transition group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-3 leading-relaxed text-foreground/85">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+          />
         </section>
 
       </main>
