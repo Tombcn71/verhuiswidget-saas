@@ -1704,7 +1704,7 @@ export function MoveFlow({
           </div>
         )}
 
-        <div ref={stepScrollRef} className="flex-1 overflow-y-auto pb-4 pt-10">
+        <div ref={stepScrollRef} className="flex-1 overflow-y-auto pb-4 pt-16">
           {step === 0 && fancyFotosBody}
           {step === 1 && inventarisBody}
           {step === 2 && adressenBody}
