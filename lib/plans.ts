@@ -72,9 +72,9 @@ export const MORE_SEATS_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURICom
 
 /** De drie kanalen; zitten in elk plan. */
 export const CHANNEL_FEATURES = [
-  "Onsite: de widget op je website",
-  "Onspot: zelf scannen op locatie",
-  "Onlink: direct linkje via sms of WhatsApp",
+  "Via je website: de widget op je eigen site",
+  "Via een linkje: stuur het via WhatsApp, sms of mail",
+  "Zelf op locatie: scan ter plekke met je telefoon",
 ];
 
 export function normalizePlan(value: unknown): PlanId {

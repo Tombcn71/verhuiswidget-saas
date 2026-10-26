@@ -50,6 +50,8 @@ function planFeatures(plan: Plan): Feature[] {
     ...CHANNEL_FEATURES.map((text) => ({ text })),
     { text: "White-label: je eigen logo en huisstijlkleuren" },
     { text: "Tarieven volledig instelbaar: m³, km en toeslagen" },
+    { text: "Automatische herinnering bij openstaande offertes" },
+    { text: "Automatisch reviewverzoek na de verhuizing" },
     { text: "Uitgebreid dashboard voor planners", missing: !has(["standard", "premium"]) },
     { text: "Voorrang bij support", missing: !has(["premium"]) },
   ];
@@ -179,7 +181,7 @@ export function PricingCards({ primaryButton }: { primaryButton: string }) {
                     >
                       {f.missing ? <DashIcon /> : <CheckIcon />}
                       <span>
-                        {f.missing && <span className="sr-only">Niet inbegrepen: </span>}
+                        {f.missing && <span className="sr-only">Niet inbegrepen:</span>}{" "}
                         {f.text}
                         {f.scanInfo && <ScanInfo />}
                       </span>

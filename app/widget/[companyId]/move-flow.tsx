@@ -21,7 +21,7 @@ import {
   Table,
   Utensils,
 } from "@/app/_components/icons";
-import { FLOOR_TYPES } from "@/lib/pricing";
+import { FLOOR_TYPES, totalVolume } from "@/lib/pricing";
 import { upload } from "@vercel/blob/client";
 import { Logo } from "@/app/_components/logo";
 import { AddressInput, EMPTY_ADDRESS, addressText, type AddressValue } from "./address-input";
@@ -1019,6 +1019,14 @@ export function MoveFlow({
           verhuisdozen.
         </p>
       </div>
+
+      {/* Alleen voor de verhuizer zelf (Preview en scannen op locatie), niet voor klanten. */}
+      {(preview || onspot) && (
+        <div className="sticky top-0 z-10 rounded-xl border border-slate-200 bg-white/95 px-4 py-2 text-center text-sm shadow-sm backdrop-blur">
+          Totaal volume: <strong>{totalVolume(flatInventory).toFixed(1)} m³</strong>
+          <span className="block text-xs text-slate-500">Alleen zichtbaar voor jou</span>
+        </div>
+      )}
 
       {(roomInventory ?? []).map((room) => {
         const roomPhotos = photos.filter((p) => p.room === room.name);

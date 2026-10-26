@@ -75,11 +75,11 @@ const startSteps = [
   },
   {
     t: "Upload een oude factuur",
-    d: "De AI leest je uurtarief, voorrijkosten en kilometerprijs en vult je tarieven voor je in.",
+    d: "De AI leest je uurtarief, voorrijkosten en kilometerprijs en vult je tarieven voor je in. We lezen alleen de tarieven; de factuur wordt niet bewaard.",
   },
   {
     t: "Ontvang je eerste aanvraag",
-    d: "Zet de widget op je website, of stuur klanten gewoon een link via WhatsApp of mail. Werkt meteen.",
+    d: "Zet de widget op je website, of stuur klanten gewoon een link via WhatsApp, sms of mail. Werkt meteen.",
   },
 ];
 
@@ -96,16 +96,16 @@ export default function HomePage() {
             <div className="text-center lg:text-left">
               <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
                 <Sparkles className="h-3.5 w-3.5" />
-                AI-software voor verhuizers en ontruimers
+                AI-software voor verhuizers
               </p>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
                 Offertes in 1 minuut.{" "}
                 <span className="text-brand-600">Zonder voorinspectie.</span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground">
-                Je klant scant zijn inboedel met de telefoon. moverAI herkent de
-                meubels, berekent het volume en stuurt direct een offerte met
-                jouw tarieven. Jij hoeft er niet meer voor op pad.
+                Je klant scant zijn inboedel met de telefoon en krijgt direct
+                een offerte met jouw tarieven. Zo bespaar je personeelsuren en
+                brandstof. Werkt meteen, geen gedoe.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <a
@@ -172,9 +172,10 @@ export default function HomePage() {
               die doorgaan.
             </p>
             <p className="mt-4 text-sm italic">
-              Stel: 5 opnames per week van 1,5 uur, 10 km per rit. Dat is ruim
-              30 uur en 200 km per maand, al snel €1.500. moverAI kost vanaf €79
-              per maand.
+              Rekenvoorbeeld: 20 opnames per maand × 1,5 uur = 30 uur × €45 per
+              uur = €1.350. 20 ritten × 10 km heen en terug = 200 km × €0,20
+              brandstof per km = €40. Samen €1.390 per maand. moverAI kost vanaf
+              €79 per maand.
             </p>
             <a
               href="#prijzen"
@@ -262,8 +263,8 @@ export default function HomePage() {
               </p>
             </div>
             <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
-              Elk pakket geeft je team toegang tot alle features: Onsite, Onlink
-              én Onspot. Betaal per maand of per jaar; prijzen exclusief btw.
+              In elk pakket werk je op alle 3 manieren: via je website, via een
+              linkje en zelf op locatie. Betaal per maand of per jaar; prijzen exclusief btw.
             </p>
             <PricingCards primaryButton={aiButton} />
           </div>
@@ -273,7 +274,7 @@ export default function HomePage() {
 
       <footer className="mx-auto w-full max-w-6xl px-6 py-8 text-sm text-muted-foreground">
         © {new Date().getFullYear()} moverAI · White-label AI-widget voor
-        verhuizers en ontruimers
+        verhuizers
       </footer>
     </div>
   );

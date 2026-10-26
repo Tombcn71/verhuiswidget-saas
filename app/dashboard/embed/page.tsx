@@ -27,7 +27,7 @@ export default async function EmbedPage() {
     <div className="max-w-3xl">
       <PageHeader
         title="Widget-link"
-        description="Zo komen klanten bij je offerte-widget: via je website (Onsite) of via een link in WhatsApp, sms of social media (Onlink)."
+        description="Zo komen klanten bij je offerte-widget: via je website of via een linkje in WhatsApp, sms, mail of social media."
       />
 
       <div className="space-y-4">
@@ -39,19 +39,19 @@ export default async function EmbedPage() {
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border p-4">
               <p className="flex items-center gap-2 font-medium">
-                <Globe className="size-4 text-primary" /> Op je website
+                <Globe className="size-4 text-primary" /> Via je website
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Gebruik <strong>Onsite</strong>: stap 1 én stap 2 hieronder. De widget opent als
+                Gebruik stap 1 én stap 2 hieronder. De widget opent als
                 pop-up op je eigen site; je bezoeker blijft bij jou.
               </p>
             </div>
             <div className="rounded-lg border p-4">
               <p className="flex items-center gap-2 font-medium">
-                <MessageCircle className="size-4 text-primary" /> In WhatsApp, sms of socials
+                <MessageCircle className="size-4 text-primary" /> Via een linkje
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Gebruik <strong>Onlink</strong>, de directe link onderaan. Die opent een eigen
+                Voor WhatsApp, sms, mail of socials: gebruik de directe link onderaan. Die opent een eigen
                 pagina in jouw huisstijl, met een knop terug naar je website.
               </p>
             </div>
@@ -61,7 +61,7 @@ export default async function EmbedPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Badge>Onsite · stap 1</Badge> Eenmalig: activeer de pop-up
+              <Badge>Website · stap 1</Badge> Eenmalig: activeer de pop-up
             </CardTitle>
             <CardDescription>
               Plak deze regel in de <strong>algemene code</strong> van je site (het veld voor
@@ -88,7 +88,7 @@ export default async function EmbedPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Badge>Onsite · stap 2</Badge> Zet deze link achter je knop
+              <Badge>Website · stap 2</Badge> Zet deze link achter je knop
             </CardTitle>
             <CardDescription>
               Klik erop en de widget opent in een pop-up over je site — geen code op de pagina
@@ -104,7 +104,7 @@ export default async function EmbedPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Badge variant="secondary">Onlink</Badge> Directe link voor WhatsApp, sms en socials
+              <Badge variant="secondary">Linkje</Badge> Directe link voor WhatsApp, sms, mail en socials
             </CardTitle>
             <CardDescription>
               Geen website nodig. Stuur &apos;m na een telefoontje via WhatsApp of sms, of zet &apos;m

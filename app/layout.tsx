@@ -14,7 +14,7 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: {
-    default: "moverAI — automatische offertes voor verhuizers en ontruimers",
+    default: "moverAI — Bespaar uren en brandstof met AI voor verhuizers",
     template: "%s · moverAI",
   },
   description:
