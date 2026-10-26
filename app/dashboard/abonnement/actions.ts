@@ -47,6 +47,9 @@ export async function startCheckout(formData: FormData): Promise<void> {
     customer: customerId,
     client_reference_id: company.id,
     line_items: [{ price: await priceIdFor(lookupKeyFor(plan.id, interval)), quantity: 1 }],
+    // Alleen iDEAL (NL-verhuizers). Stripe zet daar een SEPA-incasso op voor de
+    // volgende maanden, dus SEPA Direct Debit moet in het dashboard aan blijven.
+    payment_method_types: ["ideal"],
     subscription_data: {
       metadata: { companyId: company.id },
       ...(trialMsLeft > MIN_TRIAL_MS
