@@ -3,6 +3,7 @@ import heroImage from "@/public/hero.jpg";
 import { DemoModal } from "@/app/_components/demo-modal";
 import { SiteHeader } from "@/app/_components/site-header";
 import { PricingCards } from "@/app/_components/pricing-cards";
+import { WhatsAppButton } from "@/app/_components/whatsapp-button";
 import { Globe, Link, MapPin, Star } from "lucide-react";
 import {
   Timer,
@@ -276,6 +277,7 @@ export default function HomePage() {
         © {new Date().getFullYear()} moverAI · White-label AI-widget voor
         verhuizers
       </footer>
+      <WhatsAppButton />
     </div>
   );
 }

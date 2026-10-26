@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { AppSidebar } from "./app-sidebar";
 import { ThemeToggle } from "@/components/theme";
 import { FeedbackButton } from "@/app/_components/FeedbackButton";
+import { WhatsAppButton } from "@/app/_components/whatsapp-button";
 
 export default async function DashboardLayout({
   children,
@@ -80,6 +81,7 @@ export default async function DashboardLayout({
           </main>
         </SidebarInset>
         <FeedbackButton />
+        <WhatsAppButton message="Hoi, ik heb een vraag over mijn moverAI-dashboard" />
       </SidebarProvider>
     </TooltipProvider>
   );
