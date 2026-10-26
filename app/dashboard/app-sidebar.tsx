@@ -6,7 +6,6 @@ import {
   Building2,
   Calculator,
   CreditCard,
-  Eye,
   Inbox,
   LayoutDashboard,
   Link2,
@@ -49,7 +48,6 @@ const GROUPS: { label: string; items: Item[] }[] = [
       { href: "/dashboard/tarieven", label: "Tarieven", icon: Calculator, adminOnly: true },
       { href: "/dashboard/instellingen", label: "Bedrijf", icon: Building2, adminOnly: true },
       { href: "/dashboard/embed", label: "Widget-link", icon: Link2 },
-      { href: "/dashboard/preview", label: "Preview", icon: Eye },
     ],
   },
   {
@@ -65,11 +63,14 @@ export function AppSidebar({
   admin,
   planLabel,
   trialDaysLeft,
+  trialExpired,
 }: {
   admin: boolean;
   planLabel: string;
   /** Resterende proefdagen, of null als er betaald wordt of de proef voorbij is. */
   trialDaysLeft: number | null;
+  /** Proef voorbij en (nog) niet betaald. */
+  trialExpired: boolean;
 }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
@@ -125,7 +126,11 @@ export function AppSidebar({
         <div className="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-xs">
           <Badge variant="secondary">{planLabel}</Badge>
           <span className="text-muted-foreground">
-            {trialDaysLeft !== null ? `Proef: nog ${trialDaysLeft} ${trialDaysLeft === 1 ? "dag" : "dagen"}` : "Actief"}
+            {trialExpired
+              ? "Proef verlopen"
+              : trialDaysLeft !== null
+                ? `Proef: nog ${trialDaysLeft} ${trialDaysLeft === 1 ? "dag" : "dagen"}`
+                : "Actief"}
           </span>
         </div>
       </SidebarFooter>

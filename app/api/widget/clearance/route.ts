@@ -148,6 +148,7 @@ export async function POST(request: Request) {
     hasElevator: parsed.details.hasElevator,
     streetAccessible: parsed.details.streetAccessible,
     rush: isRushDate(parsed.details.moveDate),
+    moveDate: parsed.details.moveDate,
   });
 
   // Extra werkzaamheden op m²/aantal.

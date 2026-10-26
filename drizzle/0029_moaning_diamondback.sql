@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ALTER COLUMN "truck_capacity_m3" SET DEFAULT 40;

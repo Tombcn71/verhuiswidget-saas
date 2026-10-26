@@ -8,7 +8,10 @@ import { CATEGORIEEN, type FeedbackCategorie } from "@/lib/feedback";
 export function FeedbackButton() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [categorie, setCategorie] = useState<FeedbackCategorie>("idee");
+  // Op "Test je tarieven" gaat feedback bijna altijd over de prijs.
+  const [categorie, setCategorie] = useState<FeedbackCategorie>(
+    pathname === "/dashboard/preview" ? "prijs" : "idee",
+  );
   const [bericht, setBericht] = useState("");
   const [magReageren, setMagReageren] = useState(true);
   const [loading, setLoading] = useState(false);

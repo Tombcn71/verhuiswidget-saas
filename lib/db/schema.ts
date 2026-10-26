@@ -114,6 +114,7 @@ export const companies = pgTable("companies", {
   pricePerKmCents: integer("price_per_km_cents").notNull().default(150), // per km enkele reis
   packingFeeCents: integer("packing_fee_cents").notNull().default(12000), // inpakservice
   assemblyFeeCents: integer("assembly_fee_cents").notNull().default(8000), // (de)montage
+  boxPriceCents: integer("box_price_cents").notNull().default(0), // verhuisdoos per stuk; €0 = niet aangeboden
   storagePerMonthCents: integer("storage_per_month_cents").notNull().default(9500),
   minPriceCents: integer("min_price_cents").notNull().default(15000),
   vatRate: numeric("vat_rate", { precision: 4, scale: 3 }).notNull().default("0.210"),
@@ -125,7 +126,26 @@ export const companies = pgTable("companies", {
   m3PerHourPerMover: numeric("m3_per_hour_per_mover", { precision: 4, scale: 1 })
     .notNull()
     .default("1.8"), // laadsnelheid: m³ per verhuizer per uur
-  truckCapacityM3: integer("truck_capacity_m3").notNull().default(20), // laadvermogen wagen; bepaalt aantal ritten
+  truckCapacityM3: integer("truck_capacity_m3").notNull().default(40), // laadvermogen wagen; bepaalt aantal ritten
+  // Tempo zoals de verhuizer het zegt: "30 m³ in 5,5 uur werk met 3 man" (zonder
+  // rijden). m3PerHourPerMover hierboven wordt hieruit afgeleid bij opslaan.
+  tempoM3: numeric("tempo_m3", { precision: 6, scale: 1 }).notNull().default("30"),
+  tempoHours: numeric("tempo_hours", { precision: 4, scale: 1 }).notNull().default("5.5"),
+  tempoMovers: integer("tempo_movers").notNull().default(3),
+  // Ploeg per volume: t/m crewTwoMaxM3 2 man, t/m crewThreeMaxM3 3 man, daarboven 4.
+  crewTwoMaxM3: integer("crew_two_max_m3").notNull().default(15),
+  crewThreeMaxM3: integer("crew_three_max_m3").notNull().default(35),
+  // Verhuiswagen als eigen regel: per "uur", "dag" of "rit". €0 = zit in het uurtarief.
+  vanRateCents: integer("van_rate_cents").notNull().default(0),
+  vanRateUnit: text("van_rate_unit").notNull().default("uur"),
+  // Welke reistijd in de uren telt: "rit" (A → B), "loods" (vestiging → A → B →
+  // vestiging) of "geen".
+  travelMode: text("travel_mode").notNull().default("rit"),
+  minHours: numeric("min_hours", { precision: 3, scale: 1 }).notNull().default("2"),
+  roundingMinutes: integer("rounding_minutes").notNull().default(30), // 15, 30 of 60
+  // Weekendtoeslag in procenten over de mankracht (en de wagen per uur).
+  saturdaySurchargePct: integer("saturday_surcharge_pct").notNull().default(0),
+  sundaySurchargePct: integer("sunday_surcharge_pct").notNull().default(0),
 
   // Verhuizen: extra toeslagen
   // Trappen tellen standaard als extra tijd (rekenmethode "uur"); de vaste
@@ -267,12 +287,16 @@ export type InventoryItem = {
 export type LeadOptions = {
   packing?: boolean;
   assembly?: boolean;
+  /** Verhuisdozen laten bezorgen; aantal komt uit de inboedelscan. */
+  boxes?: boolean;
   storageMonths?: number;
 };
 
 export type PriceLine = {
   label: string;
   amountCents: number;
+  /** Korte uitleg onder de regel, bijv. "5 uur werk + 1 uur rijden". */
+  detail?: string;
 };
 
 export type Company = typeof companies.$inferSelect;

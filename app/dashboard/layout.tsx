@@ -42,6 +42,7 @@ export default async function DashboardLayout({
           admin={admin}
           planLabel={plan.label}
           trialDaysLeft={trial.kind === "trial" ? trial.daysLeft : null}
+          trialExpired={trial.kind === "expired"}
         />
         <SidebarInset className="bg-muted/40">
           <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background px-4">

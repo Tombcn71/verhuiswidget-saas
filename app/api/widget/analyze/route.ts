@@ -90,10 +90,10 @@ export async function POST(request: Request) {
     return json({ error: "De foto-analyse is mislukt. Probeer het later opnieuw." }, 502);
   }
 
-  // Gemini overschat regelmatig het aantal verhuisdozen — begrens per regel.
+  // Vangnet tegen uitschieters; gelijk aan de grens in de prompt (lib/gemini.ts).
   const BOX_RE = /verhuisdo|dozen|\bdoos\b|verhuisdoos/i;
   for (const item of inventory) {
-    if (BOX_RE.test(item.name)) item.quantity = Math.min(item.quantity, 10);
+    if (BOX_RE.test(item.name)) item.quantity = Math.min(item.quantity, 30);
   }
 
   if (inventory.length === 0) {

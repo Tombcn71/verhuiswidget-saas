@@ -68,6 +68,7 @@ const payloadSchema = z.object({
   options: z.object({
     packing: z.boolean().default(false),
     assembly: z.boolean().default(false),
+    boxes: z.boolean().default(false),
     storageMonths: z.coerce.number().int().min(0).max(36).default(0),
   }),
   photoRooms: z.array(z.string().trim().max(60)).max(MAX_PHOTOS),
@@ -204,6 +205,7 @@ export async function POST(request: Request) {
     hasElevator: parsed.move.hasElevator,
     streetAccessible: parsed.move.streetAccessible,
     rush: isRushDate(parsed.move.moveDate),
+    moveDate: parsed.move.moveDate,
   });
 
   // Demo: geen lead opslaan, maar wél de offerte naar de klant mailen

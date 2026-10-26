@@ -21,12 +21,13 @@ import {
   Table,
   Utensils,
 } from "@/app/_components/icons";
-import { FLOOR_TYPES, totalVolume } from "@/lib/pricing";
+import { FLOOR_TYPES, boxCount, totalVolume } from "@/lib/pricing";
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/app/_components/logo";
 import { AddressInput, EMPTY_ADDRESS, addressText, type AddressValue } from "./address-input";
 import { InAppCamera, canUseInAppCamera } from "./in-app-camera";
+import { SAMPLE_HOMES, type SampleHome } from "./sample-homes";
 
 export const ROOM_PRESETS: { label: string; Icon: typeof Sofa }[] = [
   { label: "Woonkamer", Icon: Sofa },
@@ -37,12 +38,41 @@ export const ROOM_PRESETS: { label: string; Icon: typeof Sofa }[] = [
   { label: "Kantoor", Icon: Briefcase },
 ];
 
+// Doosregels uit de AI-analyse (zie lib/gemini.ts): "Inhoud … (verhuisdozen)"
+// direct onder de kast, en per kamer "Losse spullen (verhuisdozen)".
+const BOX_LINE_RE = /verhuisdo/i;
+const CONTENT_LINE_RE = /^inhoud\b/i;
+
 type CompanyPublic = {
   id: string;
   name: string;
   logoUrl: string | null;
   primaryColor: string;
 };
+
+// Test je tarieven: de AI-analyse van een voorbeeldwoning onthouden (alleen in
+// deze browser). Versie ophogen als de analyse-prompt (lib/gemini.ts) verandert.
+const SAMPLE_CACHE_VERSION = 1;
+const sampleCacheKey = (companyId: string, homeId: string) =>
+  `moverai:sample-analysis:v${SAMPLE_CACHE_VERSION}:${companyId}:${homeId}`;
+
+function readSampleAnalysis(companyId: string, homeId: string): unknown[] | null {
+  try {
+    const raw = localStorage.getItem(sampleCacheKey(companyId, homeId));
+    const parsed = raw ? JSON.parse(raw) : null;
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSampleAnalysis(companyId: string, homeId: string, rooms: unknown) {
+  try {
+    localStorage.setItem(sampleCacheKey(companyId, homeId), JSON.stringify(rooms));
+  } catch {
+    // opslag vol of geblokkeerd — dan analyseert de AI de volgende keer opnieuw
+  }
+}
 
 /** Gegevens van een verhuisbedrijf dat de demo via een persoonlijke link opent. */
 export type DemoContact = { name?: string | null; email?: string | null; phone?: string | null };
@@ -70,7 +100,7 @@ function demoMoveDate(): string {
 
 type Photo = { id: string; file: Blob; url: string; room: string; blobUrl?: string };
 
-type PriceLine = { label: string; amountCents: number };
+type PriceLine = { label: string; amountCents: number; detail?: string };
 type InventoryItem = {
   name: string;
   quantity: number;
@@ -180,20 +210,29 @@ export function MoveFlow({
   }, [step]);
   const onspot = source === "onspot";
   const router = useRouter();
+  // Demo en preview (Test je tarieven): alles alvast ingevuld, zodat de verhuizer
+  // alleen op "Volgende" hoeft. In de preview gaat er toch geen mail uit.
+  const prefill = demo || preview;
   // Stap 1 — contact
-  const [name, setName] = useState(demo ? demoContact?.name || "Demo Gebruiker" : "");
+  const [name, setName] = useState(
+    demo ? demoContact?.name || "Demo Gebruiker" : preview ? "Testklant" : "",
+  );
   // Zonder e-mailadres een voorbeeldadres: dan gaat er geen mail uit, maar kan de demo door.
-  const [email, setEmail] = useState(demo ? demoContact?.email || "demo@voorbeeld.nl" : "");
+  const [email, setEmail] = useState(
+    demo ? demoContact?.email || "demo@voorbeeld.nl" : preview ? "test@voorbeeld.nl" : "",
+  );
   const [phone, setPhone] = useState(
-    demo ? (demoContact?.phone && isValidPhone(demoContact.phone) ? demoContact.phone : "06 12345678") : "",
+    demo
+      ? demoContact?.phone && isValidPhone(demoContact.phone) ? demoContact.phone : "06 12345678"
+      : preview ? "06 12345678" : "",
   );
   // Alleen in de demo (bezoeker = verhuizer): toestemming voor één opvolgmail van moverAI.
   const [demoConsent, setDemoConsent] = useState(false);
 
   // Stap 2 — adressen
-  // Demo: voorbeeldadressen alvast gevonden, zodat de bezoeker alleen op "Volgende" hoeft.
-  const [from, setFrom] = useState<AddressValue>(demo ? DEMO_FROM : EMPTY_ADDRESS);
-  const [to, setTo] = useState<AddressValue>(demo ? DEMO_TO : EMPTY_ADDRESS);
+  // Demo/preview: voorbeeldadressen alvast gevonden, zodat de bezoeker alleen op "Volgende" hoeft.
+  const [from, setFrom] = useState<AddressValue>(prefill ? DEMO_FROM : EMPTY_ADDRESS);
+  const [to, setTo] = useState<AddressValue>(prefill ? DEMO_TO : EMPTY_ADDRESS);
   // Afstand ophaal → bezorg; automatisch berekend, door de klant aan te passen.
   const [distanceKm, setDistanceKm] = useState("");
   const [distanceStatus, setDistanceStatus] = useState<"idle" | "loading" | "auto" | "manual">(
@@ -203,7 +242,7 @@ export function MoveFlow({
   const toAddress = addressText(to);
   const [propertyType, setPropertyType] = useState<"huis" | "appartement">("huis");
   const [fromFloor, setFromFloor] = useState("");
-  const [moveDate, setMoveDate] = useState(demo ? demoMoveDate() : "");
+  const [moveDate, setMoveDate] = useState(prefill ? demoMoveDate() : "");
   // Vandaag als JJJJ-MM-DD in de tijdzone van de klant: eerder kiezen kan niet.
   const todayIso = new Date().toLocaleDateString("sv-SE");
   const [roomCount, setRoomCount] = useState("1");
@@ -230,6 +269,7 @@ export function MoveFlow({
 
   // Stap 3 — opties (verhuizen)
   const [packing, setPacking] = useState(false);
+  const [boxes, setBoxes] = useState(false);
   const [assembly, setAssembly] = useState(false);
   const [storageMonths, setStorageMonths] = useState("0");
 
@@ -355,6 +395,36 @@ export function MoveFlow({
     fileInputRef.current?.click();
   };
 
+  // Preview: foto's van een voorbeeldwoning klaarzetten (zonder downscale; ze
+  // staan al op formaat in public/voorbeeldwoningen).
+  const [loadingSample, setLoadingSample] = useState<string | null>(null);
+  const [sampleHome, setSampleHome] = useState<SampleHome | null>(null);
+  const [usedSampleCache, setUsedSampleCache] = useState(false);
+  const loadSampleHome = async (home: SampleHome) => {
+    setLoadingSample(home.id);
+    setError(null);
+    try {
+      const loaded = await Promise.all(
+        home.photos.map(async ({ room, file }): Promise<Photo> => {
+          const res = await fetch(`/voorbeeldwoningen/${home.id}/${file}.jpg`);
+          if (!res.ok) throw new Error();
+          const blob = await res.blob();
+          const id = `${home.id}-${file}-${Date.now()}`;
+          return { id, file: blob, url: URL.createObjectURL(blob), room };
+        }),
+      );
+      const presetLabels = ROOM_PRESETS.map((r) => r.label);
+      setCustomRooms([...new Set(home.photos.map((p) => p.room))].filter((r) => !presetLabels.includes(r)));
+      setPhotos(loaded);
+      setSampleHome(home);
+      setPhotoMethod("gallery");
+    } catch {
+      setError("De voorbeeldfoto's konden niet worden geladen. Probeer het opnieuw.");
+    } finally {
+      setLoadingSample(null);
+    }
+  };
+
   const removePhoto = (id: string) => {
     setPhotos((ps) => {
       const target = ps.find((p) => p.id === id);
@@ -414,7 +484,27 @@ export function MoveFlow({
     [roomInventory],
   );
 
-  async function analyzeAndContinue() {
+  const boxTotal = useMemo(() => boxCount(flatInventory), [flatInventory]);
+
+  // Test je tarieven: staan de foto's van de voorbeeldwoning er nog ongewijzigd?
+  const sampleUntouched =
+    !!sampleHome &&
+    photos.length === sampleHome.photos.length &&
+    photos.every((p) => p.id.startsWith(`${sampleHome.id}-`));
+
+  async function analyzeAndContinue(fresh = false) {
+    // Voorbeeldwoning die de AI al eens analyseerde: meteen door, zodat de
+    // verhuizer na het aanpassen van zijn tarieven niet opnieuw hoeft te wachten.
+    if (preview && sampleHome && sampleUntouched && !fresh) {
+      const cached = readSampleAnalysis(company.id, sampleHome.id);
+      if (cached) {
+        setRoomInventory(cached as typeof roomInventory);
+        setRoomCount(String(Math.max(1, cached.length)));
+        setUsedSampleCache(true);
+        setStep(1);
+        return;
+      }
+    }
     setAnalyzing(true);
     setError(null);
     try {
@@ -433,6 +523,9 @@ export function MoveFlow({
       setRoomInventory(data.rooms as typeof roomInventory);
       // Aantal kamers alvast invullen met de gefotografeerde kamers.
       setRoomCount(String(Math.max(1, (data.rooms as unknown[] | undefined)?.length ?? 1)));
+      if (preview && sampleHome && sampleUntouched)
+        writeSampleAnalysis(company.id, sampleHome.id, data.rooms);
+      setUsedSampleCache(false);
       setStep(1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Er ging iets mis.");
@@ -544,6 +637,7 @@ export function MoveFlow({
             options: {
               packing,
               assembly,
+              boxes,
               storageMonths: Number(storageMonths) || 0,
             },
             photoRooms,
@@ -620,7 +714,20 @@ export function MoveFlow({
   const fancyFotosBody = (
     <>
       <div className="text-center">
-        {!roomPickerOpen ? (
+        {!roomPickerOpen && preview ? (
+          <>
+            <h2 className="text-3xl font-bold tracking-tight">
+              Test je{" "}
+              <span className="text-(--accent)">
+                tarieven
+              </span>
+            </h2>
+            <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
+              Kies een voorbeeldwoning. De AI scant de foto&apos;s en je ziet welke prijs je klant
+              krijgt met jouw tarieven.
+            </p>
+          </>
+        ) : !roomPickerOpen ? (
           <>
             <h2 className="text-3xl font-bold tracking-tight">
               <span className="text-(--accent)">
@@ -633,6 +740,38 @@ export function MoveFlow({
                 ? "Loop met de klant door het huis en maak per kamer foto's. Het volume loopt direct op."
                 : "Maak foto's terwijl je door je huis loopt, of kies bestaande foto's uit je gallerij."}
             </p>
+          </>
+        ) : sampleHome ? (
+          <>
+            <button
+              onClick={() => {
+                photos.forEach((p) => URL.revokeObjectURL(p.url));
+                setPhotos([]);
+                setCustomRooms([]);
+                setSampleHome(null);
+                setUsedSampleCache(false);
+                setPhotoMethod(null);
+              }}
+              className="text-xs text-slate-500 hover:text-slate-700"
+            >
+              ‹ Andere woning
+            </button>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight">
+              <span className="text-(--accent)">
+                {sampleHome.title}
+              </span>{" "}
+              staat klaar
+            </h2>
+            <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
+              De foto&apos;s zijn per kamer ingevuld. Tik op Start AI-analyse en check of de prijs
+              klopt met wat jij zou rekenen.
+            </p>
+            {readSampleAnalysis(company.id, sampleHome.id) && (
+              <p className="mx-auto mt-2 max-w-xs text-xs text-slate-500">
+                De AI heeft deze woning al eens voor je geanalyseerd, dus je hoeft niet te
+                wachten.
+              </p>
+            )}
           </>
         ) : (
           <>
@@ -676,7 +815,36 @@ export function MoveFlow({
         </div>
       )}
 
-      <div className="mt-6">
+      {preview && !roomPickerOpen && (
+        <div className="mt-6 space-y-3">
+          {SAMPLE_HOMES.map((home) => (
+            <button
+              key={home.id}
+              onClick={() => void loadSampleHome(home)}
+              disabled={loadingSample !== null}
+              className="flex w-full items-start gap-3 rounded-xl border border-slate-200 p-4 text-left hover:bg-slate-50 disabled:opacity-60"
+            >
+              <span aria-hidden="true" className="text-2xl">
+                {home.icon}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold">
+                  {home.title} · ca. {home.areaM2} m²
+                </span>
+                <span className="block text-xs text-slate-600">{home.rooms}</span>
+                <span className="mt-1 block text-xs font-medium text-slate-900">
+                  {loadingSample === home.id
+                    ? "Foto's laden…"
+                    : `Inboedel ca. ${home.volume} m³`}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Test je tarieven: alleen voorbeeldwoningen, geen eigen foto's (daarvoor is Scannen). */}
+      <div className={preview && !roomPickerOpen ? "hidden" : "mt-6"}>
         {!roomPickerOpen ? (
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -1028,6 +1196,24 @@ export function MoveFlow({
         </p>
       </div>
 
+      {/* Test je tarieven: eerdere analyse van deze voorbeeldwoning hergebruikt. */}
+      {preview && usedSampleCache && (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+          <p>
+            Deze woning heeft de AI eerder al voor je geanalyseerd. Je test met dezelfde inboedel:
+            verandert de prijs, dan komt dat door je tarieven.
+          </p>
+          <button
+            type="button"
+            onClick={() => void analyzeAndContinue(true)}
+            disabled={analyzing}
+            className="mt-2 font-semibold text-slate-900 underline disabled:opacity-60"
+          >
+            {analyzing ? "De AI analyseert opnieuw…" : "Opnieuw laten analyseren"}
+          </button>
+        </div>
+      )}
+
       {/* Alleen voor de verhuizer zelf (Preview en scannen op locatie), niet voor klanten. */}
       {(preview || onspot) && (
         <div className="sticky top-0 z-10 rounded-xl border border-slate-200 bg-white/95 px-4 py-2 text-center text-sm shadow-sm backdrop-blur">
@@ -1060,7 +1246,10 @@ export function MoveFlow({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={roomPhotos[0].url} alt={`Foto ${room.name}`} className="w-full object-cover" />
               {room.items
-                .filter((it) => typeof it.x === "number" && typeof it.y === "number")
+                .filter(
+                  (it) =>
+                    typeof it.x === "number" && typeof it.y === "number" && !BOX_LINE_RE.test(it.name),
+                )
                 .map((it, i) => (
                   <span
                     key={i}
@@ -1074,16 +1263,21 @@ export function MoveFlow({
           )}
 
           <div className="space-y-2 p-4">
-            {room.items.map((it, i) => (
-              <div key={i} className="flex items-center justify-between gap-2">
-                <span className="text-sm">
-                  {it.name}
+            {room.items.map((it, i) => {
+              const content = CONTENT_LINE_RE.test(it.name);
+              return (
+              <div
+                key={i}
+                className={`flex items-center justify-between gap-2 ${content ? "-mt-1 pl-4" : ""}`}
+              >
+                <span className={content ? "text-xs text-slate-500" : "text-sm"}>
+                  {content ? `↳ ${it.name}` : it.name}
                   {it.needsInfo && (
                     <span className="ml-1 text-xs text-amber-600">· check</span>
                   )}
-                  {/verhuisdo/i.test(it.name) && (
+                  {!content && BOX_LINE_RE.test(it.name) && (
                     <span className="block text-xs text-slate-500">
-                      Schatting voor de losse spullen in deze kamer. Telt mee voor het volume;
+                      Schatting voor wat niet in een kast zit. Telt mee voor het volume;
                       verwacht je meer of minder, pas het aan.
                     </span>
                   )}
@@ -1106,7 +1300,8 @@ export function MoveFlow({
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
 
             {newItemFor === room.name ? (
               <div className="flex gap-2 pt-1">
@@ -1413,6 +1608,17 @@ export function MoveFlow({
               </span>
             </span>
           </label>
+          {boxTotal > 0 && (
+            <label className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
+              <input type="checkbox" checked={boxes} onChange={(e) => setBoxes(e.target.checked)} className="mt-1" />
+              <span>
+                <span className="block text-sm font-medium">Verhuisdozen laten bezorgen</span>
+                <span className="block text-xs text-slate-600">
+                  {boxTotal} dozen, geteld uit je inboedel.
+                </span>
+              </span>
+            </label>
+          )}
           <label className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
             <input type="checkbox" checked={assembly} onChange={(e) => setAssembly(e.target.checked)} className="mt-1" />
             <span>
@@ -1464,8 +1670,14 @@ export function MoveFlow({
           <tbody>
             {result.breakdown.map((l, i) => (
               <tr key={i}>
-                <td className="py-1 text-slate-600">{l.label}</td>
-                <td className="py-1 text-right">{fmt(l.amountCents)}</td>
+                <td className="py-1 text-slate-600">
+                  {l.label}
+                  {/* Uitleg alleen voor de verhuizer (Test je tarieven / zelf scannen). */}
+                  {l.detail && (preview || onspot) && (
+                    <span className="block text-xs text-slate-500">{l.detail}</span>
+                  )}
+                </td>
+                <td className="py-1 text-right align-top">{fmt(l.amountCents)}</td>
               </tr>
             ))}
             <tr className="border-t border-slate-200">
@@ -1580,10 +1792,16 @@ export function MoveFlow({
 
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center">
         <p className="text-sm font-semibold">
-          {onspot ? "Opgeslagen bij je leads ✓" : "Je offerte is verzonden ✓"}
+          {preview
+            ? "Dit was een test"
+            : onspot
+              ? "Opgeslagen bij je leads ✓"
+              : "Je offerte is verzonden ✓"}
         </p>
         <p className="mt-1 text-xs text-slate-600">
-          {onspot
+          {preview
+            ? "Er is niets opgeslagen of verstuurd. Klopt de prijs niet? Pas je tarieven aan en test opnieuw."
+            : onspot
             ? result.emailSent
               ? `De offerte is gemaild naar ${email}.`
               : "De offerte kon niet gemaild worden; stuur 'm vanuit je leads."

@@ -63,9 +63,9 @@ export default async function LeadDetailPage({
   const yesNo = (b: boolean | undefined) => (b === undefined ? "—" : b ? "Ja" : "Nee");
 
   const billableVolume = Math.max(1, Math.ceil(Number(lead.totalVolumeM3)));
-  const estimatedTrips = Math.max(
+  const estimatedVans = Math.max(
     1,
-    Math.ceil(billableVolume / (company.truckCapacityM3 || 20)),
+    Math.ceil(billableVolume / (company.truckCapacityM3 || 40)),
   );
 
   const rows: Array<[string, string]> = [
@@ -83,7 +83,7 @@ export default async function LeadDetailPage({
     ["Voorkeursdatum", formatDate(lead.moveDate)],
     ...(isClearance ? [] : ([["Afstand", `${Math.round(Number(lead.distanceKm))} km`]] as Array<[string, string]>)),
     ["Totaal volume", `${Number(lead.totalVolumeM3).toFixed(1)} m³`],
-    ["Geschat aantal ritten", `${estimatedTrips}× (wagen ${company.truckCapacityM3} m³)`],
+    ["Aantal wagens", `${estimatedVans}× (wagen van ${company.truckCapacityM3} m³)`],
     ["Aangevraagd op", formatDateTime(lead.createdAt)],
   ];
 
@@ -158,6 +158,7 @@ export default async function LeadDetailPage({
                 <ul className="mt-1 list-inside list-disc text-sm">
                   {options.packing && <li>Inpakservice</li>}
                   {options.assembly && <li>Meubelmontage en -demontage</li>}
+                  {options.boxes && <li>Verhuisdozen laten bezorgen</li>}
                   {(options.storageMonths ?? 0) > 0 && (
                     <li>Opslag: {options.storageMonths} maand(en)</li>
                   )}
@@ -194,8 +195,13 @@ export default async function LeadDetailPage({
               <TableBody>
                 {(lead.priceBreakdown ?? []).map((line, i) => (
                   <TableRow key={i}>
-                    <TableCell className="text-muted-foreground">{line.label}</TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="whitespace-normal text-muted-foreground">
+                      {line.label}
+                      {line.detail && (
+                        <span className="block text-xs text-muted-foreground/80">{line.detail}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right align-top tabular-nums">
                       {formatEuroCents(line.amountCents)}
                     </TableCell>
                   </TableRow>
