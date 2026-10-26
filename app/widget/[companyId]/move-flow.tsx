@@ -626,11 +626,12 @@ export function MoveFlow({
               <span className="text-(--accent)">
                 Scan
               </span>{" "}
-              je {isClearance ? "woning" : "ruimtes"}
+              {onspot ? "de woning" : `je ${isClearance ? "woning" : "ruimtes"}`}
             </h2>
             <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
-              Maak foto&apos;s terwijl je door je huis loopt, of kies bestaande foto&apos;s uit je
-              gallerij.
+              {onspot
+                ? "Loop met de klant door het huis en maak per kamer foto's. Het volume loopt direct op."
+                : "Maak foto's terwijl je door je huis loopt, of kies bestaande foto's uit je gallerij."}
             </p>
           </>
         ) : (
@@ -646,10 +647,12 @@ export function MoveFlow({
               <span className="text-(--accent)">
                 ruimte
               </span>{" "}
-              begin je?
+              {onspot ? "eerst" : "begin je"}?
             </h2>
             <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
-              Maak foto&apos;s kamer voor kamer, je kan altijd terug om meer toe te voegen.
+              {onspot
+                ? "Kamer voor kamer. Je kunt altijd terug om er een toe te voegen."
+                : "Maak foto's kamer voor kamer, je kan altijd terug om meer toe te voegen."}
             </p>
           </>
         )}
@@ -1013,15 +1016,15 @@ export function MoveFlow({
     <div className="space-y-5">
       <div className="text-center">
         <h2 className="text-3xl font-bold tracking-tight">
-          Check je{" "}
+          Check {onspot ? "de" : "je"}{" "}
           <span className="text-(--accent)">
             inboedel
           </span>
         </h2>
         <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
-          Onze AI herkende dit. Pas aantallen aan of voeg ontbrekende spullen toe. Losse spullen
-          zoals boeken, servies en kleding hoef je niet apart te noemen: die tellen we als
-          verhuisdozen.
+          {onspot
+            ? "Loop de lijst na met de klant. Pas aantallen aan of voeg toe wat de AI miste. Losse spullen tellen als verhuisdozen."
+            : "Onze AI herkende dit. Pas aantallen aan of voeg ontbrekende spullen toe. Losse spullen zoals boeken, servies en kleding hoef je niet apart te noemen: die tellen we als verhuisdozen."}
         </p>
       </div>
 
@@ -1167,11 +1170,11 @@ export function MoveFlow({
       {chrome && (
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight">
-            {isClearance ? "Waar is de " : "Waar ga je "}
+            {isClearance ? "Waar is de " : onspot ? "Waar gaat de " : "Waar ga je "}
             <span className="text-(--accent)">
-              {isClearance ? "ontruiming" : "naartoe"}
+              {isClearance ? "ontruiming" : onspot ? "klant" : "naartoe"}
             </span>
-            ?
+            {!isClearance && onspot && " naartoe"}?
           </h2>
         </div>
       )}
@@ -1293,12 +1296,17 @@ export function MoveFlow({
       {chrome && (
         <div className="mb-2 text-center">
           <h2 className="text-3xl font-bold tracking-tight">
-            Nog wat{" "}
+            {onspot ? "Wat" : "Nog wat"}{" "}
             <span className="text-(--accent)">
               extra&apos;s
             </span>
             ?
           </h2>
+          {onspot && (
+            <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
+              Lift, inpakken, (de)montage: wat heeft de klant nodig?
+            </p>
+          )}
         </div>
       )}
 
