@@ -60,8 +60,7 @@ export async function startCheckout(formData: FormData): Promise<void> {
     billing_address_collection: "required",
     // B2B vanuit Spanje: geen btw, die wordt verlegd naar de klant. Daarvoor is
     // een btw-nummer nodig; de factuur-voettekst in Stripe vermeldt de verlegging.
-    // TIJDELIJK optioneel voor een testbetaling; daarna terug naar "if_supported".
-    tax_id_collection: { enabled: true, required: "never" },
+    tax_id_collection: { enabled: true, required: "if_supported" },
     customer_update: { address: "auto", name: "auto" },
     allow_promotion_codes: true,
     locale: "nl",
