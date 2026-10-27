@@ -211,7 +211,7 @@ export function MoveFlow({
   demoContact?: DemoContact;
   /** Slug in de verkoop-CRM van moverAI; reist mee zodat "demo gedaan/boeken" bijgehouden wordt. */
   prospect?: string;
-  /** Demo: "Plan een adviesgesprek" op het slotscherm. */
+  /** Demo: "Plan een adviesgesprek" bij de prijs. */
   calendlyUrl?: string | null;
 }) {
   const chrome = demo || appChrome;
@@ -1863,16 +1863,7 @@ export function MoveFlow({
                 >
                   Start 14 dagen gratis
                 </a>
-                {calendlyUrl && (
-                  <a
-                    href={meetingHref(calendlyUrl)}
-                    target="_blank"
-                    rel="noopener"
-                    className="rounded-full border border-slate-300 bg-white px-6 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    Plan een adviesgesprek
-                  </a>
-                )}
+                {/* "Plan een adviesgesprek" staat al bij de prijs, niet nog een keer hier. */}
                 <p className="text-center text-xs text-slate-500">
                   Geen betaalgegevens nodig
                 </p>
