@@ -43,7 +43,7 @@ function planFeatures(plan: Plan): Feature[] {
     scanInfo: true,
   };
   if (plan.id === "standard") {
-    return [seats, scans, { text: "Uitgebreid dashboard voor planners" }];
+    return [seats, scans];
   }
   if (plan.id === "premium") {
     return [seats, scans, { text: "Voorrang bij support" }];
