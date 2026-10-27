@@ -28,7 +28,12 @@ export async function DemoBooking({
   if (confirmed && get("dl")) await markDemoLeadBooked(get("dl"));
   if (confirmed && get("p")) await markDemoBooked(get("p"));
   const c = DEMO_COMPANY_PUBLIC;
-  const calendlyUrl = process.env.CALENDLY_URL;
+  // Persoonlijke demolink: via /gesprek (klik vastleggen, opvolgmail schrappen).
+  const calendlyUrl = process.env.CALENDLY_URL
+    ? get("p")
+      ? `/gesprek/${encodeURIComponent(get("p"))}`
+      : process.env.CALENDLY_URL
+    : null;
 
   return (
     <div

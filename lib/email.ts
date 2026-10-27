@@ -98,6 +98,15 @@ function planningBlock(d: QuoteData): string {
   </div>`;
 }
 
+/** Onderaan de verhuizersmail van de demo: uitnodiging voor een gesprek (hoort bij de demo). */
+function demoInvite(meetingUrl: string): string {
+  return `<div style="background:#e8f0fe;border-radius:12px;padding:18px 20px;margin:24px 0 0;text-align:center">
+    <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#0f172a">Benieuwd hoe dit werkt met jouw tarieven?</p>
+    <p style="margin:0 0 14px;font-size:14px;color:#334155">Plan een gesprek van 15 minuten. Dan zetten we moverAI samen klaar voor jouw bedrijf.</p>
+    <a href="${esc(meetingUrl)}" style="display:inline-block;background:#1a73e8;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 26px;border-radius:999px">Plan een adviesgesprek</a>
+  </div>`;
+}
+
 /** Balk boven de mails van de demo: wiens mail dit is. */
 function demoBanner(text: string): string {
   return `<div style="background:#e8f0fe;color:#1557b0;border-radius:10px;padding:10px 14px;margin:0 0 16px;font-size:13px;font-weight:600">${esc(text)}</div>`;
@@ -395,7 +404,7 @@ function photoBlock(urls: string[] | undefined): string {
   return `<h3 style="font-size:16px">Foto's van de klant (${urls.length})</h3><div>${imgs}</div>`;
 }
 
-function companyEmailHtml(d: QuoteData, banner = ""): string {
+function companyEmailHtml(d: QuoteData, banner = "", footer = ""): string {
   return baseLayout(
     d.company,
     `${banner}<h1 style="font-size:20px">Nieuwe offerteaanvraag</h1>
@@ -412,7 +421,8 @@ function companyEmailHtml(d: QuoteData, banner = ""): string {
      ${photoBlock(d.photoUrls)}
      <h3 style="font-size:16px">Volledige inventarislijst</h3>
      ${inventoryBlock(d)}
-     ${d.leadId === "demo" ? "" : `<p style="font-size:12px;color:#64748b">Lead-id: ${esc(d.leadId)}</p>`}`,
+     ${d.leadId === "demo" ? "" : `<p style="font-size:12px;color:#64748b">Lead-id: ${esc(d.leadId)}</p>`}
+     ${footer}`,
   );
 }
 
@@ -424,7 +434,12 @@ function companyEmailHtml(d: QuoteData, banner = ""): string {
  */
 export async function sendQuoteEmails(
   d: QuoteData,
-  opts: { customerOnly?: boolean; demo?: boolean } = {},
+  opts: {
+    customerOnly?: boolean;
+    demo?: boolean;
+    /** Demo: link "Plan een adviesgesprek" onderaan de verhuizersmail. */
+    meetingUrl?: string | null;
+  } = {},
 ): Promise<{ sent: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.QUOTE_FROM_EMAIL;
@@ -451,6 +466,7 @@ export async function sendQuoteEmails(
         html: companyEmailHtml(
           d,
           demoBanner("Demo · Deze mail krijg jij als verhuizer bij elke nieuwe aanvraag."),
+          opts.meetingUrl ? demoInvite(opts.meetingUrl) : "",
         ),
       });
       const error = first.error ?? second.error;

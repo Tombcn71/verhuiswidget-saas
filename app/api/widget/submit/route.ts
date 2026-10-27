@@ -5,7 +5,7 @@ import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { hasAccess } from "@/lib/plans";
 import { demoBookingUrl, isDemoCompany } from "@/lib/demo";
 import { recordDemoLead } from "@/lib/demo-leads";
-import { handleDemoCompleted } from "@/lib/prospect-mails";
+import { demoMeetingUrl, handleDemoCompleted } from "@/lib/prospect-mails";
 import { appUrl } from "@/lib/app-url";
 import { bookingUrl, createLead } from "@/lib/leads";
 import { analyzePhotos, type PhotoInput } from "@/lib/gemini";
@@ -37,8 +37,6 @@ const payloadSchema = z.object({
   companyId: z.uuid(),
   // Alleen een label voor de verhuizer (niet geverifieerd): widget, link of zelf gescand.
   source: z.enum(["onsite", "onlink", "onspot"]).default("onsite"),
-  // Alleen in de demo: toestemming voor één opvolgmail van moverAI.
-  demoConsent: z.boolean().optional(),
   // Alleen in de demo: slug van de prospect (persoonlijke demolink in de verkoop-CRM).
   prospect: z.string().trim().max(60).optional(),
   // Alleen in de demo: gekozen voorbeeldwoning, voor de foto's in de verhuizersmail.
@@ -234,9 +232,9 @@ export async function POST(request: Request) {
       preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
     // Persoonlijke demolink: in de verkoop-CRM op "Demo gedaan" zetten.
     if (isDemo && !preview && parsed.prospect) await handleDemoCompleted(parsed.prospect);
-    // Demo met vinkje (en echt e-mailadres): verhuizer-lead voor moverAI.
+    // Demo met echt e-mailadres: verhuizer-lead voor moverAI (/admin).
     const demoLead =
-      isDemo && !fake && parsed.demoConsent
+      isDemo && !fake
         ? await recordDemoLead({
             name: parsed.customer.name,
             email: parsed.customer.email,
@@ -282,7 +280,7 @@ export async function POST(request: Request) {
             }),
           },
           // Test je tarieven (preview) mailt nooit; alleen de echte demo.
-          { demo: true },
+          { demo: true, meetingUrl: demoMeetingUrl(parsed.prospect, parsed.customer) },
         );
     return json({
       ok: true,

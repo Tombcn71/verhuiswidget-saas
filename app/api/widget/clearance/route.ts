@@ -32,8 +32,6 @@ const payloadSchema = z.object({
   companyId: z.uuid(),
   // Alleen een label voor de verhuizer (niet geverifieerd): widget, link of zelf gescand.
   source: z.enum(["onsite", "onlink", "onspot"]).default("onsite"),
-  // Alleen in de demo: toestemming voor één opvolgmail van moverAI.
-  demoConsent: z.boolean().optional(),
   // Alleen in de demo: slug van de prospect (persoonlijke demolink in de verkoop-CRM).
   prospect: z.string().trim().max(60).optional(),
   customer: z.object({
@@ -250,9 +248,9 @@ export async function POST(request: Request) {
       preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
     // Persoonlijke demolink: in de verkoop-CRM op "Demo gedaan" zetten.
     if (isDemo && !preview && parsed.prospect) await handleDemoCompleted(parsed.prospect);
-    // Demo met vinkje (en echt e-mailadres): verhuizer-lead voor moverAI.
+    // Demo met echt e-mailadres: verhuizer-lead voor moverAI (/admin).
     const demoLead =
-      isDemo && !fake && parsed.demoConsent
+      isDemo && !fake
         ? await recordDemoLead({
             name: parsed.customer.name,
             email: parsed.customer.email,

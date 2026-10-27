@@ -305,9 +305,8 @@ export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 
 /**
- * Bezoekers van de demo op de homepage (meestal verhuizers) die het vinkje
- * "moverAI mag me mailen" aanzetten. Alleen mét toestemming opgeslagen; voor
- * de opvolgmail en het overzicht op /admin.
+ * Bezoekers die de demo afronden met een echt e-mailadres (meestal verhuizers),
+ * voor het overzicht op /admin. Ze krijgen geen aparte opvolgmail.
  */
 export const demoLeads = pgTable("demo_leads", {
   id: uuid("id").primaryKey().defaultRandom(),

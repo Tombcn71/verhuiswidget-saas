@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-/** Bezoekers van de algemene demo (homepage) die het vinkje "mag mailen" aanzetten. */
+/** Bezoekers die de algemene demo afronden met een echt e-mailadres. */
 export default async function DemoLeadsPage() {
   const leads = await listDemoLeads();
   return (

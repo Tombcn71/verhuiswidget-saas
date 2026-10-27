@@ -50,6 +50,24 @@ export function meetingLinkFor(p: Pick<Prospect, "slug">): string {
   return `${appUrl()}/gesprek/${p.slug}`;
 }
 
+/**
+ * "Plan een adviesgesprek" vanuit de demo. Persoonlijke demolink: via /gesprek,
+ * dat de klik vastlegt en de opvolgmail schrapt. Anders rechtstreeks naar
+ * Calendly met naam en e-mail ingevuld. Null zonder CALENDLY_URL.
+ */
+export function demoMeetingUrl(
+  prospect: string | undefined,
+  person: { name: string; email: string },
+): string | null {
+  const calendly = process.env.CALENDLY_URL;
+  if (!calendly) return null;
+  if (prospect) return meetingLinkFor({ slug: prospect });
+  const url = new URL(calendly);
+  url.searchParams.set("name", person.name);
+  url.searchParams.set("email", person.email);
+  return url.toString();
+}
+
 /** Mail 1: de persoonlijke demolink, na het telefoongesprek. Plant meteen de herinnering in. */
 export async function sendDemoMail(p: Prospect): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!p.email) return { ok: false, error: "Vul eerst een e-mailadres in." };
@@ -132,7 +150,15 @@ export async function handleDemoCompleted(slug: string): Promise<void> {
   const p = await getProspectBySlug(slug);
   if (!p) return;
   if (p.reminderEmailId) await cancelAutoMails(p, "reminder");
-  if (!p.email || p.autoMailOff || p.followUpEmailId || STOPPED_STAGES.includes(p.stage)) return;
+  // Al op "Plan een adviesgesprek" geklikt: geen uitnodiging meer nodig.
+  if (
+    !p.email ||
+    p.autoMailOff ||
+    p.followUpEmailId ||
+    p.meetingClickedAt ||
+    STOPPED_STAGES.includes(p.stage)
+  )
+    return;
 
   const r = resend();
   if (!r) return;

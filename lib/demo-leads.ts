@@ -5,11 +5,6 @@ import { appUrl } from "@/lib/app-url";
 import { formatEuroCents } from "@/lib/format";
 import { CONTACT_EMAIL } from "@/lib/plans";
 
-/** Afzender van de opvolgmail: persoonlijk, niet "moverAI no-reply". */
-const FOLLOW_UP_SENDER = "Tom van moverAI";
-/** Opvolgmail niet direct naast de demo-offerte, maar een paar uur later. */
-const FOLLOW_UP_DELAY_MS = 2 * 60 * 60 * 1000;
-
 function esc(s: string): string {
   return s.replace(/[&<>"]/g, (c) =>
     c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;",
@@ -17,8 +12,9 @@ function esc(s: string): string {
 }
 
 /**
- * Demo afgerond mét toestemming: opslaan, opvolgmail inplannen en moverAI
- * direct een seintje geven. Mailfouten zijn niet fataal voor de demo.
+ * Demo afgerond: opslaan voor /admin en moverAI direct een seintje geven. Geen
+ * aparte opvolgmail; de uitnodiging voor een gesprek staat in de demo-mail zelf
+ * (die heeft de bezoeker aangevraagd). Mailfouten zijn niet fataal voor de demo.
  */
 export async function recordDemoLead(input: {
   name: string;
@@ -38,7 +34,7 @@ export async function recordDemoLead(input: {
     })
     .returning();
 
-  await Promise.allSettled([sendFollowUp(lead), notifyMoverAI(lead)]);
+  await notifyMoverAI(lead).catch(() => {});
   return lead;
 }
 
@@ -61,37 +57,6 @@ function resend(): { client: Resend; from: string } | null {
   return apiKey && from ? { client: new Resend(apiKey), from } : null;
 }
 
-/** Persoonlijke uitnodiging voor een adviesgesprek, 2 uur na de demo. */
-async function sendFollowUp(lead: DemoLead): Promise<void> {
-  const r = resend();
-  if (!r) return;
-  const firstName = lead.name.trim().split(/\s+/)[0] || lead.name;
-  const calendly = process.env.CALENDLY_URL;
-  const button = (href: string, label: string) =>
-    `<a href="${esc(href)}" style="display:inline-block;background:#1a73e8;color:#fff;text-decoration:none;font-weight:600;padding:12px 24px;border-radius:999px">${label}</a>`;
-
-  await r.client.emails.send({
-    from: `${FOLLOW_UP_SENDER} <${r.from}>`,
-    to: lead.email,
-    replyTo: CONTACT_EMAIL,
-    subject: "Je moverAI-demo — even sparren?",
-    scheduledAt: new Date(Date.now() + FOLLOW_UP_DELAY_MS).toISOString(),
-    html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#0f172a;font-size:15px;line-height:1.55">
-      <p>Hoi ${esc(firstName)},</p>
-      <p>Je hebt net de demo van moverAI uitgeprobeerd. Benieuwd wat je ervan vond!</p>
-      <p>Zullen we 15 minuten bellen? Dan laat ik zien hoe het werkt met jouw tarieven en jouw website, en beantwoord ik al je vragen.</p>
-      <p style="margin:24px 0">${
-        calendly
-          ? button(calendly, "Plan een adviesgesprek")
-          : `Antwoord gewoon op deze mail met een moment dat jou uitkomt.`
-      }</p>
-      <p>Of begin direct zelf: <a href="${esc(appUrl())}/#prijzen" style="color:#1a73e8">14 dagen gratis, zonder betaalgegevens</a>.</p>
-      <p>Groet,<br>Tom<br>moverAI</p>
-      <p style="font-size:12px;color:#64748b;margin-top:32px">Je krijgt deze mail omdat je in de demo aangaf dat we je mochten mailen. Geen interesse? Dan hoor je niets meer van ons.</p>
-    </div>`,
-  });
-}
-
 /** Direct seintje naar moverAI: een (waarschijnlijke) verhuizer heeft de demo gedaan. */
 async function notifyMoverAI(lead: DemoLead): Promise<void> {
   const r = resend();
@@ -102,9 +67,9 @@ async function notifyMoverAI(lead: DemoLead): Promise<void> {
     replyTo: lead.email,
     subject: `Nieuwe demo-lead: ${lead.name}`,
     html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px">
-      <p><strong>${esc(lead.name)}</strong> heeft de demo afgerond en wil gemaild worden.</p>
+      <p><strong>${esc(lead.name)}</strong> heeft de demo afgerond.</p>
       <p>E-mail: ${esc(lead.email)}<br>Telefoon: ${esc(lead.phone ?? "—")}<br>Demo: ${esc(lead.moveType)}, ${formatEuroCents(lead.totalCents)}</p>
-      <p>De uitnodigingsmail gaat over 2 uur automatisch de deur uit. Alle demo-leads: <a href="${esc(appUrl())}/admin">${esc(appUrl())}/admin</a></p>
+      <p>Er gaat geen automatische opvolgmail; volg zelf op als je wilt. Alle demo-leads: <a href="${esc(appUrl())}/admin">${esc(appUrl())}/admin</a></p>
     </div>`,
   });
 }

@@ -248,8 +248,6 @@ export function MoveFlow({
       ? demoContact?.phone && isValidPhone(demoContact.phone) ? demoContact.phone : ""
       : preview ? "06 12345678" : "",
   );
-  // Alleen in de demo (bezoeker = verhuizer): toestemming voor één opvolgmail van moverAI.
-  const [demoConsent, setDemoConsent] = useState(false);
 
   // Stap 2 — adressen
   // Demo/preview: voorbeeldadressen alvast gevonden, zodat de bezoeker alleen op "Volgende" hoeft.
@@ -620,7 +618,7 @@ export function MoveFlow({
             companyId: company.id,
             source,
             customer: { name, email, phone },
-            ...(demo ? { demoConsent, prospect } : {}),
+            ...(demo ? { prospect } : {}),
             details,
             works: {
               floorRemoval: floorRemoval
@@ -642,7 +640,7 @@ export function MoveFlow({
             moveType,
             customer: { name, email, phone },
             ...(demo
-              ? { demoConsent, prospect, ...(sampleUntouched ? { sampleHome: sampleHome!.id } : {}) }
+              ? { prospect, ...(sampleUntouched ? { sampleHome: sampleHome!.id } : {}) }
               : {}),
             move: {
               fromAddress,
@@ -733,6 +731,20 @@ export function MoveFlow({
   );
 
   const roomPickerOpen = photoMethod !== null;
+
+  // "Plan een adviesgesprek" in de demo. Persoonlijke demolink: via /gesprek, dat de
+  // klik vastlegt en de opvolgmail schrapt. Anders Calendly met naam/e-mail ingevuld.
+  const meetingHref = (calendly: string) => {
+    if (prospect) return `/gesprek/${encodeURIComponent(prospect)}`;
+    try {
+      const url = new URL(calendly);
+      if (name.trim()) url.searchParams.set("name", name.trim());
+      if (email.trim()) url.searchParams.set("email", email.trim());
+      return url.toString();
+    } catch {
+      return calendly;
+    }
+  };
 
   // Voorbeeldwoningen: in Test je tarieven de enige keuze, in de demo een snelkoppeling
   // voor wie geen woning bij de hand heeft (de klant ziet ze nooit).
@@ -1208,19 +1220,6 @@ export function MoveFlow({
           </span>
         )}
       </label>
-      {demo && (
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3">
-          <input
-            type="checkbox"
-            checked={demoConsent}
-            onChange={(e) => setDemoConsent(e.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0"
-          />
-          <span className="text-sm text-slate-700">
-            moverAI mag me één keer mailen met een uitnodiging voor een kort adviesgesprek.
-          </span>
-        </label>
-      )}
     </div>
   );
 
@@ -1854,7 +1853,7 @@ export function MoveFlow({
                 </a>
                 {calendlyUrl && (
                   <a
-                    href={calendlyUrl}
+                    href={meetingHref(calendlyUrl)}
                     target="_blank"
                     rel="noopener"
                     className="rounded-full border border-slate-300 bg-white px-6 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
