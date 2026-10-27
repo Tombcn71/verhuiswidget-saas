@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel, Type } from "@google/genai";
 import type { InvoiceJob } from "@/lib/tariff-derive";
 import type {
   ClearanceFill,
@@ -14,7 +14,7 @@ export type PhotoInput = {
   room: string;
 };
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
 const clamp01 = (n: number) => (Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0.5);
 
@@ -104,6 +104,9 @@ export async function analyzePhotos(photos: PhotoInput[]): Promise<InventoryItem
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       responseSchema: responseSchema as any,
       temperature: 0.2,
+      // Weinig nadenken: even nauwkeurig op de voorbeeldwoningen (±5% m³), maar
+      // ruim een derde goedkoper en twee keer zo snel (gemeten 2026-10-27).
+      thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
     },
   });
 

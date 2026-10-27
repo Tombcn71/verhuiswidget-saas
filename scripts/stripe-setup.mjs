@@ -26,7 +26,7 @@ const webhookUrl = process.argv[2];
 const PLANS = [
   { id: "moverai_basic", name: "moverAI Basic", cents: 7900, yearlyCents: 79000 },
   { id: "moverai_standard", name: "moverAI Standard", cents: 12900, yearlyCents: 129000 },
-  { id: "moverai_premium", name: "moverAI Premium", cents: 22900, yearlyCents: 229000 },
+  { id: "moverai_premium", name: "moverAI Premium", cents: 24900, yearlyCents: 249000 },
 ];
 const EXTRA_SEAT = { id: "moverai_extra_seat", name: "moverAI extra gebruiker", cents: 1900 };
 
