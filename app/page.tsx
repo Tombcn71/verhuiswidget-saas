@@ -2,7 +2,7 @@ import Image from "next/image";
 import heroImage from "@/public/hero.jpg";
 import { DemoModal } from "@/app/_components/demo-modal";
 import { SiteHeader } from "@/app/_components/site-header";
-import { PricingCards } from "@/app/_components/pricing-cards";
+import { PricingCards, TrialCard } from "@/app/_components/pricing-cards";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
 import { Globe, Link, MapPin, Star } from "lucide-react";
 import {
@@ -302,26 +302,21 @@ export default function HomePage() {
           className="scroll-mt-20 border-t border-border bg-muted py-20">
           <div className="mx-auto w-full max-w-5xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Kies je prijsplan
+              Probeer moverAI 14 dagen gratis
             </h2>
-            <div className="mt-5 flex justify-center">
-              <p className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200">
-                <span>🎁 Eerste 2 weken gratis</span>
-                <span aria-hidden="true" className="text-emerald-300">
-                  ·
-                </span>
-                <span>Geen betaalgegevens nodig</span>
-                <span aria-hidden="true" className="text-emerald-300">
-                  ·
-                </span>
-                <span>Niets wordt automatisch afgeschreven</span>
-              </p>
-            </div>
             <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
+              Alle functies, geen betaalgegevens nodig en er wordt niets automatisch afgeschreven.
+              Bevalt het? Dan kies je daarna pas een pakket.
+            </p>
+            <TrialCard primaryButton={aiButton} />
+            <h3 className="mt-16 text-center text-xl font-semibold tracking-tight">
+              Na je proefperiode: kies het pakket dat bij je past
+            </h3>
+            <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
               In elk pakket werk je op alle 3 manieren: via je website, via een
               linkje en zelf op locatie. Betaal per maand of per jaar; prijzen exclusief btw.
             </p>
-            <PricingCards primaryButton={aiButton} />
+            <PricingCards />
           </div>
         </section>
 

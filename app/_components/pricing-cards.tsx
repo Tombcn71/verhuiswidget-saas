@@ -25,43 +25,70 @@ type Feature = {
   text: string;
   /** Verschilt per plan: blauw en vet, zodat je kaarten horizontaal vergelijkt. */
   highlight?: boolean;
-  /** Niet in dit plan: grijs met een streepje (de regel blijft staan voor de uitlijning). */
-  missing?: boolean;
   scanInfo?: boolean;
 };
 
 /**
- * Volledige lijst per plan, in dezelfde volgorde in elke kaart: eerst de
- * verschillen (gebruikers, scans), dan wat overal in zit, dan de extra's.
- * Zo lijnen de regels uit en hoef je niet tussen kaarten te puzzelen.
+ * Basic toont alles; Standard en Premium alleen wat ze extra hebben, onder
+ * "Alles uit …, plus:" (zie `PLAN_BASE`).
  */
 function planFeatures(plan: Plan): Feature[] {
-  const has = (ids: PlanId[]) => ids.includes(plan.id);
+  const seats: Feature = {
+    text: `${plan.seats} gebruikers${plan.id === "standard" ? " om flexibel samen te werken" : ""}`,
+    highlight: true,
+  };
+  const scans: Feature = {
+    text: `${plan.scans === null ? "Onbeperkt" : plan.scans.toLocaleString("nl-NL")} inboedelscans per maand${plan.fairUse ? " (fair use)" : ""}`,
+    highlight: true,
+    scanInfo: true,
+  };
+  if (plan.id === "standard") {
+    return [seats, scans, { text: "Uitgebreid dashboard voor planners" }];
+  }
+  if (plan.id === "premium") {
+    return [seats, scans, { text: "Voorrang bij support" }];
+  }
   return [
-    {
-      text: `${plan.seats} gebruikers${plan.id === "standard" ? " om flexibel samen te werken" : ""}`,
-      highlight: true,
-    },
-    {
-      text: `${plan.scans === null ? "Onbeperkt" : plan.scans.toLocaleString("nl-NL")} inboedelscans per maand${plan.fairUse ? " (fair use)" : ""}`,
-      highlight: true,
-      scanInfo: true,
-    },
+    seats,
+    scans,
     ...CHANNEL_FEATURES.map((text) => ({ text })),
     { text: "White-label: je eigen bedrijfsnaam en huisstijlkleur" },
     { text: "Tarieven volledig instelbaar: m³, km en toeslagen" },
     { text: "Automatische herinnering bij openstaande offertes" },
     { text: "Automatisch reviewverzoek na de verhuizing" },
-    { text: "Uitgebreid dashboard voor planners", missing: !has(["standard", "premium"]) },
-    { text: "Voorrang bij support", missing: !has(["premium"]) },
   ];
 }
 
-function DashIcon() {
+/** Het pakket waar Standard en Premium op voortbouwen. */
+const PLAN_BASE: Partial<Record<PlanId, string>> = {
+  standard: "Basic",
+  premium: "Standard",
+};
+
+/** "Zo werkt je proefperiode": staat boven de pakketten op de homepage. */
+export function TrialCard({ primaryButton }: { primaryButton: string }) {
   return (
-    <span aria-hidden="true" className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center text-muted-foreground/60">
-      —
-    </span>
+    <div className="mx-auto mt-10 max-w-2xl rounded-2xl border-2 border-brand-600 bg-background p-6 shadow-sm sm:p-8">
+      <h3 className="text-lg font-semibold">Zo werkt je proefperiode</h3>
+      <ul className="mt-4 space-y-3 text-sm">
+        {[
+          "14 dagen alle functies",
+          "Upload een oude factuur en je tarieven staan klaar",
+          "Persoonlijke hulp bij het instellen, via WhatsApp",
+        ].map((text) => (
+          <li key={text} className="flex gap-2.5">
+            <CheckIcon />
+            <span>{text}</span>
+          </li>
+        ))}
+      </ul>
+      <Link
+        href="/kies-plan?plan=standard"
+        className={`mt-6 inline-block w-full rounded-full px-6 py-3 text-center font-semibold sm:w-auto ${primaryButton}`}
+      >
+        Start je gratis proefperiode
+      </Link>
+    </div>
   );
 }
 
@@ -87,8 +114,11 @@ const euro = (cents: number) =>
     cents / 100,
   );
 
-/** Prijskaarten van de homepage met de schakelaar Maandelijks / Jaarlijks. */
-export function PricingCards({ primaryButton }: { primaryButton: string }) {
+/**
+ * Prijskaarten van de homepage met de schakelaar Maandelijks / Jaarlijks. Zonder
+ * knoppen: starten gaat via `TrialCard`, het pakket kies je pas na de proef.
+ */
+export function PricingCards() {
   const [interval, setInterval] = useState<BillingInterval>("month");
 
   return (
@@ -168,20 +198,17 @@ export function PricingCards({ primaryButton }: { primaryButton: string }) {
                     "Maandelijks opzegbaar"
                   )}
                 </p>
-                <p className="mt-1 text-sm font-medium text-emerald-700">
-                  Eerste 2 weken gratis, zonder betaalgegevens
-                </p>
                 <ul className="mt-6 flex-1 space-y-3 text-sm text-muted-foreground">
+                  {PLAN_BASE[plan.id] && (
+                    <li className="font-semibold text-foreground">Alles uit {PLAN_BASE[plan.id]}, plus:</li>
+                  )}
                   {planFeatures(plan).map((f) => (
                     <li
                       key={f.text}
-                      className={`flex gap-2.5 ${f.missing ? "text-muted-foreground/80" : ""} ${
-                        f.highlight ? "font-semibold text-brand-700" : ""
-                      }`}
+                      className={`flex gap-2.5 ${f.highlight ? "font-semibold text-brand-700" : ""}`}
                     >
-                      {f.missing ? <DashIcon /> : <CheckIcon />}
+                      <CheckIcon />
                       <span>
-                        {f.missing && <span className="sr-only">Niet inbegrepen:</span>}{" "}
                         {f.text}
                         {f.scanInfo && <ScanInfo />}
                       </span>
@@ -196,14 +223,6 @@ export function PricingCards({ primaryButton }: { primaryButton: string }) {
                     </a>
                   </p>
                 )}
-                <Link
-                  href={`/kies-plan?plan=${plan.id}`}
-                  className={`mt-8 rounded-full px-6 py-3 text-center font-semibold ${
-                    featured ? primaryButton : "border border-border text-foreground/80 hover:bg-muted"
-                  }`}
-                >
-                  Kies {plan.label}
-                </Link>
               </div>
             </div>
           );
