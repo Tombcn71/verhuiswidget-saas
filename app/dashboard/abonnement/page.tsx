@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireAdminCompany } from "@/lib/current-company";
-import { refreshFromStripe } from "@/lib/billing";
+import { getSubscriptionTerm, refreshFromStripe } from "@/lib/billing";
 import { countMembers } from "@/lib/companies";
 import { countLeadsThisMonth } from "@/lib/leads";
 import {
@@ -35,6 +35,7 @@ import { PageHeader } from "../page-header";
 import { UsageBar } from "../usage-bar";
 import { ScanInfo } from "@/app/_components/scan-info";
 import { openBillingPortal, startCheckout } from "./actions";
+import { CancelSubscription, DeleteAccount } from "./account-actions";
 
 export const metadata: Metadata = { title: "Abonnement" };
 
@@ -43,9 +44,10 @@ export default async function SubscriptionPage({
 }: PageProps<"/dashboard/abonnement">) {
   // Altijd de actuele stand uit Stripe, ook als de webhook nog niet binnen is.
   const company = await refreshFromStripe(await requireAdminCompany());
-  const [used, members, { fout, plan: wanted, betaald, periode }] = await Promise.all([
+  const [used, members, term, { fout, plan: wanted, betaald, periode }] = await Promise.all([
     countLeadsThisMonth(company.id),
     countMembers(company),
+    getSubscriptionTerm(company),
     searchParams,
   ]);
 
@@ -56,6 +58,7 @@ export default async function SubscriptionPage({
   // Met een lopend Stripe-abonnement gaat alles (wisselen, opzeggen) via het portaal.
   const subscribed = company.stripeSubscriptionId !== null;
   const pastDue = company.subscriptionStatus === "past_due";
+  const endsOn = term?.cancelAt ?? term?.periodEnd ?? null;
 
   const error =
     fout === "teamleden"
@@ -88,7 +91,7 @@ export default async function SubscriptionPage({
       />
       {subscribed && (
         <p className="-mt-4 mb-6 text-xs text-muted-foreground">
-          Via &ldquo;Abonnement beheren&rdquo;: facturen, betaalmethode, plan wisselen of opzeggen.
+          Via &ldquo;Abonnement beheren&rdquo;: facturen, betaalmethode of plan wisselen.
         </p>
       )}
 
@@ -224,6 +227,14 @@ export default async function SubscriptionPage({
           );
         })}
       </div>
+
+      {subscribed && (
+        <CancelSubscription
+          endsOn={endsOn ? formatDate(endsOn) : null}
+          cancelled={term?.cancelAt != null}
+        />
+      )}
+      <DeleteAccount companyName={company.name} subscribed={subscribed} />
     </>
   );
 }

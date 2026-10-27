@@ -115,6 +115,15 @@ export async function updateLeadNotes(
  * Offerteaanvragen (= scans) in de huidige kalendermaand, Nederlandse tijd.
  * Telt mee voor de scan-limiet van het plan.
  */
+/** Alle klantfoto's van een bedrijf in Vercel Blob (om te wissen bij opzeggen account). */
+export async function listCompanyPhotoUrls(companyId: string): Promise<string[]> {
+  const rows = await db
+    .select({ photoUrls: leads.photoUrls })
+    .from(leads)
+    .where(eq(leads.companyId, companyId));
+  return rows.flatMap((r) => r.photoUrls).filter((u) => u.includes(".blob.vercel-storage.com"));
+}
+
 export async function countLeadsThisMonth(companyId: string): Promise<number> {
   const [row] = await db
     .select({ count: sql<number>`count(*)::int` })

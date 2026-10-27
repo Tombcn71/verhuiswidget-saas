@@ -263,6 +263,11 @@ export async function setStripeCustomerId(id: string, customerId: string): Promi
     .where(eq(companies.id, id));
 }
 
+/** Wist het bedrijf; de leads gaan mee (cascade). Stripe, foto's en Clerk regelt de aanroeper. */
+export async function deleteCompany(id: string): Promise<void> {
+  await db.delete(companies).where(eq(companies.id, id));
+}
+
 /**
  * Verwerkt de stand van een Stripe-abonnement (vanuit de webhook) op het bedrijf
  * en past de gebruikerslimiet in Clerk mee aan.

@@ -47,6 +47,32 @@ export async function syncSubscription(sub: Stripe.Subscription): Promise<void> 
   });
 }
 
+/** Hoe het lopende abonnement afloopt, voor de opzegknop op de Abonnement-pagina. */
+export type SubscriptionTerm = {
+  /** Einde van de betaalde periode (of van de proef, als er nog niet betaald is). */
+  periodEnd: Date | null;
+  /** Gezet als er is opgezegd: dan stopt het abonnement op deze datum. */
+  cancelAt: Date | null;
+};
+
+export async function getSubscriptionTerm(company: Company): Promise<SubscriptionTerm | null> {
+  if (!company.stripeSubscriptionId) return null;
+  try {
+    const sub = await getStripe().subscriptions.retrieve(company.stripeSubscriptionId);
+    const end = sub.trial_end && sub.status === "trialing"
+      ? sub.trial_end
+      : sub.items.data[0]?.current_period_end;
+    const cancelAt = sub.cancel_at ?? (sub.cancel_at_period_end ? end : null);
+    return {
+      periodEnd: end ? new Date(end * 1000) : null,
+      cancelAt: cancelAt ? new Date(cancelAt * 1000) : null,
+    };
+  } catch (err) {
+    console.error("Stripe: abonnement ophalen mislukt", err);
+    return null;
+  }
+}
+
 /**
  * Haalt de actuele stand direct bij Stripe op (nieuwste abonnement van de klant).
  * Zo klopt de Abonnement-pagina ook als de webhook (nog) niet binnen is —
