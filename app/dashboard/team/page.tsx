@@ -28,7 +28,7 @@ export default async function TeamPage({ searchParams }: PageProps<"/dashboard/t
   return (
     <>
       {welkom !== undefined ? (
-        // Eerste bezoek na het aanmaken (via /kies-plan bij Standard/Premium).
+        // Eerste bezoek na het aanmaken (via /kies-plan bij Pro).
         <PageHeader
           title={`Welkom bij moverAI, ${company.name}!`}
           description={

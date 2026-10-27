@@ -215,7 +215,7 @@ export default function HomePage() {
               Rekenvoorbeeld: 20 opnames per maand × 1,5 uur = 30 uur × €45 per
               uur = €1.350. 20 ritten × 10 km heen en terug = 200 km × €0,20
               brandstof per km = €40. Samen €1.390 per maand. moverAI kost vanaf
-              €79 per maand.
+              €69 per maand.
             </p>
             <a
               href="#prijzen"

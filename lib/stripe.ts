@@ -18,7 +18,9 @@ export function getStripe(): Stripe {
  */
 export const PLAN_LOOKUP_KEY: Record<PlanId, string> = {
   basic: "moverai_basic",
-  standard: "moverai_standard",
+  pro: "moverai_pro",
+  // Op maat: niet te koop; oude prijs van vóór 2026-10-27. Een maatwerkprijs heeft
+  // geen lookup key, dan blijft het plan staan dat je met de hand hebt gezet.
   premium: "moverai_premium",
 };
 export const EXTRA_SEAT_LOOKUP_KEY = "moverai_extra_seat";
@@ -30,6 +32,7 @@ export function lookupKeyFor(plan: PlanId, interval: BillingInterval): string {
 
 export function planForLookupKey(key: string | null | undefined): PlanId | null {
   const base = key?.replace(/_yearly$/, "");
+  if (base === "moverai_standard") return "pro"; // oude naam, vóór 2026-10-27
   const hit = Object.entries(PLAN_LOOKUP_KEY).find(([, k]) => k === base);
   return hit ? (hit[0] as PlanId) : null;
 }

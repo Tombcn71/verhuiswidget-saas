@@ -3,6 +3,7 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { isOrgAdmin, requireCompany } from "@/lib/current-company";
 import { countLeadsThisMonth } from "@/lib/leads";
 import {
+  CONTACT_EMAIL,
   nextPlan,
   planFor,
   scanUsage,
@@ -99,6 +100,10 @@ function planNotice(plan: Plan, usage: ScanUsage, trial: TrialState): string | n
   const upgrade = nextPlan(plan);
   if (usage.over && upgrade) {
     return `Je hebt deze maand ${usage.used} inboedelscans gebruikt, meer dan de ${usage.limit} van ${plan.label}. Alles blijft gewoon werken — met ${upgrade.label} heb je ${upgrade.scans === null ? "onbeperkt" : upgrade.scans.toLocaleString("nl-NL")} inboedelscans per maand.`;
+  }
+  // Geen groter pakket (Pro, op maat): dan een pakket op maat via contact.
+  if (usage.over) {
+    return `Je hebt deze maand ${usage.used} inboedelscans gebruikt, meer dan de ${usage.limit} van ${plan.label}. Alles blijft gewoon werken. Heb je structureel meer nodig? Neem contact op via ${CONTACT_EMAIL} voor een pakket op maat.`;
   }
   if (usage.nearLimit && upgrade) {
     return `Je zit op ${usage.used} van de ${usage.limit} inboedelscans deze maand. Groei je door? ${upgrade.label} geeft meer ruimte.`;

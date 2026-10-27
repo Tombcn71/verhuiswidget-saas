@@ -211,7 +211,7 @@ export function MoveFlow({
   demoContact?: DemoContact;
   /** Slug in de verkoop-CRM van moverAI; reist mee zodat "demo gedaan/boeken" bijgehouden wordt. */
   prospect?: string;
-  /** Demo: "Plan een adviesgesprek" bij de prijs. */
+  /** Demo: "Plan een adviesgesprek" aan het eind. */
   calendlyUrl?: string | null;
 }) {
   const chrome = demo || appChrome;
@@ -1717,16 +1717,6 @@ export function MoveFlow({
               jouw eigen tarieven.
             </span>
           </p>
-          {calendlyUrl && (
-            <a
-              href={meetingHref(calendlyUrl)}
-              target="_blank"
-              rel="noopener"
-              className="mt-3 block rounded-full border border-slate-300 bg-white px-5 py-2.5 text-center text-sm font-semibold text-slate-700 hover:bg-slate-100"
-            >
-              Plan een adviesgesprek
-            </a>
-          )}
         </div>
       )}
 
@@ -1855,19 +1845,6 @@ export function MoveFlow({
                 ))}
               </ul>
 
-              <div className="mt-5 flex flex-col gap-2">
-                <a
-                  href="/kies-plan?plan=standard"
-                  target="_top"
-                  className={`rounded-full px-6 py-3 text-center text-sm font-semibold text-white shadow-md ${ACCENT_BG}`}
-                >
-                  Start 14 dagen gratis
-                </a>
-                {/* "Plan een adviesgesprek" staat al bij de prijs, niet nog een keer hier. */}
-                <p className="text-center text-xs text-slate-500">
-                  Geen betaalgegevens nodig
-                </p>
-              </div>
             </div>
           )}
         </div>
@@ -1910,6 +1887,29 @@ export function MoveFlow({
               ? `De offerte staat nu in je mailbox (${email}). ${company.name} neemt binnenkort contact met je op.`
               : `Je aanvraag is ontvangen. ${company.name} neemt binnenkort contact met je op.`}
         </p>
+        {/* Einde van de demo: pas hier de vervolgstap, als hij alles heeft gezien. */}
+        {demo && (
+          <div className="mt-4 border-t border-slate-200 pt-4">
+            <p className="text-sm font-semibold">Benieuwd hoe dit werkt met jouw tarieven?</p>
+            {calendlyUrl && (
+              <a
+                href={meetingHref(calendlyUrl)}
+                target="_blank"
+                rel="noopener"
+                className={`mt-3 block rounded-full px-6 py-3 text-center text-sm font-semibold text-white shadow-md ${ACCENT_BG}`}
+              >
+                Plan een adviesgesprek
+              </a>
+            )}
+            <a
+              href="/kies-plan?plan=pro"
+              target="_top"
+              className="mt-3 inline-block text-xs text-slate-600 underline hover:text-slate-900"
+            >
+              of probeer het zelf, 14 dagen gratis
+            </a>
+          </div>
+        )}
         {backUrl && !onspot && (
           <a
             href={backUrl}

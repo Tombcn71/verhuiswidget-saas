@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getOrCreateCompany, setCompanyPlan } from "@/lib/companies";
-import { PLANS, normalizePlan, trialState } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, normalizePlan, trialState } from "@/lib/plans";
 
 /**
  * Landt hier vanaf de pricing-knop "Probeer … gratis". Het begin van de flow:
@@ -9,7 +9,9 @@ import { PLANS, normalizePlan, trialState } from "@/lib/plans";
  * Clerk hier terug en zetten we het gekozen plan (tijdens de proef) op het bedrijf.
  */
 export async function GET(req: NextRequest) {
-  const plan = normalizePlan(req.nextUrl.searchParams.get("plan"));
+  // Op maat (premium) kies je niet zelf; een oude link daarnaar wordt Pro.
+  const asked = normalizePlan(req.nextUrl.searchParams.get("plan"));
+  const plan = PLAN_ORDER.includes(asked) ? asked : "pro";
   const origin = req.nextUrl.origin;
 
   const { userId, orgId, has } = await auth();

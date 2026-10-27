@@ -16,9 +16,9 @@ import {
 
 // Teksten per plan; aantallen (gebruikers, scans, prijzen) komen uit `lib/plans.ts`.
 const PLAN_TAGLINE: Record<PlanId, string> = {
-  basic: "Voor de zelfstandige verhuizer die direct professioneel wil scannen.",
-  standard: "Voor groeiende verhuisbedrijven met een kantoor- of planningsteam.",
-  premium: "Voor de grotere verhuisketens met meerdere planners en taxateurs op de weg.",
+  basic: "Voor de zelfstandige verhuizer, alleen of met z'n tweeën.",
+  pro: "Voor verhuisbedrijven met personeel en een kantoor of planner.",
+  premium: "Meer gebruikers of meer scans nodig? We maken een pakket dat bij je past.",
 };
 
 type Feature = {
@@ -29,12 +29,12 @@ type Feature = {
 };
 
 /**
- * Basic toont alles; Standard en Premium alleen wat ze extra hebben, onder
- * "Alles uit …, plus:" (zie `PLAN_BASE`).
+ * Basic toont alles; Pro alleen wat er extra in zit, onder "Alles uit Basic,
+ * plus:" (zie `PLAN_BASE`).
  */
 function planFeatures(plan: Plan): Feature[] {
   const seats: Feature = {
-    text: `${plan.seats} gebruikers${plan.id === "standard" ? " om flexibel samen te werken" : ""}`,
+    text: `${plan.seats} ${plan.seats === 1 ? "gebruiker" : "gebruikers"}${plan.id === "pro" ? " om flexibel samen te werken" : ""}`,
     highlight: true,
   };
   const scans: Feature = {
@@ -42,11 +42,8 @@ function planFeatures(plan: Plan): Feature[] {
     highlight: true,
     scanInfo: true,
   };
-  if (plan.id === "standard") {
+  if (plan.id === "pro") {
     return [seats, scans];
-  }
-  if (plan.id === "premium") {
-    return [seats, scans, { text: "Voorrang bij support" }];
   }
   return [
     seats,
@@ -59,10 +56,9 @@ function planFeatures(plan: Plan): Feature[] {
   ];
 }
 
-/** Het pakket waar Standard en Premium op voortbouwen. */
+/** Het pakket waar Pro op voortbouwt. */
 const PLAN_BASE: Partial<Record<PlanId, string>> = {
-  standard: "Basic",
-  premium: "Standard",
+  pro: "Basic",
 };
 
 /** "Zo werkt je proefperiode": staat boven de pakketten op de homepage. */
@@ -93,7 +89,7 @@ export function TrialCard({
       </p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <Link
-          href="/kies-plan?plan=standard"
+          href="/kies-plan?plan=pro"
           className={`w-full rounded-full px-6 py-3 text-center font-semibold sm:w-auto ${primaryButton}`}
         >
           Start je gratis proefperiode
@@ -183,7 +179,7 @@ export function PricingCards() {
 
       <div className="mt-10 grid gap-6 md:grid-cols-3">
         {PLAN_ORDER.map((id) => PLANS[id]).map((plan) => {
-          const featured = plan.id === "standard";
+          const featured = plan.id === "pro";
           return (
             <div
               key={plan.id}
@@ -236,18 +232,35 @@ export function PricingCards() {
                     </li>
                   ))}
                 </ul>
-                {plan.id === "premium" && (
-                  <p className="mt-4 text-sm text-muted-foreground">
-                    Meer dan {plan.seats} gebruikers?{" "}
-                    <a href={MORE_SEATS_MAILTO} className="font-medium text-brand-600 underline">
-                      Neem contact op
-                    </a>
-                  </p>
-                )}
               </div>
             </div>
           );
         })}
+
+        {/* Op maat: geen vaste prijs, in een gesprek afgesproken (bijv. Pro met extra scans). */}
+        <div className="flex h-full flex-col rounded-2xl border border-dashed border-border bg-background/60 p-8">
+          <h3 className="text-lg font-semibold">Op maat</h3>
+          <p className="mt-1 min-h-11 text-sm text-muted-foreground">{PLAN_TAGLINE.premium}</p>
+          <ul className="mt-6 flex-1 space-y-3 text-sm text-muted-foreground">
+            {[
+              "Alles uit Pro",
+              `Meer dan ${PLANS.pro.seats} gebruikers`,
+              `Meer dan ${PLANS.pro.scans?.toLocaleString("nl-NL")} inboedelscans per maand`,
+              "Een prijs die past bij wat je gebruikt",
+            ].map((text) => (
+              <li key={text} className="flex gap-2.5">
+                <CheckIcon />
+                <span>{text}</span>
+              </li>
+            ))}
+          </ul>
+          <a
+            href={MORE_SEATS_MAILTO}
+            className="mt-8 rounded-full border border-border px-6 py-3 text-center font-semibold text-foreground/80 hover:bg-muted"
+          >
+            Neem contact op
+          </a>
+        </div>
       </div>
     </>
   );

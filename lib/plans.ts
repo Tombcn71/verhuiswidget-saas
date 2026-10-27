@@ -1,6 +1,6 @@
 import type { Company } from "@/lib/db";
 
-export type PlanId = "basic" | "standard" | "premium";
+export type PlanId = "basic" | "pro" | "premium";
 
 export type Plan = {
   id: PlanId;
@@ -33,28 +33,30 @@ export const PLANS: Record<PlanId, Plan> = {
     id: "basic",
     label: "Basic",
     audience: "ZZP",
-    priceCents: 7900,
-    yearlyCents: 79000,
+    priceCents: 6900,
+    yearlyCents: 69000,
     seats: 2,
     extraSeatCents: null,
-    scans: 150,
+    scans: 100,
   },
-  standard: {
-    id: "standard",
-    label: "Standard",
+  pro: {
+    id: "pro",
+    label: "Pro",
     audience: "MKB",
-    priceCents: 12900,
-    yearlyCents: 129000,
+    priceCents: 9900,
+    yearlyCents: 99000,
     seats: 5,
     extraSeatCents: null,
     scans: 500,
   },
+  // Niet te koop op de site: "Op maat" (neem contact op). Voor een groot bedrijf
+  // zet je dit plan met de hand, met een eigen prijs in Stripe.
   premium: {
     id: "premium",
-    label: "Premium",
-    audience: "Enterprise",
-    priceCents: 24900,
-    yearlyCents: 249000,
+    label: "Op maat",
+    audience: "Op maat",
+    priceCents: 0,
+    yearlyCents: 0,
     seats: 10,
     extraSeatCents: 1900,
     scans: 1500,
@@ -62,12 +64,13 @@ export const PLANS: Record<PlanId, Plan> = {
   },
 };
 
-export const PLAN_ORDER: PlanId[] = ["basic", "standard", "premium"];
+/** De plannen die je zelf kunt kiezen (site, kies-plan, Abonnement). Premium = op maat. */
+export const PLAN_ORDER: PlanId[] = ["basic", "pro"];
 
-/** Contact voor maatwerk (bijv. meer dan 5 gebruikers). */
+/** Contact voor maatwerk (meer gebruikers of meer scans dan Pro). */
 export const CONTACT_EMAIL = "info@moverai.nl";
 export const MORE_SEATS_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-  "Meer gebruikers voor moverAI",
+  "moverAI op maat",
 )}`;
 
 /** De drie kanalen; zitten in elk plan. */
@@ -77,17 +80,19 @@ export const CHANNEL_FEATURES = [
   "Zelf op locatie: scan ter plekke met je telefoon",
 ];
 
+/** Onbekend of het oude "standard" (tot 2026-10-27) → Pro. */
 export function normalizePlan(value: unknown): PlanId {
-  return value === "basic" || value === "premium" ? value : "standard";
+  return value === "basic" || value === "premium" ? value : "pro";
 }
 
 export function planFor(company: Company): Plan {
   return PLANS[normalizePlan(company.plan)];
 }
 
-/** Het eerstvolgende plan met meer ruimte, of null bij Premium. */
+/** Het eerstvolgende plan met meer ruimte, of null bij Pro en op maat (dan: contact). */
 export function nextPlan(plan: Plan): Plan | null {
-  const next = PLAN_ORDER[PLAN_ORDER.indexOf(plan.id) + 1];
+  const i = PLAN_ORDER.indexOf(plan.id);
+  const next = i === -1 ? undefined : PLAN_ORDER[i + 1];
   return next ? PLANS[next] : null;
 }
 

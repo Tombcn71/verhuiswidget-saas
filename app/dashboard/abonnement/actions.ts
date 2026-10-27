@@ -7,7 +7,7 @@ import { del } from "@vercel/blob";
 import { requireAdminCompany } from "@/lib/current-company";
 import { countMembers, deleteCompany, setStripeCustomerId } from "@/lib/companies";
 import { listCompanyPhotoUrls } from "@/lib/leads";
-import { PLANS, normalizeInterval, normalizePlan } from "@/lib/plans";
+import { MORE_SEATS_MAILTO, PLANS, PLAN_ORDER, normalizeInterval, normalizePlan } from "@/lib/plans";
 import { getStripe, lookupKeyFor, priceIdFor } from "@/lib/stripe";
 import { appUrl } from "@/lib/app-url";
 
@@ -22,6 +22,8 @@ export async function startCheckout(formData: FormData): Promise<void> {
   const company = await requireAdminCompany();
   const plan = PLANS[normalizePlan(formData.get("plan"))];
   const interval = normalizeInterval(formData.get("interval"));
+  // Op maat (premium) is niet zelf af te sluiten: dat gaat via een gesprek.
+  if (!PLAN_ORDER.includes(plan.id)) redirect(MORE_SEATS_MAILTO);
 
   // Al een lopend abonnement: wisselen gaat via het Stripe-portaal.
   if (company.stripeSubscriptionId) await openBillingPortal();

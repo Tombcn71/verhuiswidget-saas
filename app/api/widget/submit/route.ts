@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notifyIfOverScanLimit } from "@/lib/scan-alerts";
 import { z } from "zod";
 import { isValidPhone } from "@/lib/phone";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
@@ -327,6 +328,8 @@ export async function POST(request: Request) {
     vatCents: price.vatCents,
     totalCents: price.totalCents,
   });
+  // Voor het eerst deze maand over de scans: seintje aan moverAI (niet fataal).
+  await notifyIfOverScanLimit(company).catch(() => {});
 
   // 4. Offerte-e-mails versturen (niet fataal). Proef verlopen zonder betaling:
   // alleen de klant krijgt z'n offerte; het bedrijf ziet de lead na activeren.

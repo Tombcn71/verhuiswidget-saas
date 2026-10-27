@@ -151,7 +151,7 @@ export default async function SubscriptionPage({
         </div>
       )}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
         {PLAN_ORDER.map((id) => {
           const p = PLANS[id];
           const current = p.id === plan.id;
@@ -188,7 +188,7 @@ export default async function SubscriptionPage({
                   )}
                   <ul className="mt-4 flex-1 space-y-2 text-sm">
                     {[
-                      `${p.seats} gebruikers`,
+                      `${p.seats} ${p.seats === 1 ? "gebruiker" : "gebruikers"}`,
                       p.scans === null
                         ? "Onbeperkt inboedelscans"
                         : `${p.scans.toLocaleString("nl-NL")} inboedelscans per maand${p.fairUse ? " (fair use)" : ""}`,
@@ -201,9 +201,9 @@ export default async function SubscriptionPage({
                       </li>
                     ))}
                   </ul>
-                  {p.id === "premium" && (
+                  {p.id === "pro" && (
                     <p className="mt-4 text-sm text-muted-foreground">
-                      Meer dan {p.seats} gebruikers?{" "}
+                      Meer dan {p.seats} gebruikers of {p.scans?.toLocaleString("nl-NL")} scans?{" "}
                       <a href={MORE_SEATS_MAILTO} className="font-medium text-primary underline">
                         Neem contact op
                       </a>

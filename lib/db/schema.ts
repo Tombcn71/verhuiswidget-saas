@@ -69,9 +69,9 @@ export const companies = pgTable("companies", {
   // Wie het bedrijf heeft aangemaakt; zegt niets meer over toegang.
   clerkUserId: text("clerk_user_id").notNull(),
 
-  // Abonnement. `plan`: "basic" | "standard" | "premium" (zie `lib/plans.ts`).
+  // Abonnement. `plan`: "basic" | "pro" | "premium" (= op maat; zie `lib/plans.ts`).
   // Zonder betaald abonnement geldt de proefperiode tot `trialEndsAt`.
-  plan: text("plan").notNull().default("standard"),
+  plan: text("plan").notNull().default("pro"),
   trialEndsAt: timestamp("trial_ends_at", { withTimezone: true })
     .notNull()
     .default(sql`now() + interval '14 days'`),

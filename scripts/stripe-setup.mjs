@@ -24,15 +24,21 @@ const webhookUrl = process.argv[2];
 
 // Houd gelijk met lib/plans.ts en lib/stripe.ts. Jaar = 10 × maand ("2 maanden gratis").
 const PLANS = [
-  { id: "moverai_basic", name: "moverAI Basic", cents: 7900, yearlyCents: 79000 },
-  { id: "moverai_standard", name: "moverAI Standard", cents: 12900, yearlyCents: 129000 },
-  { id: "moverai_premium", name: "moverAI Premium", cents: 24900, yearlyCents: 249000 },
+  { id: "moverai_basic", name: "moverAI Basic", cents: 6900, yearlyCents: 69000 },
+  { id: "moverai_pro", name: "moverAI Pro", cents: 9900, yearlyCents: 99000 },
 ];
+// Niet meer te koop (Standard heet sinds 2026-10-27 Pro; Premium is "op maat"):
+// prijzen en product uitzetten. Lopende abonnementen houden hun prijs.
+const RETIRED = ["moverai_standard", "moverai_premium"];
 const EXTRA_SEAT = { id: "moverai_extra_seat", name: "moverAI extra gebruiker", cents: 1900 };
 
 async function ensureProduct({ id, name }) {
   try {
-    return await stripe.products.retrieve(id);
+    const product = await stripe.products.retrieve(id);
+    // Naam zoals de klant hem ziet bij afrekenen en op de factuur.
+    return product.name === name && product.active
+      ? product
+      : stripe.products.update(id, { name, active: true });
   } catch {
     return stripe.products.create({ id, name, tax_code: "txcd_10103001" }); // SaaS
   }
@@ -68,6 +74,18 @@ for (const plan of PLANS) {
   const yearly = await ensurePrice(product, `${plan.id}_yearly`, plan.yearlyCents, "year");
   planPrices.push({ product: product.id, prices: [monthly.id, yearly.id] });
   console.log(`✓ ${plan.name}: maand ${monthly.id} · jaar ${yearly.id}`);
+}
+for (const id of RETIRED) {
+  for (const key of [id, `${id}_yearly`]) {
+    const { data } = await stripe.prices.list({ lookup_keys: [key], active: true });
+    for (const price of data) await stripe.prices.update(price.id, { active: false });
+  }
+  try {
+    await stripe.products.update(id, { active: false });
+    console.log(`✓ Uitgezet: ${id}`);
+  } catch {
+    // bestond niet
+  }
 }
 const seatProduct = await ensureProduct(EXTRA_SEAT);
 const seatPrice = await ensurePrice(seatProduct, EXTRA_SEAT.id, EXTRA_SEAT.cents, "month");

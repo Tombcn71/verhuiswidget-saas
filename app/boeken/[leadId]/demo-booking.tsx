@@ -149,7 +149,7 @@ export async function DemoBooking({
               </li>
             </ul>
             <Link
-              href="/kies-plan?plan=standard"
+              href="/kies-plan?plan=pro"
               className="mt-8 block rounded-full bg-(--accent) px-6 py-3.5 text-center font-semibold text-white shadow-md transition hover:brightness-95"
             >
               Probeer 14 dagen gratis
