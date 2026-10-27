@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BellRing, Check, ClipboardList, MailCheck } from "lucide-react";
 import { DEMO_COMPANY_PUBLIC } from "@/lib/demo";
 import { markDemoLeadBooked } from "@/lib/demo-leads";
 import { markDemoBooked } from "@/lib/prospects";
@@ -27,6 +28,7 @@ export async function DemoBooking({
   if (confirmed && get("dl")) await markDemoLeadBooked(get("dl"));
   if (confirmed && get("p")) await markDemoBooked(get("p"));
   const c = DEMO_COMPANY_PUBLIC;
+  const calendlyUrl = process.env.CALENDLY_URL;
 
   return (
     <div
@@ -112,29 +114,29 @@ export async function DemoBooking({
         ) : (
           <>
             <div className="mt-6 text-center">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50 text-3xl">
-                ✓
+              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <Check className="size-7" />
               </div>
               <h1 className="mt-4 text-2xl font-bold tracking-tight">Bedankt, {name}!</h1>
               <p className="mt-2 text-slate-600">Zo ziet je klant het. Dit gebeurt er in het echt:</p>
             </div>
             <ul className="mt-6 space-y-3 text-sm text-slate-700">
               <li className="flex gap-3">
-                <span aria-hidden="true">🎉</span>
+                <BellRing className="mt-0.5 size-4 shrink-0 text-(--accent)" />
                 <span>
                   <strong>Jij krijgt meteen een mail:</strong> &ldquo;{name} wil boeken (
                   {formatEuroCents(totalCents)})&rdquo;, met telefoonnummer en voorkeursdatum.
                 </span>
               </li>
               <li className="flex gap-3">
-                <span aria-hidden="true">📋</span>
+                <ClipboardList className="mt-0.5 size-4 shrink-0 text-(--accent)" />
                 <span>
                   <strong>In je dashboard</strong> staat de lead op &ldquo;klant akkoord&rdquo;, met
                   foto&apos;s, inventaris en prijsopbouw.
                 </span>
               </li>
               <li className="flex gap-3">
-                <span aria-hidden="true">✉️</span>
+                <MailCheck className="mt-0.5 size-4 shrink-0 text-(--accent)" />
                 <span>
                   <strong>Je klant krijgt een bevestiging</strong> in jouw huisstijl, met jouw logo
                   en handtekening.
@@ -142,11 +144,21 @@ export async function DemoBooking({
               </li>
             </ul>
             <Link
-              href="/#prijzen"
+              href="/kies-plan?plan=standard"
               className="mt-8 block rounded-full bg-(--accent) px-6 py-3.5 text-center font-semibold text-white shadow-md transition hover:brightness-95"
             >
               Probeer 14 dagen gratis
             </Link>
+            {calendlyUrl && (
+              <a
+                href={calendlyUrl}
+                target="_blank"
+                rel="noopener"
+                className="mt-3 block rounded-full border border-slate-300 bg-white px-6 py-3.5 text-center font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Plan een adviesgesprek
+              </a>
+            )}
             <p className="mt-2 text-center text-xs text-slate-500">Geen betaalgegevens nodig</p>
           </>
         )}
