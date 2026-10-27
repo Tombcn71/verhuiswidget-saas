@@ -33,7 +33,12 @@ export default async function SignUpPage({
           nodig.
         </p>
       )}
-      <SignUp forceRedirectUrl={redirectUrl} signInForceRedirectUrl={redirectUrl} />
+      <SignUp
+        path="/registreren"
+        signInUrl="/inloggen"
+        forceRedirectUrl={redirectUrl}
+        signInForceRedirectUrl={redirectUrl}
+      />
     </div>
   );
 }
