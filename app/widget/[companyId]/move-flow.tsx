@@ -1709,13 +1709,25 @@ export function MoveFlow({
       </div>
 
       {demo && (
-        <p className="flex gap-2 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-600">
-          <Info className="mt-px size-4 shrink-0 text-slate-400" />
-          <span>
-            Dit zijn voorbeeldtarieven van een gemiddelde verhuizer. In moverAI rekent alles met jouw
-            eigen tarieven.
-          </span>
-        </p>
+        <div className="rounded-xl bg-slate-50 px-4 py-3">
+          <p className="flex gap-2 text-xs text-slate-600">
+            <Info className="mt-px size-4 shrink-0 text-slate-400" />
+            <span>
+              Dit zijn voorbeeldtarieven van een gemiddelde verhuizer. In moverAI rekent alles met
+              jouw eigen tarieven.
+            </span>
+          </p>
+          {calendlyUrl && (
+            <a
+              href={meetingHref(calendlyUrl)}
+              target="_blank"
+              rel="noopener"
+              className="mt-3 block rounded-full border border-slate-300 bg-white px-5 py-2.5 text-center text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            >
+              Plan een adviesgesprek
+            </a>
+          )}
+        </div>
       )}
 
       <div>

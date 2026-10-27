@@ -102,7 +102,7 @@ function planningBlock(d: QuoteData): string {
 function demoInvite(meetingUrl: string): string {
   return `<div style="background:#e8f0fe;border-radius:12px;padding:18px 20px;margin:24px 0 0;text-align:center">
     <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#0f172a">Benieuwd hoe dit werkt met jouw tarieven?</p>
-    <p style="margin:0 0 14px;font-size:14px;color:#334155">Plan een gesprek van 15 minuten. Dan zetten we moverAI samen klaar voor jouw bedrijf.</p>
+    <p style="margin:0 0 14px;font-size:14px;color:#334155">Plan een gesprek van 15 minuten. Dan laat ik zien hoe moverAI werkt met jouw manier van rekenen, en beantwoord ik je vragen.</p>
     <a href="${esc(meetingUrl)}" style="display:inline-block;background:#1a73e8;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 26px;border-radius:999px">Plan een adviesgesprek</a>
   </div>`;
 }
