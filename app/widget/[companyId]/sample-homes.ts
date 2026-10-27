@@ -1,15 +1,17 @@
 /**
- * Voorbeeldwoningen voor de preview (Tarieven → "Test je tarieven"): de
- * verhuizer heeft zelf geen foto's bij de hand, dus deze gaan door de echte
+ * Voorbeeldwoningen voor de preview (Tarieven → "Test je tarieven") en de demo:
+ * de verhuizer heeft zelf geen foto's bij de hand, dus deze gaan door de echte
  * AI-analyse. Foto's in public/voorbeeldwoningen/<id>/<bestand>.jpg.
  *
  * `volume` is wat de AI er gemeten uit haalt (niet een wens); na een wijziging
  * in de prompt (lib/gemini.ts) opnieuw meten en bijwerken.
  */
+import { Building2, House, Trees, type LucideIcon } from "lucide-react";
+
 export type SampleHome = {
   id: string;
   title: string;
-  icon: string;
+  Icon: LucideIcon;
   areaM2: number;
   rooms: string;
   volume: number;
@@ -21,7 +23,7 @@ export const SAMPLE_HOMES: SampleHome[] = [
   {
     id: "appartement",
     title: "Appartement",
-    icon: "🏢",
+    Icon: Building2,
     areaM2: 75,
     rooms: "Woonkamer · 2 slaapkamers · keuken · berging",
     volume: 30,
@@ -36,7 +38,7 @@ export const SAMPLE_HOMES: SampleHome[] = [
   {
     id: "eengezinswoning",
     title: "Eengezinswoning",
-    icon: "🏠",
+    Icon: House,
     areaM2: 120,
     rooms: "Woonkamer · 3 slaapkamers · keuken · zolder · schuur",
     volume: 50,
@@ -53,7 +55,7 @@ export const SAMPLE_HOMES: SampleHome[] = [
   {
     id: "vrijstaand",
     title: "Vrijstaande woning",
-    icon: "🏡",
+    Icon: Trees,
     areaM2: 180,
     rooms: "Woonkamer · eetkamer · 4 slaapkamers · keuken · werkkamer · zolder · garage",
     volume: 75,

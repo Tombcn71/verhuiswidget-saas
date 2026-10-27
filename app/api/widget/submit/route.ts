@@ -21,6 +21,7 @@ import {
   jsonResponse as json,
 } from "@/lib/widget-request";
 import type { InventoryItem } from "@/lib/db/schema";
+import { SAMPLE_HOMES } from "@/app/widget/[companyId]/sample-homes";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -40,6 +41,8 @@ const payloadSchema = z.object({
   demoConsent: z.boolean().optional(),
   // Alleen in de demo: slug van de prospect (persoonlijke demolink in de verkoop-CRM).
   prospect: z.string().trim().max(60).optional(),
+  // Alleen in de demo: gekozen voorbeeldwoning, voor de foto's in de verhuizersmail.
+  sampleHome: z.string().trim().max(40).optional(),
   moveType: z.enum(["verhuizing", "ontruiming"]).default("verhuizing"),
   customer: z.object({
     name: z.string().trim().min(1).max(120),
@@ -208,8 +211,24 @@ export async function POST(request: Request) {
     moveDate: parsed.move.moveDate,
   });
 
-  // Demo: geen lead opslaan, maar wél de offerte naar de klant mailen
-  // (behalve naar de niet-bestaande voorbeeld-adressen).
+  const extras = [
+    parsed.options.packing && "Inpakservice",
+    parsed.options.assembly && "Meubelmontage en -demontage",
+    parsed.options.boxes && "Verhuisdozen laten bezorgen",
+    parsed.options.storageMonths > 0 &&
+      `Opslag (${parsed.options.storageMonths} ${parsed.options.storageMonths === 1 ? "maand" : "maanden"})`,
+  ].filter((x): x is string => !!x);
+  const details = {
+    Woningtype: parsed.move.propertyType || "",
+    "Aantal kamers": parsed.move.roomCount ? String(parsed.move.roomCount) : "",
+    Etage: parsed.move.fromFloor || "",
+    "Lift aanwezig": parsed.move.hasElevator ? "Ja" : "Nee",
+    "Bereikbaar voor de wagen": parsed.move.streetAccessible ? "Ja" : "Nee",
+  };
+
+  // Demo: geen lead opslaan, maar wél de offerte mailen (behalve naar de
+  // niet-bestaande voorbeeld-adressen). De bezoeker is een verhuizer, dus hij
+  // krijgt beide mails: die van zijn klant en die van hemzelf.
   if (demo) {
     const fake =
       preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
@@ -226,6 +245,11 @@ export async function POST(request: Request) {
             totalCents: price.totalCents,
           })
         : null;
+    // Voorbeeldwoning: de foto's staan publiek op de site, dus die kunnen in de mail.
+    const sample = SAMPLE_HOMES.find((h) => h.id === parsed.sampleHome);
+    const samplePhotoUrls = sample
+      ? sample.photos.map((p) => `${appUrl()}/voorbeeldwoningen/${sample.id}/${p.file}.jpg`)
+      : [];
     const demoEmail = fake
       ? { sent: false as const }
       : await sendQuoteEmails(
@@ -234,6 +258,10 @@ export async function POST(request: Request) {
             customer: parsed.customer,
             move: { type: parsed.moveType, ...parsed.move },
             inventory,
+            photoUrls: samplePhotoUrls,
+            details,
+            planning: price.planning,
+            extras,
             totalVolumeM3: price.totalVolumeM3,
             breakdown: price.breakdown,
             subtotalCents: price.subtotalCents,
@@ -253,7 +281,8 @@ export async function POST(request: Request) {
               prospect: parsed.prospect,
             }),
           },
-          { customerOnly: true },
+          // Test je tarieven (preview) mailt nooit; alleen de echte demo.
+          { demo: true },
         );
     return json({
       ok: true,
@@ -261,6 +290,7 @@ export async function POST(request: Request) {
       inventory,
       rooms,
       totalVolumeM3: price.totalVolumeM3,
+      planning: price.planning,
       breakdown: price.breakdown,
       subtotalCents: price.subtotalCents,
       vatCents: price.vatCents,
@@ -309,14 +339,9 @@ export async function POST(request: Request) {
       move: { type: parsed.moveType, ...parsed.move, distanceKm },
       inventory,
       photoUrls: parsed.photoUrls,
-      details: {
-        Woningtype: parsed.move.propertyType || "",
-        "Aantal kamers": parsed.move.roomCount ? String(parsed.move.roomCount) : "",
-        Etage: parsed.move.fromFloor || "",
-        "Lift aanwezig": parsed.move.hasElevator ? "Ja" : "Nee",
-        "Bereikbaar voor de wagen": parsed.move.streetAccessible ? "Ja" : "Nee",
-        "Geschat aantal ritten": String(price.trips),
-      },
+      details,
+      planning: price.planning,
+      extras,
       totalVolumeM3: price.totalVolumeM3,
       breakdown: price.breakdown,
       subtotalCents: price.subtotalCents,
@@ -333,6 +358,7 @@ export async function POST(request: Request) {
     inventory,
     rooms,
     totalVolumeM3: price.totalVolumeM3,
+    planning: price.planning,
     breakdown: price.breakdown,
     subtotalCents: price.subtotalCents,
     vatCents: price.vatCents,

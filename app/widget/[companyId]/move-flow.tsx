@@ -21,7 +21,9 @@ import {
   Table,
   Utensils,
 } from "@/app/_components/icons";
-import { FLOOR_TYPES, boxCount, totalVolume } from "@/lib/pricing";
+import { FLOOR_TYPES, boxCount, totalVolume, type MovePlanning } from "@/lib/pricing";
+import { planningRows } from "@/lib/planning";
+import { Clock, Globe, Info, Link2, Package, Truck, Users, type LucideIcon } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/app/_components/logo";
@@ -123,6 +125,20 @@ type Result = {
   emailSent: boolean;
   /** Link "Ja, ik wil boeken" (niet bij demo/preview). */
   acceptUrl?: string | null;
+  /** Wagens, ploeg en uren (verhuizen); voor het slotscherm van de demo. */
+  planning?: MovePlanning;
+};
+
+/** Kubieke meters met een Nederlandse komma, bijv. "30,1". */
+const m3 = (value: number, decimals: number) =>
+  value.toLocaleString("nl-NL", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+
+/** Iconen bij het planningsblok op het slotscherm van de demo (de mail gebruikt emoji). */
+const PLANNING_ICON: Record<string, LucideIcon> = {
+  Wagens: Truck,
+  Ploeg: Users,
+  Duur: Clock,
+  Volume: Package,
 };
 
 const STEPS = ["Foto's", "Inventaris", "Adressen", "Opties", "Contact", "Resultaat"];
@@ -172,6 +188,7 @@ export function MoveFlow({
   showName = false,
   demoContact,
   prospect,
+  calendlyUrl = null,
 }: {
   company: CompanyPublic;
   demo: boolean;
@@ -194,6 +211,8 @@ export function MoveFlow({
   demoContact?: DemoContact;
   /** Slug in de verkoop-CRM van moverAI; reist mee zodat "demo gedaan/boeken" bijgehouden wordt. */
   prospect?: string;
+  /** Demo: "Plan een adviesgesprek" op het slotscherm. */
+  calendlyUrl?: string | null;
 }) {
   const chrome = demo || appChrome;
 
@@ -214,16 +233,19 @@ export function MoveFlow({
   // alleen op "Volgende" hoeft. In de preview gaat er toch geen mail uit.
   const prefill = demo || preview;
   // Stap 1 — contact
+  // Demo: alleen ingevuld via een persoonlijke demolink (dat zijn z'n eigen gegevens);
+  // anders leeg met een voorbeeld als placeholder, zodat hij niets hoeft te wissen.
   const [name, setName] = useState(
-    demo ? demoContact?.name || "Demo Gebruiker" : preview ? "Testklant" : "",
+    demo ? demoContact?.name || "" : preview ? "Testklant" : "",
   );
-  // Zonder e-mailadres een voorbeeldadres: dan gaat er geen mail uit, maar kan de demo door.
+  // Demo: het eigen e-mailadres van de verhuizer (leeg als we het niet weten), want
+  // de belofte is dat beide mails meteen in zijn mailbox staan.
   const [email, setEmail] = useState(
-    demo ? demoContact?.email || "demo@voorbeeld.nl" : preview ? "test@voorbeeld.nl" : "",
+    demo ? demoContact?.email || "" : preview ? "test@voorbeeld.nl" : "",
   );
   const [phone, setPhone] = useState(
     demo
-      ? demoContact?.phone && isValidPhone(demoContact.phone) ? demoContact.phone : "06 12345678"
+      ? demoContact?.phone && isValidPhone(demoContact.phone) ? demoContact.phone : ""
       : preview ? "06 12345678" : "",
   );
   // Alleen in de demo (bezoeker = verhuizer): toestemming voor één opvolgmail van moverAI.
@@ -619,7 +641,9 @@ export function MoveFlow({
             source,
             moveType,
             customer: { name, email, phone },
-            ...(demo ? { demoConsent, prospect } : {}),
+            ...(demo
+              ? { demoConsent, prospect, ...(sampleUntouched ? { sampleHome: sampleHome!.id } : {}) }
+              : {}),
             move: {
               fromAddress,
               toAddress,
@@ -710,6 +734,30 @@ export function MoveFlow({
 
   const roomPickerOpen = photoMethod !== null;
 
+  // Voorbeeldwoningen: in Test je tarieven de enige keuze, in de demo een snelkoppeling
+  // voor wie geen woning bij de hand heeft (de klant ziet ze nooit).
+  const sampleHomeCards = SAMPLE_HOMES.map((home) => (
+    <button
+      key={home.id}
+      onClick={() => void loadSampleHome(home)}
+      disabled={loadingSample !== null}
+      className="flex w-full items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left hover:bg-slate-50 disabled:opacity-60"
+    >
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-(--accent)">
+        <home.Icon className="size-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold">
+          {home.title} · ca. {home.areaM2} m²
+        </span>
+        <span className="block text-xs text-slate-600">{home.rooms}</span>
+        <span className="mt-1 block text-xs font-medium text-slate-900">
+          {loadingSample === home.id ? "Foto's laden…" : `Inboedel ca. ${home.volume} m³`}
+        </span>
+      </span>
+    </button>
+  ));
+
   // --- Stap 0: foto's (versie voor de demo — grote koptekst, kaarten zonder achtergrond op het icoon) ---
   const fancyFotosBody = (
     <>
@@ -763,10 +811,11 @@ export function MoveFlow({
               staat klaar
             </h2>
             <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
-              De foto&apos;s zijn per kamer ingevuld. Tik op Start AI-analyse en check of de prijs
-              klopt met wat jij zou rekenen.
+              {demo
+                ? "De foto's staan per kamer klaar, zoals je klant ze zelf zou maken. Tik op Start AI-analyse."
+                : "De foto's zijn per kamer ingevuld. Tik op Start AI-analyse en check of de prijs klopt met wat jij zou rekenen."}
             </p>
-            {readSampleAnalysis(company.id, sampleHome.id) && (
+            {preview && readSampleAnalysis(company.id, sampleHome.id) && (
               <p className="mx-auto mt-2 max-w-xs text-xs text-slate-500">
                 De AI heeft deze woning al eens voor je geanalyseerd, dus je hoeft niet te
                 wachten.
@@ -815,33 +864,7 @@ export function MoveFlow({
         </div>
       )}
 
-      {preview && !roomPickerOpen && (
-        <div className="mt-6 space-y-3">
-          {SAMPLE_HOMES.map((home) => (
-            <button
-              key={home.id}
-              onClick={() => void loadSampleHome(home)}
-              disabled={loadingSample !== null}
-              className="flex w-full items-start gap-3 rounded-xl border border-slate-200 p-4 text-left hover:bg-slate-50 disabled:opacity-60"
-            >
-              <span aria-hidden="true" className="text-2xl">
-                {home.icon}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold">
-                  {home.title} · ca. {home.areaM2} m²
-                </span>
-                <span className="block text-xs text-slate-600">{home.rooms}</span>
-                <span className="mt-1 block text-xs font-medium text-slate-900">
-                  {loadingSample === home.id
-                    ? "Foto's laden…"
-                    : `Inboedel ca. ${home.volume} m³`}
-                </span>
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      {preview && !roomPickerOpen && <div className="mt-6 space-y-3">{sampleHomeCards}</div>}
 
       {/* Test je tarieven: alleen voorbeeldwoningen, geen eigen foto's (daarvoor is Scannen). */}
       <div className={preview && !roomPickerOpen ? "hidden" : "mt-6"}>
@@ -861,6 +884,18 @@ export function MoveFlow({
               <ImageIcon className="h-10 w-10 text-slate-700" />
               <span className="text-sm font-semibold">Gallerij</span>
             </button>
+            {demo && (
+              <div className="col-span-2 mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-(--accent)">
+                  Alleen in de demo
+                </p>
+                <p className="mt-1 text-sm text-slate-700">
+                  Geen woning bij de hand? Kies een voorbeeldwoning. De foto&apos;s staan dan voor
+                  je klaar, zoals je klant ze zelf zou maken.
+                </p>
+                <div className="mt-3 space-y-2">{sampleHomeCards}</div>
+              </div>
+            )}
           </div>
         ) : cameraRoom ? (
           <InAppCamera
@@ -1129,19 +1164,29 @@ export function MoveFlow({
           <p className="mx-auto mt-1 max-w-xs text-sm text-slate-600">
             {onspot
               ? "De offerte komt bij je leads en wordt naar de klant gemaild."
-              : "Vul je naam en e-mail in — je prijsindicatie verschijnt op het scherm en komt ook in je mailbox."}
+              : demo
+                ? "Vul je eigen e-mailadres in. Je krijgt meteen twee mails: de offerte zoals je klant hem krijgt, en de aanvraag zoals jij hem binnenkrijgt."
+                : "Vul je naam en e-mail in — je prijsindicatie verschijnt op het scherm en komt ook in je mailbox."}
           </p>
         </div>
       )}
       <label className="block">
         <span className="text-sm font-medium">Naam *</span>
-        <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
+        <input
+          className={inputCls}
+          autoComplete="name"
+          placeholder="Bijv. Jan de Vries"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
       </label>
       <label className="block">
         <span className="text-sm font-medium">E-mailadres *</span>
         <input
           className={inputCls}
           type="email"
+          autoComplete="email"
+          placeholder={demo ? "jij@jouwbedrijf.nl" : "naam@voorbeeld.nl"}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -1217,7 +1262,7 @@ export function MoveFlow({
       {/* Alleen voor de verhuizer zelf (Preview en scannen op locatie), niet voor klanten. */}
       {(preview || onspot) && (
         <div className="sticky top-0 z-10 rounded-xl border border-slate-200 bg-white/95 px-4 py-2 text-center text-sm shadow-sm backdrop-blur">
-          Totaal volume: <strong>{totalVolume(flatInventory).toFixed(1)} m³</strong>
+          Totaal volume: <strong>{m3(totalVolume(flatInventory), 1)} m³</strong>
           <span className="block text-xs text-slate-500">Alleen zichtbaar voor jou</span>
         </div>
       )}
@@ -1658,38 +1703,46 @@ export function MoveFlow({
   // --- Stap 4: resultaat ---
   const resultaatBody = result && (
     <div className="space-y-5">
-      <div className={`rounded-lg p-4 text-white ${fillClass}`} style={fillStyle}>
+      <div className={`rounded-2xl p-5 text-white ${fillClass}`} style={fillStyle}>
         <p className="text-sm opacity-90">Je offerte-indicatie</p>
-        <p className="text-3xl font-bold">{fmt(result.totalCents)}</p>
-        <p className="text-sm opacity-90">incl. btw · {result.totalVolumeM3.toFixed(1)} m³ inboedel</p>
+        <p className="mt-1 text-3xl font-bold tabular-nums">{fmt(result.totalCents)}</p>
+        <p className="mt-1 text-sm opacity-90">incl. btw · {m3(result.totalVolumeM3, 1)} m³ inboedel</p>
       </div>
 
+      {demo && (
+        <p className="flex gap-2 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-600">
+          <Info className="mt-px size-4 shrink-0 text-slate-400" />
+          <span>
+            Dit zijn voorbeeldtarieven van een gemiddelde verhuizer. In moverAI rekent alles met jouw
+            eigen tarieven.
+          </span>
+        </p>
+      )}
+
       <div>
-        <h3 className="mb-1 text-sm font-semibold">Prijsopbouw</h3>
-        <table className="w-full text-sm">
-          <tbody>
-            {result.breakdown.map((l, i) => (
-              <tr key={i}>
-                <td className="py-1 text-slate-600">
-                  {l.label}
-                  {/* Uitleg alleen voor de verhuizer (Test je tarieven / zelf scannen). */}
-                  {l.detail && (preview || onspot) && (
-                    <span className="block text-xs text-slate-500">{l.detail}</span>
-                  )}
-                </td>
-                <td className="py-1 text-right align-top">{fmt(l.amountCents)}</td>
-              </tr>
-            ))}
-            <tr className="border-t border-slate-200">
-              <td className="py-1">Btw</td>
-              <td className="py-1 text-right">{fmt(result.vatCents)}</td>
-            </tr>
-            <tr className="border-t-2 border-slate-900 font-bold">
-              <td className="py-1">Totaal</td>
-              <td className="py-1 text-right">{fmt(result.totalCents)}</td>
-            </tr>
-          </tbody>
-        </table>
+        <h3 className="mb-2 text-sm font-semibold">Prijsopbouw</h3>
+        <ul className="divide-y divide-slate-100 text-sm">
+          {result.breakdown.map((l, i) => (
+            <li key={i} className="flex items-start justify-between gap-4 py-2">
+              <span className="min-w-0 text-slate-700">
+                {l.label}
+                {/* Uitleg alleen voor de verhuizer (demo / Test je tarieven / zelf scannen). */}
+                {l.detail && (demo || preview || onspot) && (
+                  <span className="mt-0.5 block text-xs leading-snug text-slate-500">{l.detail}</span>
+                )}
+              </span>
+              <span className="shrink-0 tabular-nums text-slate-900">{fmt(l.amountCents)}</span>
+            </li>
+          ))}
+          <li className="flex justify-between gap-4 py-2 text-slate-600">
+            <span>Btw</span>
+            <span className="tabular-nums">{fmt(result.vatCents)}</span>
+          </li>
+        </ul>
+        <div className="mt-1 flex justify-between gap-4 border-t-2 border-slate-900 pt-2 text-base font-bold">
+          <span>Totaal</span>
+          <span className="tabular-nums">{fmt(result.totalCents)}</span>
+        </div>
       </div>
 
       {result.acceptUrl && (
@@ -1740,37 +1793,79 @@ export function MoveFlow({
               <p className="mt-2 text-xs text-slate-600">Probeer het: dit is wat je klant ziet.</p>
             </>
           ) : (
+            // Slotscherm: wat de verhuizer zelf krijgt, en hoe hij het inzet.
             <div className="text-left">
               <p className="text-center text-sm font-semibold">✓ Boeking ontvangen (demo)</p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Wat er nu gebeurt bij een echte klant
+
+              {result.planning && (
+                <div className="mt-4 rounded-xl bg-slate-50 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    Dit krijg jij als verhuizer
+                  </p>
+                  <p className="mt-1 text-sm text-slate-700">
+                    Meteen een mail met de aanvraag, en wat je moet inplannen:
+                  </p>
+                  <ul className="mt-3 space-y-2 text-sm">
+                    {planningRows(result.planning, result.totalVolumeM3).map((r) => {
+                      const Icon = PLANNING_ICON[r.label] ?? Package;
+                      return (
+                        <li key={r.label} className="flex items-start gap-2.5">
+                          <Icon className="mt-0.5 size-4 shrink-0 text-(--accent)" />
+                          <span className="w-14 shrink-0 text-slate-500">{r.label}</span>
+                          <span className="font-semibold text-slate-900">{r.value}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <p className="mt-3 text-xs text-slate-600">
+                    Plus de foto&apos;s, de inventarislijst en de prijsopbouw. Boekt de klant? Dan
+                    krijg je direct een melding en bel jij alleen nog om de datum vast te zetten.
+                  </p>
+                </div>
+              )}
+
+              <p className="mt-5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                Zo zet jij het in
               </p>
-              <ul className="mt-2 space-y-2 text-sm text-slate-700">
-                <li className="flex gap-2">
-                  <span aria-hidden="true">🎉</span>
-                  <span>
-                    <strong>Jij krijgt meteen een mail:</strong> &ldquo;{name || "Jan"} wil boeken (
-                    {fmt(result.totalCents)})&rdquo;, met telefoonnummer en voorkeursdatum.
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span aria-hidden="true">📋</span>
-                  <span>
-                    <strong>In je dashboard</strong> staat de lead op &ldquo;klant akkoord&rdquo;,
-                    met foto&apos;s, inventaris en prijsopbouw.
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span aria-hidden="true">✉️</span>
-                  <span>
-                    <strong>Je klant krijgt een bevestiging</strong> in jouw huisstijl, met jouw
-                    logo en handtekening.
-                  </span>
-                </li>
+              <ul className="mt-2 space-y-2.5 text-sm text-slate-700">
+                {(
+                  [
+                    [Globe, "Op je website", "de widget met jouw naam en kleuren"],
+                    [Link2, "Via een linkje", "stuur het via WhatsApp aan wie belt of appt"],
+                    [MapPin, "Zelf op locatie", "sta je toch bij een klant? Scan ter plekke met je telefoon"],
+                  ] as const
+                ).map(([Icon, title, text]) => (
+                  <li key={title} className="flex items-start gap-2.5">
+                    <Icon className="mt-0.5 size-4 shrink-0 text-(--accent)" />
+                    <span>
+                      <strong>{title}:</strong> {text}
+                    </span>
+                  </li>
+                ))}
               </ul>
-              <p className="mt-3 text-center text-xs text-slate-600">
-                Jij belt alleen nog om de datum vast te zetten.
-              </p>
+
+              <div className="mt-5 flex flex-col gap-2">
+                <a
+                  href="/kies-plan?plan=standard"
+                  target="_top"
+                  className={`rounded-full px-6 py-3 text-center text-sm font-semibold text-white shadow-md ${ACCENT_BG}`}
+                >
+                  Start 14 dagen gratis
+                </a>
+                {calendlyUrl && (
+                  <a
+                    href={calendlyUrl}
+                    target="_blank"
+                    rel="noopener"
+                    className="rounded-full border border-slate-300 bg-white px-6 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Plan een adviesgesprek
+                  </a>
+                )}
+                <p className="text-center text-xs text-slate-500">
+                  Geen betaalgegevens nodig
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -1784,7 +1879,7 @@ export function MoveFlow({
               <span>
                 {it.quantity}× {it.name}
               </span>
-              <span>{(it.volumeM3 * it.quantity).toFixed(2)} m³</span>
+              <span>{m3(it.volumeM3 * it.quantity, 2)} m³</span>
             </li>
           ))}
         </ul>
@@ -1796,11 +1891,15 @@ export function MoveFlow({
             ? "Dit was een test"
             : onspot
               ? "Opgeslagen bij je leads ✓"
-              : "Je offerte is verzonden ✓"}
+              : demo && result.emailSent
+                ? "Check je mailbox ✓"
+                : "Je offerte is verzonden ✓"}
         </p>
         <p className="mt-1 text-xs text-slate-600">
           {preview
             ? "Er is niets opgeslagen of verstuurd. Klopt de prijs niet? Pas je tarieven aan en test opnieuw."
+            : demo && result.emailSent
+              ? `Er staan twee mails in ${email}: de offerte zoals je klant hem krijgt, en de aanvraag zoals jij hem binnenkrijgt.`
             : onspot
             ? result.emailSent
               ? `De offerte is gemaild naar ${email}.`

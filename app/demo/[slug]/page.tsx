@@ -32,6 +32,7 @@ export default async function ProspectDemoPage({ params }: PageProps<"/demo/[slu
         company={DEMO_COMPANY_PUBLIC}
         demo
         prospect={p?.slug}
+        calendlyUrl={process.env.CALENDLY_URL ?? null}
         demoContact={
           p ? { name: p.contactName || p.companyName, email: p.email, phone: p.phone } : undefined
         }

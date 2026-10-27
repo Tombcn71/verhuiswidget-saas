@@ -7,6 +7,18 @@ import {
   type PriceLine,
 } from "@/lib/db/schema";
 
+/** Wat de verhuizer moet inplannen (verhuizen); voor de leadmail en de demo. */
+export type MovePlanning = {
+  vans: number;
+  truckM3: number;
+  moversPerVan: number;
+  /** Uren op de offerte (afgerond, minimaal het minimum). */
+  hours: number;
+  workHours: number;
+  travelHours: number;
+  boxes: number;
+};
+
 export type PriceResult = {
   breakdown: PriceLine[];
   totalVolumeM3: number;
@@ -15,6 +27,7 @@ export type PriceResult = {
   subtotalCents: number;
   vatCents: number;
   totalCents: number;
+  planning?: MovePlanning;
 };
 
 /** Aantal verhuisdozen in de scan (kastinhoud + losse spullen, zie lib/gemini). */
@@ -173,6 +186,31 @@ export function calculatePrice(
   // Basis voor de weekendtoeslag: mankracht (+ wagen per uur), of de inboedel bij m³.
   let weekendBaseCents = 0;
 
+  // Ploeg en uren: de prijs bij een uurtarief, en bij m³ alleen voor de planning.
+  // Elke wagen krijgt de ploeg die bij zijn deel van het volume hoort.
+  const crewPerVan = moversForVolume(company, volume / vans);
+  const movers = crewPerVan * vans;
+  const throughput = throughputPerMover(company);
+  const stairHours =
+    floors > 0 && !input.hasElevator ? (floors * company.stairMinutesPerFloor) / 60 : 0;
+  const workHours = volume / (movers * throughput) + stairHours; // laden + lossen (+ trappen)
+  // De wagens rijden tegelijk: de rijtijd telt één keer.
+  const travelKm =
+    company.travelMode === "geen" ? 0 : company.travelMode === "loods" ? km + approachKm : km;
+  const travelHours = travelKm / DRIVE_KMH;
+  const minHours = Math.max(0, Number(company.minHours) || 0);
+  const rounded = roundUpHours(workHours + travelHours, company.roundingMinutes);
+  const hours = Math.max(minHours, rounded);
+  const planning: MovePlanning = {
+    vans,
+    truckM3: truckCapacity,
+    moversPerVan: crewPerVan,
+    hours,
+    workHours,
+    travelHours,
+    boxes: boxCount(input.inventory),
+  };
+
   if (company.pricingMode === "m3") {
     // --- Per m³: mankracht zit in de m³-prijs -----------------------------------
     const amountCents = billableVolume * company.pricePerM3Cents;
@@ -180,21 +218,6 @@ export function calculatePrice(
     weekendBaseCents = amountCents;
   } else {
     // --- Per uur: ploeg × uren × uurtarief, zoals de verhuizer zelf rekent -------
-    // Elke wagen krijgt de ploeg die bij zijn deel van het volume hoort.
-    const crewPerVan = moversForVolume(company, volume / vans);
-    const movers = crewPerVan * vans;
-    const throughput = throughputPerMover(company);
-    const stairHours =
-      floors > 0 && !input.hasElevator ? (floors * company.stairMinutesPerFloor) / 60 : 0;
-    const workHours = volume / (movers * throughput) + stairHours; // laden + lossen (+ trappen)
-    // De wagens rijden tegelijk: de rijtijd telt één keer.
-    const travelKm =
-      company.travelMode === "geen" ? 0 : company.travelMode === "loods" ? km + approachKm : km;
-    const travelHours = travelKm / DRIVE_KMH;
-    const minHours = Math.max(0, Number(company.minHours) || 0);
-    const rounded = roundUpHours(workHours + travelHours, company.roundingMinutes);
-    const hours = Math.max(minHours, rounded);
-
     const detail =
       (vans > 1 ? `${vans} wagens van ${truckCapacity} m³, elk met ${crewPerVan} man. ` : "") +
       [
@@ -339,6 +362,7 @@ export function calculatePrice(
     subtotalCents: subtotal,
     vatCents: vat,
     totalCents: subtotal + vat,
+    planning,
   };
 }
 

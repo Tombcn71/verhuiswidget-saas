@@ -69,21 +69,6 @@ const channels = [
   },
 ];
 
-const startSteps = [
-  {
-    t: "Start je proefperiode",
-    d: "Maak in 2 minuten een account aan. 14 dagen gratis, zonder betaalgegevens.",
-  },
-  {
-    t: "Upload een oude factuur",
-    d: "De AI leest je uurtarief, voorrijkosten en kilometerprijs en vult je tarieven voor je in. We lezen alleen de tarieven; de factuur wordt niet bewaard.",
-  },
-  {
-    t: "Ontvang je eerste aanvraag",
-    d: "Zet de widget op je website, of stuur klanten gewoon een link via WhatsApp, sms of mail. Werkt meteen.",
-  },
-];
-
 const faqs = [
   {
     q: "Hoe nauwkeurig is het volume van de AI?",
@@ -95,7 +80,7 @@ const faqs = [
   },
   {
     q: "Kan ik mijn eigen tarieven en manier van rekenen gebruiken?",
-    a: "Ja. Je kiest of je per uur of per m³ rekent. Daarnaast stel je je uurtarief, laadsnelheid, voorrijkosten, kilometerprijs, traptijd, verhuislift en extra's in. Nog sneller: upload een oude factuur en de AI vult je tarieven voor je in.",
+    a: "Ja. Je kiest of je per uur of per m³ rekent. Daarnaast stel je je uurtarief, verhuiswagen, ploeggrootte, tempo, voorrijkosten, kilometerprijs, minimum aantal uren, afronding, weekendtoeslag, traptijd, verhuislift en extra's in. Nog sneller: upload een oude factuur en de AI vult je tarieven voor je in. Met de testwoningen zie je meteen of de prijs klopt met wat jij zou rekenen.",
   },
   {
     q: "Hoe snel ben ik live, en moet ik iets technisch doen?",
@@ -119,7 +104,7 @@ const faqs = [
   },
   {
     q: "Kan ik op elk moment opzeggen?",
-    a: "Een maandabonnement zeg je per maand op, via \"Abonnement beheren\" in je dashboard. Een jaarabonnement loopt tot het einde van het jaar dat je hebt betaald.",
+    a: "Ja. Op de pagina Abonnement in je dashboard klik je op \"Abonnement opzeggen\". Een maandabonnement loopt dan door tot het einde van de maand, een jaarabonnement tot het einde van het betaalde jaar. Wil je alles laten wissen, dan verwijder je daar ook je account.",
   },
   {
     q: "Werkt het met mijn website?",
@@ -158,8 +143,8 @@ export default function HomePage() {
                 <span className="text-brand-600">Zonder voorinspectie.</span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground">
-                Je klant scant zijn inboedel met de telefoon en krijgt direct
-                een offerte met jouw tarieven. Zo bespaar je personeelsuren en
+                Je klant maakt met zijn telefoon een paar foto&apos;s per kamer en
+                krijgt direct een offerte met jouw tarieven. Zo bespaar je personeelsuren en
                 brandstof. Werkt meteen, geen gedoe.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
@@ -168,7 +153,7 @@ export default function HomePage() {
                   className={`w-full rounded-full px-6 py-3 text-center font-semibold sm:w-auto ${aiButton}`}>
                   Probeer 14 dagen gratis
                 </a>
-                <DemoModal />
+                <DemoModal calendlyUrl={calendlyUrl ?? null} />
               </div>
               <p className="mt-3 text-sm text-muted-foreground/80">
                 Geen betaalgegevens nodig
@@ -262,53 +247,19 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Zo begin je */}
-        <section id="zo-begin-je" className="scroll-mt-20 border-t border-border py-20">
-          <div className="mx-auto w-full max-w-5xl px-6">
-            <h2 className="text-center text-3xl font-bold tracking-tight">Zo begin je</h2>
-            <ol className="mt-12 grid gap-8 md:grid-cols-3">
-              {startSteps.map((s, i) => (
-                <li key={s.t} className="text-center">
-                  <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-white">
-                    {i + 1}
-                  </span>
-                  <h3 className="mt-4 font-semibold">{s.t}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{s.d}</p>
-                </li>
-              ))}
-            </ol>
-            <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a
-                href="#prijzen"
-                className={`w-full rounded-full px-6 py-3 text-center font-semibold sm:w-auto ${aiButton}`}>
-                Probeer 14 dagen gratis
-              </a>
-              {calendlyUrl && (
-                <a
-                  href={calendlyUrl}
-                  target="_blank"
-                  rel="noopener"
-                  className="w-full rounded-full border border-border bg-background px-6 py-3 text-center font-semibold shadow-sm transition hover:bg-muted sm:w-auto">
-                  Plan een gratis adviesgesprek
-                </a>
-              )}
-            </div>
-          </div>
-        </section>
-
         {/* Prijzen */}
         <section
           id="prijzen"
           className="scroll-mt-20 border-t border-border bg-muted py-20">
           <div className="mx-auto w-full max-w-5xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Probeer moverAI 14 dagen gratis
+              Probeer mover<span className="text-primary">AI</span> 14 dagen gratis
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
               Alle functies, geen betaalgegevens nodig en er wordt niets automatisch afgeschreven.
               Bevalt het? Dan kies je daarna pas een pakket.
             </p>
-            <TrialCard primaryButton={aiButton} />
+            <TrialCard primaryButton={aiButton} calendlyUrl={calendlyUrl ?? null} />
             <h3 className="mt-16 text-center text-xl font-semibold tracking-tight">
               Na je proefperiode: kies het pakket dat bij je past
             </h3>

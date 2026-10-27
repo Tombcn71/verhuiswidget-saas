@@ -66,7 +66,13 @@ const PLAN_BASE: Partial<Record<PlanId, string>> = {
 };
 
 /** "Zo werkt je proefperiode": staat boven de pakketten op de homepage. */
-export function TrialCard({ primaryButton }: { primaryButton: string }) {
+export function TrialCard({
+  primaryButton,
+  calendlyUrl,
+}: {
+  primaryButton: string;
+  calendlyUrl: string | null;
+}) {
   return (
     <div className="mx-auto mt-10 max-w-2xl rounded-2xl border-2 border-brand-600 bg-background p-6 shadow-sm sm:p-8">
       <h3 className="text-lg font-semibold">Zo werkt je proefperiode</h3>
@@ -82,12 +88,27 @@ export function TrialCard({ primaryButton }: { primaryButton: string }) {
           </li>
         ))}
       </ul>
-      <Link
-        href="/kies-plan?plan=standard"
-        className={`mt-6 inline-block w-full rounded-full px-6 py-3 text-center font-semibold sm:w-auto ${primaryButton}`}
-      >
-        Start je gratis proefperiode
-      </Link>
+      <p className="mt-4 text-xs text-muted-foreground">
+        Van je factuur lezen we alleen de tarieven; de factuur zelf wordt niet bewaard.
+      </p>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <Link
+          href="/kies-plan?plan=standard"
+          className={`w-full rounded-full px-6 py-3 text-center font-semibold sm:w-auto ${primaryButton}`}
+        >
+          Start je gratis proefperiode
+        </Link>
+        {calendlyUrl && (
+          <a
+            href={calendlyUrl}
+            target="_blank"
+            rel="noopener"
+            className="w-full rounded-full border border-border bg-background px-6 py-3 text-center font-semibold shadow-sm transition hover:bg-muted sm:w-auto"
+          >
+            Plan een gratis adviesgesprek
+          </a>
+        )}
+      </div>
     </div>
   );
 }

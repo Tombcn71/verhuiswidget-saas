@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import type { Company, InventoryItem, PriceLine } from "@/lib/db/schema";
 import { formatEuroCents, formatDate } from "@/lib/format";
+import { planningRows } from "@/lib/planning";
+import type { MovePlanning } from "@/lib/pricing";
 
 type QuoteData = {
   company: Company;
@@ -24,9 +26,21 @@ type QuoteData = {
   photoUrls?: string[];
   /** Extra antwoorden van de klant, voor in de bedrijfsmail. */
   details?: Record<string, string>;
+  /** Wagens, ploeg en uren, voor het planningsblok in de bedrijfsmail. */
+  planning?: MovePlanning;
+  /** Gekozen extra's (inpakservice, montage, …), voor de bedrijfsmail. */
+  extras?: string[];
   /** Legacy — niet meer gebruikt. */
   clearance?: undefined;
 };
+
+/** Kubieke meters met een Nederlandse komma, bijv. "22,4". */
+function m3(value: number, decimals: number): string {
+  return value.toLocaleString("nl-NL", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
 
 function esc(s: string): string {
   return s.replace(/[&<>"]/g, (c) =>
@@ -40,19 +54,53 @@ function inventoryRows(items: InventoryItem[]): string {
       (i) =>
         `<tr><td style="padding:4px 8px;border-bottom:1px solid #eee">${esc(i.name)}</td>` +
         `<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">${i.quantity}×</td>` +
-        `<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">${(i.volumeM3 * i.quantity).toFixed(2)} m³</td></tr>`,
+        `<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">${m3(i.volumeM3 * i.quantity, 2)} m³</td></tr>`,
     )
     .join("");
 }
 
-function priceRows(lines: PriceLine[]): string {
+/** `withDetail`: uitleg per regel (alleen voor de verhuizer, net als in het dashboard). */
+function priceRows(lines: PriceLine[], withDetail = false): string {
   return lines
     .map(
       (l) =>
-        `<tr><td style="padding:4px 8px">${esc(l.label)}</td>` +
-        `<td style="padding:4px 8px;text-align:right">${formatEuroCents(l.amountCents)}</td></tr>`,
+        `<tr><td style="padding:4px 8px">${esc(l.label)}` +
+        (withDetail && l.detail
+          ? `<br><span style="font-size:12px;color:#64748b">${esc(l.detail)}</span>`
+          : "") +
+        `</td><td style="padding:4px 8px;text-align:right;vertical-align:top">${formatEuroCents(l.amountCents)}</td></tr>`,
     )
     .join("");
+}
+
+/** Wat de verhuizer moet inplannen: wagens, ploeg, duur, volume, datum en extra's. */
+function planningBlock(d: QuoteData): string {
+  if (!d.planning) return "";
+  const rows = planningRows(d.planning, d.totalVolumeM3);
+  if (d.move.moveDate) {
+    rows.push({ icon: "📅", label: "Datum", value: formatDate(d.move.moveDate) });
+  }
+  if (d.extras?.length) {
+    rows.push({ icon: "✅", label: "Extra's", value: d.extras.join(", ") });
+  }
+  return `<div style="background:#f1f5f9;border-radius:12px;padding:16px 18px;margin:16px 0">
+    <p style="margin:0 0 10px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#475569">Planning</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px">
+      ${rows
+        .map(
+          (r) =>
+            `<tr><td style="padding:3px 8px 3px 0;width:24px;vertical-align:top">${r.icon}</td>` +
+            `<td style="padding:3px 12px 3px 0;color:#64748b;white-space:nowrap;vertical-align:top">${esc(r.label)}</td>` +
+            `<td style="padding:3px 0;font-weight:600">${esc(r.value)}</td></tr>`,
+        )
+        .join("")}
+    </table>
+  </div>`;
+}
+
+/** Balk boven de mails van de demo: wiens mail dit is. */
+function demoBanner(text: string): string {
+  return `<div style="background:#e8f0fe;color:#1557b0;border-radius:10px;padding:10px 14px;margin:0 0 16px;font-size:13px;font-weight:600">${esc(text)}</div>`;
 }
 
 function baseLayout(company: Company, inner: string): string {
@@ -71,18 +119,18 @@ function baseLayout(company: Company, inner: string): string {
 function moveSummary(d: QuoteData): string {
   const isClearance = d.move.type === "ontruiming";
   return `<table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0">
-    <tr><td style="padding:2px 0;color:#64748b">Type</td><td>${esc(d.move.type)}</td></tr>
-    ${d.move.fromAddress ? `<tr><td style="padding:2px 0;color:#64748b">${isClearance ? "Adres" : "Van"}</td><td>${esc(d.move.fromAddress)}</td></tr>` : ""}
-    ${d.move.toAddress ? `<tr><td style="padding:2px 0;color:#64748b">Naar</td><td>${esc(d.move.toAddress)}</td></tr>` : ""}
-    ${d.move.moveDate ? `<tr><td style="padding:2px 0;color:#64748b">Voorkeursdatum</td><td>${formatDate(d.move.moveDate)}</td></tr>` : ""}
-    ${!isClearance ? `<tr><td style="padding:2px 0;color:#64748b">Afstand</td><td>${Math.round(d.move.distanceKm)} km</td></tr>` : ""}
-    <tr><td style="padding:2px 0;color:#64748b">Volume</td><td>${d.totalVolumeM3.toFixed(1)} m³</td></tr>
+    <tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">Type</td><td>${esc(d.move.type)}</td></tr>
+    ${d.move.fromAddress ? `<tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">${isClearance ? "Adres" : "Van"}</td><td>${esc(d.move.fromAddress)}</td></tr>` : ""}
+    ${d.move.toAddress ? `<tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">Naar</td><td>${esc(d.move.toAddress)}</td></tr>` : ""}
+    ${d.move.moveDate ? `<tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">Voorkeursdatum</td><td>${formatDate(d.move.moveDate)}</td></tr>` : ""}
+    ${!isClearance ? `<tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">Afstand</td><td>${Math.round(d.move.distanceKm)} km</td></tr>` : ""}
+    <tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">Volume</td><td>${m3(d.totalVolumeM3, 1)} m³</td></tr>
   </table>`;
 }
 
-function priceBlock(d: QuoteData): string {
+function priceBlock(d: QuoteData, withDetail = false): string {
   return `<table style="width:100%;border-collapse:collapse;font-size:14px;margin:8px 0">
-    ${priceRows(d.breakdown)}
+    ${priceRows(d.breakdown, withDetail)}
     <tr><td style="padding:4px 8px;border-top:1px solid #e2e8f0">Subtotaal</td><td style="padding:4px 8px;text-align:right;border-top:1px solid #e2e8f0">${formatEuroCents(d.subtotalCents)}</td></tr>
     <tr><td style="padding:4px 8px">Btw (21%)</td><td style="padding:4px 8px;text-align:right">${formatEuroCents(d.vatCents)}</td></tr>
     <tr><td style="padding:8px;font-weight:700;border-top:2px solid #0f172a">Totaal incl. btw</td><td style="padding:8px;text-align:right;font-weight:700;border-top:2px solid #0f172a">${formatEuroCents(d.totalCents)}</td></tr>
@@ -100,10 +148,10 @@ function inventoryBlock(d: QuoteData): string {
   </table>`;
 }
 
-function customerEmailHtml(d: QuoteData): string {
+function customerEmailHtml(d: QuoteData, banner = ""): string {
   return baseLayout(
     d.company,
-    `<h1 style="font-size:20px">Je offerte-indicatie</h1>
+    `${banner}<h1 style="font-size:20px">Je offerte-indicatie</h1>
      <p style="font-size:14px">Beste ${esc(d.customer.name)},</p>
      <p style="font-size:14px">Bedankt voor je aanvraag bij ${esc(d.company.name)}. Op basis van de foto's die je hebt geüpload hebben we automatisch een inschatting gemaakt van je inboedel en de kosten.</p>
      ${moveSummary(d)}
@@ -330,7 +378,7 @@ function detailRows(details: Record<string, string> | undefined): string {
     .filter(([, v]) => v)
     .map(
       ([k, v]) =>
-        `<tr><td style="padding:2px 0;color:#64748b">${esc(k)}</td><td>${esc(v)}</td></tr>`,
+        `<tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">${esc(k)}</td><td>${esc(v)}</td></tr>`,
     )
     .join("");
   return rows ? `<table style="width:100%;border-collapse:collapse;font-size:14px;margin:8px 0">${rows}</table>` : "";
@@ -347,33 +395,36 @@ function photoBlock(urls: string[] | undefined): string {
   return `<h3 style="font-size:16px">Foto's van de klant (${urls.length})</h3><div>${imgs}</div>`;
 }
 
-function companyEmailHtml(d: QuoteData): string {
+function companyEmailHtml(d: QuoteData, banner = ""): string {
   return baseLayout(
     d.company,
-    `<h1 style="font-size:20px">Nieuwe offerteaanvraag</h1>
+    `${banner}<h1 style="font-size:20px">Nieuwe offerteaanvraag</h1>
      <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0">
-       <tr><td style="padding:2px 0;color:#64748b">Naam</td><td>${esc(d.customer.name)}</td></tr>
-       <tr><td style="padding:2px 0;color:#64748b">E-mail</td><td><a href="mailto:${esc(d.customer.email)}">${esc(d.customer.email)}</a></td></tr>
-       ${d.customer.phone ? `<tr><td style="padding:2px 0;color:#64748b">Telefoon</td><td>${esc(d.customer.phone)}</td></tr>` : ""}
+       <tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">Naam</td><td>${esc(d.customer.name)}</td></tr>
+       <tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">E-mail</td><td><a href="mailto:${esc(d.customer.email)}">${esc(d.customer.email)}</a></td></tr>
+       ${d.customer.phone ? `<tr><td style="padding:2px 12px 2px 0;width:180px;color:#64748b">Telefoon</td><td>${esc(d.customer.phone)}</td></tr>` : ""}
      </table>
+     ${planningBlock(d)}
      ${moveSummary(d)}
      ${detailRows(d.details)}
      <h3 style="font-size:16px">Berekende prijs</h3>
-     ${priceBlock(d)}
+     ${priceBlock(d, true)}
      ${photoBlock(d.photoUrls)}
      <h3 style="font-size:16px">Volledige inventarislijst</h3>
      ${inventoryBlock(d)}
-     <p style="font-size:12px;color:#64748b">Lead-id: ${esc(d.leadId)}</p>`,
+     ${d.leadId === "demo" ? "" : `<p style="font-size:12px;color:#64748b">Lead-id: ${esc(d.leadId)}</p>`}`,
   );
 }
 
 /**
  * Verstuurt twee e-mails: één naar de klant, één naar het verhuisbedrijf.
  * Gooit geen fout als e-mail niet is geconfigureerd (lead wordt dan toch opgeslagen).
+ * `demo`: de bezoeker van de demo (een verhuizer) krijgt beide mails, elk met een
+ * balk erboven die zegt wiens mail het is.
  */
 export async function sendQuoteEmails(
   d: QuoteData,
-  opts: { customerOnly?: boolean } = {},
+  opts: { customerOnly?: boolean; demo?: boolean } = {},
 ): Promise<{ sent: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.QUOTE_FROM_EMAIL;
@@ -383,6 +434,31 @@ export async function sendQuoteEmails(
 
   const resend = new Resend(apiKey);
   const fromHeader = `${d.company.name} <${from}>`;
+
+  if (opts.demo) {
+    // Na elkaar, in de volgorde van het onderwerp (1/2 klant, 2/2 verhuizer).
+    try {
+      const first = await resend.emails.send({
+        from: fromHeader,
+        to: d.customer.email,
+        subject: `Demo 1/2 · Je offerte-indicatie van ${d.company.name}`,
+        html: customerEmailHtml(d, demoBanner("Demo · Deze mail krijgt jouw klant, in jouw huisstijl.")),
+      });
+      const second = await resend.emails.send({
+        from: `moverAI <${from}>`,
+        to: d.customer.email,
+        subject: `Demo 2/2 · Nieuwe offerteaanvraag (${formatEuroCents(d.totalCents)}): zo krijg jij hem binnen`,
+        html: companyEmailHtml(
+          d,
+          demoBanner("Demo · Deze mail krijg jij als verhuizer bij elke nieuwe aanvraag."),
+        ),
+      });
+      const error = first.error ?? second.error;
+      return error ? { sent: false, error: error.message } : { sent: true };
+    } catch (err) {
+      return { sent: false, error: err instanceof Error ? err.message : "onbekende fout" };
+    }
+  }
 
   const mails = [
     resend.emails.send({

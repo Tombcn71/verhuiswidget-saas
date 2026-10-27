@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Widget } from "@/app/widget/[companyId]/widget";
 import { DEMO_COMPANY_PUBLIC } from "@/lib/demo";
 
-export function DemoModal() {
+export function DemoModal({ calendlyUrl = null }: { calendlyUrl?: string | null }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export function DemoModal() {
             </button>
             {/* Altijd van boven tot onder (mobiel én desktop) — de demo is voor mobiel gemaakt. */}
             <div className="h-dvh w-full overflow-y-auto bg-white sm:shadow-xl">
-              <Widget company={DEMO_COMPANY_PUBLIC} demo />
+              <Widget company={DEMO_COMPANY_PUBLIC} demo calendlyUrl={calendlyUrl} />
             </div>
           </div>
         </div>

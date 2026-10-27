@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function DemoPage() {
   return (
     <div className="mx-auto w-full max-w-md bg-white sm:shadow-xl sm:ring-1 sm:ring-slate-200">
-      <Widget company={DEMO_COMPANY_PUBLIC} demo />
+      <Widget company={DEMO_COMPANY_PUBLIC} demo calendlyUrl={process.env.CALENDLY_URL ?? null} />
     </div>
   );
 }
