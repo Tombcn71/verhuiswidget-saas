@@ -8,13 +8,28 @@ import { Logo } from "@/app/_components/logo";
 export const metadata: Metadata = { title: "Inloggen" };
 
 /**
+ * Terugstuuradres van Clerk ("/admin" of "https://www.moverai.nl/admin") als
+ * eigen pad; nooit een ander domein (open redirect).
+ */
+function safePath(value: string | string[] | undefined): string | null {
+  if (typeof value !== "string") return null;
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+  try {
+    const url = new URL(value);
+    if (url.hostname === "moverai.nl" || url.hostname.endsWith(".moverai.nl")) {
+      return url.pathname + url.search;
+    }
+  } catch {}
+  return null;
+}
+
+/**
  * Al ingelogd → meteen door (anders blijft Clerk's SignIn leeg). Paden staan
  * hier expliciet, zodat het niet afhangt van de NEXT_PUBLIC_CLERK_*-env.
  */
 export default async function SignInPage({ searchParams }: PageProps<"/inloggen/[[...rest]]">) {
   const { redirect_url } = await searchParams;
-  const next =
-    typeof redirect_url === "string" && redirect_url.startsWith("/") ? redirect_url : "/dashboard";
+  const next = safePath(redirect_url) ?? "/dashboard";
   const { userId } = await auth();
   if (userId) redirect(next);
 
