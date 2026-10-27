@@ -80,9 +80,12 @@ export async function updateAction(formData: FormData): Promise<void> {
     mobile: text(formData, "mobile"),
     autoMailOff: formData.get("autoMailOff") === "on",
   });
-  // Proef/klant/afgevallen of "niet meer mailen": geplande opvolgmails annuleren.
+  // Gesprek gepland/proef/klant/afgevallen of "niet meer mailen": geplande opvolgmails annuleren.
   const fresh = await getProspect(id);
-  if (fresh && (fresh.autoMailOff || ["proef", "klant", "afgevallen"].includes(fresh.stage))) {
+  if (
+    fresh &&
+    (fresh.autoMailOff || ["gesprek", "proef", "klant", "afgevallen"].includes(fresh.stage))
+  ) {
     await cancelAutoMails(fresh);
   }
   revalidatePath("/admin");

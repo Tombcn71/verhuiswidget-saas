@@ -7,6 +7,7 @@ const STAGE_STYLE: Record<string, string> = {
   gebeld: "bg-sky-50 text-sky-700 border-sky-200",
   demo_gestuurd: "bg-blue-50 text-blue-700 border-blue-200",
   demo_gedaan: "bg-violet-50 text-violet-700 border-violet-200",
+  gesprek: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
   proef: "bg-amber-50 text-amber-800 border-amber-200",
   klant: "bg-emerald-50 text-emerald-700 border-emerald-200",
   afgevallen: "bg-muted text-muted-foreground line-through",

@@ -343,7 +343,7 @@ export const prospects = pgTable("prospects", {
   rating: doublePrecision("rating"),
   reviewCount: integer("review_count"),
   notes: text("notes"),
-  // nieuw | gebeld | demo_gestuurd | demo_gedaan | proef | klant | afgevallen
+  // nieuw | gebeld | demo_gestuurd | demo_gedaan | gesprek | proef | klant | afgevallen
   stage: text("stage").notNull().default("nieuw"),
   lostReason: text("lost_reason"),
   nextAction: text("next_action"),

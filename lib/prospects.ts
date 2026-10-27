@@ -10,6 +10,7 @@ export const STAGES = [
   { key: "gebeld", label: "Gebeld" },
   { key: "demo_gestuurd", label: "Demo gestuurd" },
   { key: "demo_gedaan", label: "Demo gedaan" },
+  { key: "gesprek", label: "Gesprek gepland" },
   { key: "proef", label: "Proef gestart" },
   { key: "klant", label: "Klant" },
   { key: "afgevallen", label: "Afgevallen" },

@@ -19,7 +19,7 @@ import {
  */
 
 const SENDER = "Tom van moverAI";
-const STOPPED_STAGES = ["proef", "klant", "afgevallen"];
+const STOPPED_STAGES = ["gesprek", "proef", "klant", "afgevallen"];
 
 function resend(): { client: Resend; from: string } | null {
   const apiKey = process.env.RESEND_API_KEY;
