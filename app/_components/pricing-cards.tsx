@@ -29,8 +29,8 @@ type Feature = {
 };
 
 /**
- * Basic toont alles; Pro alleen wat er extra in zit, onder "Alles uit Basic,
- * plus:" (zie `PLAN_BASE`).
+ * Volledige lijst in elke kaart, in dezelfde volgorde: eerst de verschillen
+ * (gebruikers, scans, in blauw), dan wat in elk pakket zit. Zo lijnen de kaarten uit.
  */
 function planFeatures(plan: Plan): Feature[] {
   const seats: Feature = {
@@ -42,9 +42,6 @@ function planFeatures(plan: Plan): Feature[] {
     highlight: true,
     scanInfo: true,
   };
-  if (plan.id === "pro") {
-    return [seats, scans];
-  }
   return [
     seats,
     scans,
@@ -55,11 +52,6 @@ function planFeatures(plan: Plan): Feature[] {
     { text: "Automatisch reviewverzoek na de verhuizing" },
   ];
 }
-
-/** Het pakket waar Pro op voortbouwt. */
-const PLAN_BASE: Partial<Record<PlanId, string>> = {
-  pro: "Basic",
-};
 
 /** "Zo werkt je proefperiode": staat boven de pakketten op de homepage. */
 export function TrialCard({
@@ -216,9 +208,6 @@ export function PricingCards() {
                   )}
                 </p>
                 <ul className="mt-6 flex-1 space-y-3 text-sm text-muted-foreground">
-                  {PLAN_BASE[plan.id] && (
-                    <li className="font-semibold text-foreground">Alles uit {PLAN_BASE[plan.id]}, plus:</li>
-                  )}
                   {planFeatures(plan).map((f) => (
                     <li
                       key={f.text}
