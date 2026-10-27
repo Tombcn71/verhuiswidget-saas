@@ -1963,8 +1963,8 @@ export function MoveFlow({
           </div>
           <p className="text-lg font-semibold">AI analyseert je foto&apos;s…</p>
           <p className="max-w-xs text-sm text-slate-600">
-            We herkennen je meubels en stellen een inventarislijst samen. Dit duurt een paar
-            seconden.
+            We herkennen je meubels en stellen een inventarislijst samen. Dit duurt ongeveer een
+            halve minuut, bij een groot huis iets langer.
           </p>
         </div>
       );
@@ -2057,7 +2057,9 @@ export function MoveFlow({
           <ImageIcon className="h-6 w-6" />
         </div>
         <p className="text-sm font-semibold">AI analyseert je foto&apos;s…</p>
-        <p className="max-w-xs text-xs text-slate-600">Een paar seconden geduld.</p>
+        <p className="max-w-xs text-xs text-slate-600">
+          Dit duurt ongeveer een halve minuut, bij een groot huis iets langer.
+        </p>
       </div>
     );
   }
