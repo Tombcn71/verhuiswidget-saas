@@ -1,5 +1,5 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
-import { mailer } from "@/lib/mailer";
+import { mailer, sender } from "@/lib/mailer";
 import { db, demoLeads, type DemoLead } from "@/lib/db";
 import { appUrl } from "@/lib/app-url";
 import { formatEuroCents } from "@/lib/format";
@@ -62,7 +62,7 @@ async function notifyMoverAI(lead: DemoLead): Promise<void> {
   const r = resend();
   if (!r) return;
   await r.client.emails.send({
-    from: `moverAI <${r.from}>`,
+    from: sender("moverAI", "aanvragen") ?? `moverAI <${r.from}>`,
     to: CONTACT_EMAIL,
     replyTo: lead.email,
     subject: `Nieuwe demo-lead: ${lead.name}`,

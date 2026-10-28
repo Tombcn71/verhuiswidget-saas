@@ -1,4 +1,4 @@
-import { mailer } from "@/lib/mailer";
+import { mailer, sender } from "@/lib/mailer";
 import type { Prospect } from "@/lib/db";
 import { appUrl } from "@/lib/app-url";
 import { CONTACT_EMAIL } from "@/lib/plans";
@@ -76,7 +76,7 @@ export async function sendDemoMail(p: Prospect): Promise<{ ok: true } | { ok: fa
   const hi = firstName(p) ? `Hoi ${esc(firstName(p)!)},` : "Hoi,";
 
   const sent = await r.client.emails.send({
-    from: `${SENDER} <${r.from}>`,
+    from: sender(SENDER, "tom") ?? `${SENDER} <${r.from}>`,
     to: p.email,
     replyTo: CONTACT_EMAIL,
     subject: "De moverAI-demo, zoals besproken",
@@ -94,7 +94,7 @@ export async function sendDemoMail(p: Prospect): Promise<{ ok: true } | { ok: fa
   if (!p.autoMailOff && !p.demoOpenedAt) {
     reminderAt = morningIn(3);
     const reminder = await r.client.emails.send({
-      from: `${SENDER} <${r.from}>`,
+      from: sender(SENDER, "tom") ?? `${SENDER} <${r.from}>`,
       to: p.email,
       replyTo: CONTACT_EMAIL,
       subject: "Even de demo bekijken?",
@@ -165,7 +165,7 @@ export async function handleDemoCompleted(slug: string): Promise<void> {
   const hi = firstName(p) ? `Hoi ${esc(firstName(p)!)},` : "Hoi,";
   const followUpAt = morningIn(1);
   const mail = await r.client.emails.send({
-    from: `${SENDER} <${r.from}>`,
+    from: sender(SENDER, "tom") ?? `${SENDER} <${r.from}>`,
     to: p.email,
     replyTo: CONTACT_EMAIL,
     subject: "Wat vond je van de demo?",

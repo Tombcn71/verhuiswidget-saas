@@ -1,4 +1,4 @@
-import { mailer } from "@/lib/mailer";
+import { mailer, sender } from "@/lib/mailer";
 import type { Company, InventoryItem, PriceLine } from "@/lib/db/schema";
 import { formatEuroCents, formatDate } from "@/lib/format";
 import { planningRows } from "@/lib/planning";
@@ -304,7 +304,7 @@ export async function sendBookingNotification(input: {
 
   try {
     await mailer(apiKey).emails.send({
-      from: `moverAI <${from}>`,
+      from: sender("moverAI", "aanvragen") ?? `moverAI <${from}>`,
       to: c.email,
       // Zonder plan geen klantgegevens: antwoorden gaan dan naar moverAI.
       replyTo: input.showDetails ? input.customerEmail : CONTACT_EMAIL,
@@ -462,10 +462,12 @@ export async function sendQuoteEmails(
         html: customerEmailHtml(d, demoBanner("Demo · Deze mail krijgt jouw klant, in jouw huisstijl.")),
       });
       const second = await resend.emails.send({
-        from: `moverAI <${from}>`,
+        from: sender("moverAI", "aanvragen") ?? `moverAI <${from}>`,
         to: d.customer.email,
         replyTo: CONTACT_EMAIL,
         subject: `Demo 2/2: nieuwe aanvraag van ${d.customer.name}`,
+        // Een minuut later: twee mails in dezelfde seconde naar één adres lijkt op bulk.
+        scheduledAt: new Date(Date.now() + 60_000).toISOString(),
         html: companyEmailHtml(
           d,
           demoBanner("Demo · Deze mail krijg jij als verhuizer bij elke nieuwe aanvraag."),
@@ -493,7 +495,7 @@ export async function sendQuoteEmails(
       resend.emails.send({
         // Afzender moverAI: een mail "van" je eigen bedrijfsnaam aan jezelf lijkt
         // op vervalsing en belandt in de spam.
-        from: `moverAI <${from}>`,
+        from: sender("moverAI", "aanvragen") ?? `moverAI <${from}>`,
         to: d.company.email,
         replyTo: d.customer.email,
         subject: `Nieuwe aanvraag van ${d.customer.name}`,

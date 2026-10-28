@@ -29,6 +29,19 @@ export function htmlToText(html: string): string {
     .trim();
 }
 
+/**
+ * Afzender met een eigen adres per naam. Eén adres met wisselende namen ("Jansen
+ * Verhuizingen" en vlak daarna "moverAI") lijkt op vervalsing en gaat de spam in.
+ * - offerte@… (QUOTE_FROM_EMAIL): mails aan klanten, op naam van de verhuizer
+ * - aanvragen@…: mails van moverAI aan verhuizers en meldingen aan moverAI
+ * - tom@…: persoonlijke mails uit de verkoop-CRM ("Tom van moverAI")
+ */
+export function sender(name: string, local: "aanvragen" | "tom"): string | null {
+  const quoteFrom = process.env.QUOTE_FROM_EMAIL;
+  const domain = quoteFrom?.split("@")[1];
+  return domain ? `${name} <${local}@${domain}>` : null;
+}
+
 /** Resend, maar met automatisch een platte-tekstversie naast de HTML. */
 export function mailer(apiKey: string) {
   const resend = new Resend(apiKey);
