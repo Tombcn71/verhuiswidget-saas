@@ -455,17 +455,17 @@ export async function sendQuoteEmails(
     // Na elkaar, in de volgorde van het onderwerp (1/2 klant, 2/2 verhuizer).
     try {
       const first = await resend.emails.send({
-        from: sender("Demo offerte klant", "demo-offerte") ?? fromHeader,
+        from: sender("moverAI demo offerte", "demo-offerte") ?? fromHeader,
         to: d.customer.email,
         replyTo: CONTACT_EMAIL,
-        subject: "Demo 1/2: zo krijgt je klant zijn offerte",
+        subject: "Zo krijgt je klant zijn offerte",
         html: customerEmailHtml(d, demoBanner("Demo · Deze mail krijgt jouw klant, in jouw huisstijl.")),
       });
       const second = await resend.emails.send({
-        from: sender("Demo aanvraag verhuisbedrijf", "demo-aanvraag") ?? `moverAI <${from}>`,
+        from: sender("moverAI demo aanvraag", "demo-aanvraag") ?? `moverAI <${from}>`,
         to: d.customer.email,
         replyTo: CONTACT_EMAIL,
-        subject: `Demo 2/2: zo krijg jij de aanvraag binnen: ${formatEuroCents(d.totalCents)}`,
+        subject: `Zo krijg jij de aanvraag binnen: ${formatEuroCents(d.totalCents)}`,
         // Een minuut later: twee mails in dezelfde seconde naar één adres lijkt op bulk.
         scheduledAt: new Date(Date.now() + 60_000).toISOString(),
         html: companyEmailHtml(
