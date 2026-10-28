@@ -80,7 +80,7 @@ export async function sendDemoMail(p: Prospect): Promise<{ ok: true } | { ok: fa
       <p>${hi}</p>
       <p>Leuk je net te spreken! Zoals beloofd: hier zie je in 1 minuut zelf hoe moverAI werkt, precies zoals jouw klanten het straks zien.</p>
       <p style="margin:24px 0">${button(demoLinkFor(p), "Probeer de demo")}</p>
-      <p>Maak een paar foto's van een kamer en de AI doet de rest.</p>`),
+      <p>Geen woning bij de hand? Kies in de demo een voorbeeldwoning. Je krijgt meteen twee mails: de offerte zoals je klant hem krijgt, en de aanvraag zoals jij hem binnenkrijgt.</p>`),
   });
   if (sent.error) return { ok: false, error: sent.error.message };
 
@@ -169,9 +169,9 @@ export async function handleDemoCompleted(slug: string): Promise<void> {
     html: layout(`
       <p>${hi}</p>
       <p>Je hebt de demo van moverAI uitgeprobeerd. Wat vond je ervan?</p>
-      <p>Zullen we vrijblijvend een half uur kijken hoe moverAI werkt met <strong>jouw</strong> tarieven en <strong>jouw</strong> website?</p>
+      <p>Zullen we vrijblijvend 15 minuten kijken hoe moverAI werkt met <strong>jouw</strong> tarieven? Kan ook 's avonds.</p>
       <p style="margin:24px 0">${button(meetingLinkFor(p), "Plan een vrijblijvend adviesgesprek")}</p>
-      <p>Of begin direct zelf: <a href="${esc(appUrl())}/#prijzen" style="color:#1a73e8">14 dagen gratis, zonder betaalgegevens</a>.</p>`),
+      <p>Of begin direct zelf: <a href="${esc(appUrl())}/kies-plan?plan=pro" style="color:#1a73e8">14 dagen gratis, zonder betaalgegevens</a>.</p>`),
   });
   if (mail.data?.id) await updateProspect(p.id, { followUpEmailId: mail.data.id, followUpAt });
 }
