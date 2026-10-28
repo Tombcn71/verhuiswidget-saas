@@ -19,6 +19,11 @@ const aiButton =
 
 const features = [
   {
+    Icon: Send,
+    title: "Sneller bij offerteplatforms",
+    body: "Krijg je een aanvraag via een offerteplatform? App of mail de klant meteen je linkje. Hij scant zijn inboedel en krijgt binnen een minuut jouw prijs: geen ruwe schatting, en je hoeft niet langs.",
+  },
+  {
     Icon: Timer,
     title: "Minder personeelsuren",
     body: "Niemand hoeft meer langs voor een opname. Je mensen blijven aan het werk: op de wagen of op kantoor.",
@@ -29,19 +34,14 @@ const features = [
     body: "Geen kilometers meer om alleen een inboedel te bekijken, ook niet voor klanten die nooit boeken.",
   },
   {
-    Icon: Send,
-    title: "Sneller bij offerteplatforms",
-    body: "Krijg je een aanvraag via een offerteplatform? App of mail de klant meteen je linkje. Hij scant zijn inboedel en krijgt binnen een minuut jouw prijs: geen ruwe schatting, en je hoeft niet langs.",
+    Icon: Star,
+    title: "Meer Google-reviews",
+    body: "Na de verhuizing vragen we je klant automatisch om een review. Meer sterren betekent meer nieuwe klanten.",
   },
   {
     Icon: Truck,
     title: "Minder halflege ritten",
     body: "Je weet vooraf hoeveel m³ het is, dus je stuurt meteen de juiste wagen en de juiste ploeg.",
-  },
-  {
-    Icon: Star,
-    title: "Meer Google-reviews",
-    body: "Na de verhuizing vragen we je klant automatisch om een review. Meer sterren betekent meer nieuwe klanten.",
   },
   {
     Icon: Zap,
@@ -54,12 +54,12 @@ const channels = [
   {
     Icon: Globe,
     t: "1. Via je website",
-    d: "Plaats de widget met één regel code op je site. Je klant vult zijn gegevens in, maakt foto’s van de kamers en krijgt direct een offerte met jouw tarieven.",
+    d: "Komen klanten via Google of social media op je website? Dan vragen ze daar meteen een offerte aan: een paar foto’s per kamer en binnen een minuut jouw prijs. Ook ’s avonds en in het weekend.",
   },
   {
     Icon: Link,
     t: "2. Via een linkje",
-    d: "Belt er iemand of krijg je een WhatsApp-bericht? Maak in je dashboard met één klik een persoonlijk linkje en stuur het door. Je klant uploadt zijn foto’s, jij krijgt de inventaris en het volume binnen.",
+    d: "Krijg je een aanvraag via een offerteplatform, een telefoontje of WhatsApp? Stuur de klant je eigen linkje. Hij maakt foto’s per kamer en krijgt binnen een minuut jouw prijs. Jij krijgt de inventaris en het volume binnen.",
   },
   {
     Icon: MapPin,
