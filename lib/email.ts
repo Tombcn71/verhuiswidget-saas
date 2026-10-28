@@ -241,6 +241,37 @@ export async function sendQuoteFollowUp(input: {
   return { sent: !res.error };
 }
 
+/**
+ * Het linkje naar de klant mailen, vanuit het dashboard (Jouw linkje). Het
+ * bericht van de verhuizer, met het linkje als knop in zijn huisstijl.
+ */
+export async function sendLinkEmail(input: {
+  company: Company;
+  to: string;
+  message: string;
+  link: string;
+}): Promise<{ sent: boolean }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.QUOTE_FROM_EMAIL;
+  if (!apiKey || !from) return { sent: false };
+
+  const c = input.company;
+  // Het linkje staat al als knop onder het bericht; uit de tekst halen.
+  const text = input.message.replace(input.link, "").replace(/[ \t]*:[ \t]*$/gm, ".").trim();
+  const res = await mailer(apiKey).emails.send({
+    from: `${c.name} <${from}>`,
+    to: input.to,
+    replyTo: c.email,
+    subject: `Je offerte van ${c.name}`,
+    html: baseLayout(
+      c,
+      `<p style="font-size:15px;line-height:1.55">${esc(text).replace(/\n/g, "<br>")}</p>
+       <div style="margin:24px 0;text-align:center">${brandButton(c, input.link, "Bekijk direct je prijs")}</div>`,
+    ),
+  });
+  return { sent: !res.error };
+}
+
 /** Na de verhuisdatum: vraag de klant om een review (link uit Dashboard → Bedrijf). */
 export async function sendReviewRequest(input: {
   company: Company;

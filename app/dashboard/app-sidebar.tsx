@@ -47,7 +47,7 @@ const GROUPS: { label: string; items: Item[] }[] = [
     items: [
       { href: "/dashboard/tarieven", label: "Tarieven", icon: Calculator, adminOnly: true },
       { href: "/dashboard/instellingen", label: "Bedrijf", icon: Building2, adminOnly: true },
-      { href: "/dashboard/embed", label: "Widget-link", icon: Link2 },
+      { href: "/dashboard/embed", label: "Jouw linkje", icon: Link2 },
     ],
   },
   {
