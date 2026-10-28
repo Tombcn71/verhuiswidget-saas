@@ -306,7 +306,8 @@ export async function sendBookingNotification(input: {
     await mailer(apiKey).emails.send({
       from: `moverAI <${from}>`,
       to: c.email,
-      ...(input.showDetails ? { replyTo: input.customerEmail } : {}),
+      // Zonder plan geen klantgegevens: antwoorden gaan dan naar moverAI.
+      replyTo: input.showDetails ? input.customerEmail : CONTACT_EMAIL,
       subject,
       html: baseLayout(
         c,

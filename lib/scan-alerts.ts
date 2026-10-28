@@ -29,6 +29,7 @@ export async function notifyIfOverScanLimit(company: Company): Promise<void> {
   await mailer(apiKey).emails.send({
     from: `moverAI <${from}>`,
     to: CONTACT_EMAIL,
+    replyTo: company.email,
     subject: `${company.name} zit boven de ${plan.scans} scans (${plan.label})`,
     html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px">
       <p><strong>${esc(company.name)}</strong> heeft deze maand meer dan ${plan.scans} inboedelscans gedaan (pakket ${esc(plan.label)}). Alles blijft gewoon werken.</p>
