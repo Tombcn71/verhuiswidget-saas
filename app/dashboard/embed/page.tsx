@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "../page-header";
 import { CopyBlock } from "./copy-block";
 import { SendLink } from "./send-link";
+import { linkMessage } from "./message";
 
 export const metadata: Metadata = { title: "Jouw linkje" };
 
@@ -16,7 +17,6 @@ export default async function EmbedPage() {
   const popupLink = `${base}/widget/${company.id}?popup`;
   // Kort deellinkje; zonder "www." voor de leesbaarheid.
   const directLink = `${base.replace("://www.", "://")}/offerte/${await ensureCompanySlug(company)}`;
-  const message = `Hoi! Bedankt voor je aanvraag. Maak via deze link een paar foto's per kamer, dan heb je binnen een minuut onze prijs: ${directLink}\n\nGroet, ${company.name}`;
 
   return (
     <div className="max-w-2xl">
@@ -29,7 +29,7 @@ export default async function EmbedPage() {
         <Card>
           <CardContent className="space-y-4">
             <CopyBlock code={directLink} />
-            <SendLink defaultMessage={message} />
+            <SendLink defaultMessage={linkMessage(directLink, company.name)} />
           </CardContent>
         </Card>
 

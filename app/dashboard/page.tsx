@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CalendarDays, Inbox, Lock, ScanLine, Trophy, Wallet } from "lucide-react";
 import { requireCompany } from "@/lib/current-company";
-import { normalizeServiceType } from "@/lib/companies";
+import { ensureCompanySlug, normalizeServiceType } from "@/lib/companies";
+import { appUrl } from "@/lib/app-url";
 import { countLeadsThisMonth, getLeadStats, listLeadsForCompany } from "@/lib/leads";
 import { isLeadLocked, planFor, scanUsage } from "@/lib/plans";
 import { formatEuroCents, formatDateTime } from "@/lib/format";
@@ -27,6 +28,8 @@ import { PageHeader } from "./page-header";
 import { StatusBadge } from "./status-badge";
 import { UsageBar } from "./usage-bar";
 import { InstallHint } from "./install-hint";
+import { SendLink } from "./embed/send-link";
+import { linkMessage } from "./embed/message";
 import { ScanInfo } from "@/app/_components/scan-info";
 
 export const metadata: Metadata = { title: "Overzicht" };
@@ -40,6 +43,7 @@ export default async function DashboardOverviewPage() {
   ]);
   const usage = scanUsage(company, used);
   const serviceType = normalizeServiceType(company.serviceType);
+  const directLink = `${appUrl().replace("://www.", "://")}/offerte/${await ensureCompanySlug(company)}`;
 
   const kpis = [
     { label: "Leads totaal", value: String(stats.total), icon: Inbox },
@@ -63,6 +67,16 @@ export default async function DashboardOverviewPage() {
       />
 
       <InstallHint />
+
+      <Card className="mb-4 gap-3">
+        <CardHeader>
+          <CardTitle>Snelle acties</CardTitle>
+          <CardDescription>Stuur je linkje naar een nieuwe aanvraag.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SendLink defaultMessage={linkMessage(directLink, company.name)} />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((k) => (
@@ -126,7 +140,7 @@ export default async function DashboardOverviewPage() {
             <CardContent>
               <Button asChild variant="outline">
                 <Link href="/dashboard/embed">
-                  Naar widget-link <ArrowRight />
+                  Naar jouw linkje <ArrowRight />
                 </Link>
               </Button>
             </CardContent>
