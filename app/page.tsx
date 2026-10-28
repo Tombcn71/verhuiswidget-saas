@@ -31,7 +31,7 @@ const features = [
   {
     Icon: Send,
     title: "Sneller bij offerteplatforms",
-    body: "Krijg je een aanvraag via een offerteplatform? App de klant meteen je linkje. Hij scant zijn inboedel en krijgt binnen een minuut jouw prijs: geen ruwe schatting, en je hoeft niet langs.",
+    body: "Krijg je een aanvraag via een offerteplatform? App of mail de klant meteen je linkje. Hij scant zijn inboedel en krijgt binnen een minuut jouw prijs: geen ruwe schatting, en je hoeft niet langs.",
   },
   {
     Icon: Truck,

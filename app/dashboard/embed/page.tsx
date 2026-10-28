@@ -117,6 +117,19 @@ export default async function EmbedPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <CopyBlock code={directLink} />
+            <div>
+              <p className="mb-1.5 text-sm font-medium">
+                Kant-en-klaar bericht, bijvoorbeeld voor een aanvraag via een offerteplatform
+              </p>
+              <CopyBlock
+                multiline
+                code={`Hoi! Bedankt voor je aanvraag. Maak via deze link een paar foto's per kamer, dan krijg je binnen een minuut onze prijs: ${directLink}\n\nGroet, ${company.name}`}
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Stuur het het liefst via WhatsApp, dan lezen klanten het meteen. Geen 06-nummer?
+                Dan per mail.
+              </p>
+            </div>
             <p className="flex gap-2 text-sm text-muted-foreground">
               <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />
               Veilig om te delen: hiermee zijn alleen je publieke tarieven en huisstijl
