@@ -4,7 +4,7 @@ import { DemoModal } from "@/app/_components/demo-modal";
 import { SiteHeader } from "@/app/_components/site-header";
 import { PricingCards, TrialCard } from "@/app/_components/pricing-cards";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
-import { Globe, Link, MapPin, Send, Star } from "lucide-react";
+import { Globe, Keyboard, Link, MapPin, Star } from "lucide-react";
 import {
   Timer,
   Fuel,
@@ -19,7 +19,7 @@ const aiButton =
 
 const features = [
   {
-    Icon: Send,
+    Icon: Zap,
     title: "Sneller bij offerteplatforms",
     body: "Krijg je een aanvraag via een offerteplatform? App of mail de klant meteen je linkje. Hij scant zijn inboedel en krijgt binnen een minuut jouw prijs: geen ruwe schatting, en je hoeft niet langs.",
   },
@@ -44,7 +44,7 @@ const features = [
     body: "Je weet vooraf hoeveel m³ het is, dus je stuurt meteen de juiste wagen en de juiste ploeg.",
   },
   {
-    Icon: Zap,
+    Icon: Keyboard,
     title: "Minder typewerk",
     body: "Geen meubels tellen of Excel-sheets invullen. De offerte gaat binnen een minuut de deur uit, met jouw naam en tarieven.",
   },
