@@ -135,12 +135,12 @@ export default async function DashboardOverviewPage() {
           <Card className="gap-3">
             <CardHeader>
               <CardTitle>Meer aanvragen krijgen</CardTitle>
-              <CardDescription>Zet de widget op je site of deel je link.</CardDescription>
+              <CardDescription>Zet de widget ook op je eigen website.</CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild variant="outline">
-                <Link href="/dashboard/embed">
-                  Naar jouw linkje <ArrowRight />
+                <Link href="/dashboard/website">
+                  Naar Website <ArrowRight />
                 </Link>
               </Button>
             </CardContent>
@@ -162,11 +162,12 @@ export default async function DashboardOverviewPage() {
         <CardContent>
           {leads.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              Nog geen leads. Plaats de{" "}
-              <Link href="/dashboard/embed" className="text-primary underline">
-                widget-link
-              </Link>{" "}
-              achter een knop op je website om aanvragen te ontvangen.
+              Nog geen leads. Stuur je linkje hierboven naar je volgende aanvraag, of zet de
+              widget op je{" "}
+              <Link href="/dashboard/website" className="text-primary underline">
+                website
+              </Link>
+              .
             </p>
           ) : (
             <Table>

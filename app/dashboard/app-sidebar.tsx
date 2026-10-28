@@ -6,6 +6,7 @@ import {
   Building2,
   Calculator,
   CreditCard,
+  Globe,
   Inbox,
   LayoutDashboard,
   Link2,
@@ -40,6 +41,8 @@ const GROUPS: { label: string; items: Item[] }[] = [
       { href: "/dashboard", label: "Overzicht", icon: LayoutDashboard },
       { href: "/dashboard/leads", label: "Leads", icon: Inbox },
       { href: "/dashboard/scan", label: "Scannen", icon: ScanLine },
+      { href: "/dashboard/embed", label: "Jouw linkje", icon: Link2 },
+      { href: "/dashboard/website", label: "Website", icon: Globe },
     ],
   },
   {
@@ -47,7 +50,6 @@ const GROUPS: { label: string; items: Item[] }[] = [
     items: [
       { href: "/dashboard/tarieven", label: "Tarieven", icon: Calculator, adminOnly: true },
       { href: "/dashboard/instellingen", label: "Bedrijf", icon: Building2, adminOnly: true },
-      { href: "/dashboard/embed", label: "Jouw linkje", icon: Link2 },
     ],
   },
   {
