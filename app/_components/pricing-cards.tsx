@@ -93,10 +93,15 @@ export function TrialCard({
             rel="noopener"
             className="w-full rounded-full border border-border bg-background px-6 py-3 text-center font-semibold shadow-sm transition hover:bg-muted sm:w-auto"
           >
-            Plan een gratis adviesgesprek
+            Plan een vrijblijvend adviesgesprek
           </a>
         )}
       </div>
+      {calendlyUrl && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Adviesgesprek: 15 minuten, ook &apos;s avonds mogelijk.
+        </p>
+      )}
     </div>
   );
 }

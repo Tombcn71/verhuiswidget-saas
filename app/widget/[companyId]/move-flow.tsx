@@ -1915,8 +1915,11 @@ export function MoveFlow({
                 rel="noopener"
                 className={`mt-3 block rounded-full px-6 py-3 text-center text-sm font-semibold text-white shadow-md ${ACCENT_BG}`}
               >
-                Plan een adviesgesprek
+                Plan een vrijblijvend adviesgesprek
               </a>
+            )}
+            {calendlyUrl && (
+              <p className="mt-2 text-xs text-slate-500">15 minuten, ook &apos;s avonds mogelijk.</p>
             )}
             <a
               href="/kies-plan?plan=pro"

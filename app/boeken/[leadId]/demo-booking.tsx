@@ -161,10 +161,13 @@ export async function DemoBooking({
                 rel="noopener"
                 className="mt-3 block rounded-full border border-slate-300 bg-white px-6 py-3.5 text-center font-semibold text-slate-700 transition hover:bg-slate-50"
               >
-                Plan een adviesgesprek
+                Plan een vrijblijvend adviesgesprek
               </a>
             )}
-            <p className="mt-2 text-center text-xs text-slate-500">Geen betaalgegevens nodig</p>
+            <p className="mt-2 text-center text-xs text-slate-500">
+              {calendlyUrl ? "Gesprek van 15 minuten, ook 's avonds mogelijk · " : ""}Geen
+              betaalgegevens nodig
+            </p>
           </>
         )}
       </div>

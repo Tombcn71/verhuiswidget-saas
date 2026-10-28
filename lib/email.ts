@@ -1,3 +1,4 @@
+import { appUrl } from "@/lib/app-url";
 import { mailer, sender } from "@/lib/mailer";
 import type { Company, InventoryItem, PriceLine } from "@/lib/db/schema";
 import { formatEuroCents, formatDate } from "@/lib/format";
@@ -98,12 +99,17 @@ function planningBlock(d: QuoteData): string {
   </div>`;
 }
 
-/** Onderaan de verhuizersmail van de demo: uitnodiging voor een gesprek (hoort bij de demo). */
-function demoInvite(meetingUrl: string): string {
+/**
+ * Onderaan beide demo-mails: uitnodiging voor een gesprek (hoort bij de demo).
+ * `withTrial`: ook de kleine link om zelf te beginnen (alleen de verhuizersmail).
+ */
+function demoInvite(meetingUrl: string, withTrial = false): string {
   return `<div style="background:#e8f0fe;border-radius:12px;padding:18px 20px;margin:24px 0 0;text-align:center">
     <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#0f172a">Benieuwd hoe dit werkt met jouw tarieven?</p>
-    <p style="margin:0 0 14px;font-size:14px;color:#334155">Plan een gesprek van 15 minuten. Dan laat ik zien hoe moverAI werkt met jouw manier van rekenen, en beantwoord ik je vragen.</p>
-    <a href="${esc(meetingUrl)}" style="display:inline-block;background:#1a73e8;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 26px;border-radius:999px">Plan een adviesgesprek</a>
+    <p style="margin:0 0 14px;font-size:14px;color:#334155">Dan laat ik zien hoe moverAI werkt met jouw manier van rekenen, en beantwoord ik je vragen.</p>
+    <a href="${esc(meetingUrl)}" style="display:inline-block;background:#1a73e8;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 26px;border-radius:999px">Plan een vrijblijvend adviesgesprek</a>
+    <p style="margin:10px 0 0;font-size:13px;color:#475569">15 minuten, ook 's avonds mogelijk.</p>
+    ${withTrial ? `<p style="margin:12px 0 0;font-size:13px"><a href="${esc(appUrl())}/kies-plan?plan=pro" style="color:#1a73e8">of probeer het zelf, 14 dagen gratis</a></p>` : ""}
   </div>`;
 }
 
@@ -112,10 +118,11 @@ function demoBanner(text: string): string {
   return `<div style="background:#e8f0fe;color:#1557b0;border-radius:10px;padding:10px 14px;margin:0 0 16px;font-size:13px;font-weight:600">${esc(text)}</div>`;
 }
 
-function baseLayout(company: Company, inner: string): string {
+/** `title`: kop bovenaan; standaard de bedrijfsnaam (de demo-aanvraag zet "Demo aanvraag"). */
+function baseLayout(company: Company, inner: string, title = company.name): string {
   return `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;color:#0f172a">
     <div style="border-top:4px solid ${esc(company.primaryColor)};padding:24px 4px">
-      <h2 style="margin:0 0 16px">${esc(company.name)}</h2>
+      <h2 style="margin:0 0 16px">${esc(title)}</h2>
       ${inner}
       <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0">
       <p style="font-size:12px;color:#64748b">
@@ -157,7 +164,7 @@ function inventoryBlock(d: QuoteData): string {
   </table>`;
 }
 
-function customerEmailHtml(d: QuoteData, banner = ""): string {
+function customerEmailHtml(d: QuoteData, banner = "", footer = ""): string {
   return baseLayout(
     d.company,
     `${banner}<h1 style="font-size:20px">Je offerte-indicatie</h1>
@@ -170,7 +177,8 @@ function customerEmailHtml(d: QuoteData, banner = ""): string {
      <p style="font-size:13px;color:#64748b">Dit is een automatische indicatie op basis van foto-analyse en geen bindende offerte. ${esc(d.company.name)} neemt binnenkort contact met je op om de details te bevestigen.</p>
      <h3 style="font-size:16px">Herkende inboedel</h3>
      ${inventoryBlock(d)}
-     ${signatureBlock(d.company)}`,
+     ${signatureBlock(d.company)}
+     ${footer}`,
   );
 }
 
@@ -405,7 +413,7 @@ function photoBlock(urls: string[] | undefined): string {
   return `<h3 style="font-size:16px">Foto's van de klant (${urls.length})</h3><div>${imgs}</div>`;
 }
 
-function companyEmailHtml(d: QuoteData, banner = "", footer = ""): string {
+function companyEmailHtml(d: QuoteData, banner = "", footer = "", title?: string): string {
   return baseLayout(
     d.company,
     `${banner}<h1 style="font-size:20px">Nieuwe offerteaanvraag</h1>
@@ -424,6 +432,7 @@ function companyEmailHtml(d: QuoteData, banner = "", footer = ""): string {
      ${inventoryBlock(d)}
      ${d.leadId === "demo" ? "" : `<p style="font-size:12px;color:#64748b">Lead-id: ${esc(d.leadId)}</p>`}
      ${footer}`,
+    title,
   );
 }
 
@@ -459,7 +468,13 @@ export async function sendQuoteEmails(
         to: d.customer.email,
         replyTo: CONTACT_EMAIL,
         subject: "Zo krijgt je klant zijn offerte",
-        html: customerEmailHtml(d, demoBanner("Demo · Deze mail krijgt jouw klant, in jouw huisstijl.")),
+        html: customerEmailHtml(
+          d,
+          demoBanner(
+            "Demo offerte · Zo krijgt jouw klant zijn offerte: met jouw bedrijfsnaam bovenaan en jouw tarieven.",
+          ),
+          opts.meetingUrl ? demoInvite(opts.meetingUrl) : "",
+        ),
       });
       const second = await resend.emails.send({
         from: sender("moverAI demo aanvraag", "demo-aanvraag") ?? `moverAI <${from}>`,
@@ -468,8 +483,11 @@ export async function sendQuoteEmails(
         subject: `Zo krijg jij de aanvraag binnen: ${formatEuroCents(d.totalCents)}`,
         html: companyEmailHtml(
           d,
-          demoBanner("Demo · Deze mail krijg jij als verhuizer bij elke nieuwe aanvraag."),
-          opts.meetingUrl ? demoInvite(opts.meetingUrl) : "",
+          demoBanner(
+            "Demo aanvraag · Dit krijg jij bij elke nieuwe aanvraag. De prijzen zijn voorbeeldtarieven: in moverAI stel je je eigen tarieven in, of upload je een oude factuur en staan ze meteen klaar.",
+          ),
+          opts.meetingUrl ? demoInvite(opts.meetingUrl, true) : "",
+          "Demo aanvraag",
         ),
       });
       const error = first.error ?? second.error;
