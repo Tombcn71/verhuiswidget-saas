@@ -11,16 +11,16 @@ const STEPS = [
     say: "Goedemorgen, met Tom van moverAI. Spreek ik met de eigenaar?",
   },
   {
-    title: "De vraag die het gesprek opent",
-    say: "Krijg je aanvragen via offerteplatforms? (laat hem praten: welke, hoeveel, wat het kost)",
+    title: "Waarom je belt",
+    say: "Ik heb software gebouwd voor verhuisbedrijven. Je klant maakt met zijn telefoon een paar foto's per kamer en krijgt binnen een minuut een offerte met jóuw tarieven.",
   },
   {
-    title: "Waarom je belt (dan stoppen met praten)",
-    say: "Ik heb iets gebouwd waarmee je daar als eerste bent. Aanvraag binnen? Je tikt het e-mailadres in, één klik, en de klant scant zijn kamers met zijn telefoon. Binnen een minuut heeft hij jouw prijs, met jóuw tarieven. Zonder bezoek aan huis.",
+    title: "De vraag (dan stoppen met praten)",
+    say: "Krijg je ook aanvragen via offerteplatforms? (laat hem vertellen) Dan stuur je die klant meteen je linkje, en ben je als eerste met een echte prijs.",
   },
   {
     title: "Het kleine verzoek",
-    say: "Ik houd het kort. Mag ik je de demo mailen? Dan zie je zelf in een minuut of de prijs klopt.",
+    say: "Ik weet dat je druk bent, dus ik houd het kort. Mag ik je een linkje naar de demo mailen? Dan probeer je het zelf wanneer het jou uitkomt.",
   },
   {
     title: "Bij ja",
@@ -32,7 +32,7 @@ const OBJECTIONS = [
   ["Geen tijd.", "Daarom mail ik het. Het kost je twee minuten wanneer het jou uitkomt."],
   [
     "Wat kost het?",
-    `Eerst een vraag terug: wat betaal je per maand aan offerteplatforms, en hoeveel ritjes rijd je om te kijken? moverAI kost ${euro(PLANS.basic.priceCents)} per maand, of ${euro(PLANS.pro.priceCents)} met ${PLANS.pro.seats} gebruikers en ${PLANS.pro.scans} scans. Je probeert het eerst 14 dagen gratis, zonder betaalgegevens.`,
+    `${euro(PLANS.basic.priceCents)} per maand, of ${euro(PLANS.pro.priceCents)} met ${PLANS.pro.seats} gebruikers en ${PLANS.pro.scans} scans. Je probeert het eerst 14 dagen gratis, zonder betaalgegevens.`,
   ],
   [
     "Dat is duur.",
