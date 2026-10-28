@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
 import { isDemoCompany } from "@/lib/demo";
+import { scanLimitReached } from "@/lib/scan-alerts";
 import { analyzePhotos, type PhotoInput } from "@/lib/gemini";
 import { CORS, checkDemoRateLimit, clientIp, jsonResponse as json } from "@/lib/widget-request";
 import type { InventoryItem } from "@/lib/db/schema";
@@ -36,6 +37,11 @@ export async function POST(request: Request) {
   const demo = isDemoCompany(companyId);
   const company = demo ? await ensureDemoCompany() : await getCompanyById(companyId);
   if (!company) return json({ error: "Onbekende verhuizer." }, 404);
+  // Scans op: geen betaalde analyse; de widget toont dan het contactformulier.
+  // Test je tarieven (preview) telt niet mee en mag altijd.
+  if (form.get("preview") !== "1" && (await scanLimitReached(company))) {
+    return json({ error: "Deze verhuizer kan op dit moment geen directe prijs geven. Laat je gegevens achter, dan nemen ze contact met je op.", limitReached: true }, 403);
+  }
 
   const files = form.getAll("photos").filter((f): f is File => f instanceof File);
   const urls = form.getAll("photoUrls").map((u) => String(u));

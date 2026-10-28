@@ -24,8 +24,8 @@ const webhookUrl = process.argv[2];
 
 // Houd gelijk met lib/plans.ts en lib/stripe.ts. Jaar = 10 × maand ("2 maanden gratis").
 const PLANS = [
-  { id: "moverai_basic", name: "moverAI Basic", cents: 6900, yearlyCents: 69000 },
-  { id: "moverai_pro", name: "moverAI Pro", cents: 9900, yearlyCents: 99000 },
+  { id: "moverai_basic", name: "moverAI Basic", cents: 9900, yearlyCents: 99000 },
+  { id: "moverai_pro", name: "moverAI Pro", cents: 14900, yearlyCents: 149000 },
 ];
 // Niet meer te koop (Standard heet sinds 2026-10-27 Pro; Premium is "op maat"):
 // prijzen en product uitzetten. Lopende abonnementen houden hun prijs.

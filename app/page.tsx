@@ -99,7 +99,7 @@ const faqs = [
   },
   {
     q: "Wat als ik meer scans nodig heb dan in mijn pakket?",
-    a: "Dan blijft alles gewoon werken; we blokkeren nooit een aanvraag. Je krijgt een melding en kunt overstappen naar een groter pakket als je wilt.",
+    a: "Je krijgt ruim op tijd een melding en een mail, bij 80% en als ze op zijn. Zijn ze op, dan mis je geen aanvraag: je klant laat zijn gegevens achter en jij belt hem terug, alleen zonder directe prijs. Met een groter pakket werkt alles meteen weer.",
   },
   {
     q: "Kan ik op elk moment opzeggen?",
@@ -213,7 +213,7 @@ export default function HomePage() {
               Rekenvoorbeeld: 20 opnames per maand × 1,5 uur = 30 uur × €45 per
               uur = €1.350. 20 ritten × 10 km heen en terug = 200 km × €0,20
               brandstof per km = €40. Samen €1.390 per maand. moverAI kost vanaf
-              €69 per maand.
+              €99 per maand.
             </p>
             <a
               href="#prijzen"

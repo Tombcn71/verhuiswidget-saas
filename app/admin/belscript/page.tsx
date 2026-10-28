@@ -33,7 +33,7 @@ const OBJECTIONS = [
   ],
   [
     "We zitten al bij een offerteplatform.",
-    "Juist dan. Je stuurt elke aanvraag meteen je linkje en hebt als eerste een echte prijs, in plaats van een schatting of een afspraak om langs te komen.",
+    "Juist dan. Je stuurt elke aanvraag meteen je linkje en hebt als eerste een echte prijs, in plaats van een schatting of een afspraak om langs te komen. In je dashboard staat er een kant-en-klaar antwoord voor: kopiëren, plakken, versturen.",
   ],
   [
     "Werkt dat wel, zo'n AI?",

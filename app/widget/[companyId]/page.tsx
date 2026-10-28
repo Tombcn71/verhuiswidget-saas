@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCompanyById, normalizeServiceType } from "@/lib/companies";
+import { scanLimitReached } from "@/lib/scan-alerts";
 import { Widget } from "./widget";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +49,8 @@ export default async function WidgetPage({
   // Alleen op de losse pagina terug naar de site van de verhuizer; in de
   // pop-up/iframe sluit de klant gewoon het venster.
   const standalone = embed === undefined;
+  // Scans op: alleen een contactformulier. Test je tarieven (preview) werkt altijd.
+  const limitReached = preview === undefined && (await scanLimitReached(company));
 
   const widget = (
     <Widget
@@ -57,6 +60,7 @@ export default async function WidgetPage({
       backUrl={standalone && preview === undefined ? websiteUrl(company.website) : null}
       // Losse pagina (linkje): de klant zit niet op de site van de verhuizer, dus de naam erbij.
       showName={standalone}
+      limitReached={limitReached}
       company={{
         id: company.id,
         name: company.name,

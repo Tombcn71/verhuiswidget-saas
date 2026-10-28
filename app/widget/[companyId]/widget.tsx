@@ -5,6 +5,7 @@ import type { LeadSource } from "@/lib/leads";
 import { Calculator, Camera, Mail } from "lucide-react";
 import { Logo, LogoMark } from "@/app/_components/logo";
 import { MoveFlow, type DemoContact } from "./move-flow";
+import { ContactFallback } from "./contact-fallback";
 
 type CompanyPublic = {
   id: string;
@@ -45,6 +46,7 @@ export function Widget({
   demoContact,
   prospect,
   calendlyUrl = null,
+  limitReached = false,
 }: {
   company: CompanyPublic;
   demo?: boolean;
@@ -60,6 +62,8 @@ export function Widget({
   prospect?: string;
   /** Demo: "Plan een adviesgesprek" op het slotscherm. */
   calendlyUrl?: string | null;
+  /** Scans van de verhuizer op: alleen een contactformulier, geen scan of prijs. */
+  limitReached?: boolean;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   // Alle accenten in de widget (knoppen, toggles, koppen) in de kleur van de verhuizer.
@@ -137,6 +141,20 @@ export function Widget({
           Start de demo
         </button>
         <p className="mt-3 text-xs text-slate-400">Werkt het best op je telefoon</p>
+      </div>
+    );
+  }
+
+  if (limitReached) {
+    return (
+      <div ref={rootRef} style={accentStyle} className="bg-white text-slate-900">
+        <ContactFallback
+          company={company}
+          source={source}
+          showName={showName}
+          showToggle={showToggle}
+          forcedType={forcedType}
+        />
       </div>
     );
   }

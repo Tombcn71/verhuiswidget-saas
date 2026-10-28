@@ -31,10 +31,14 @@ export default async function DashboardLayout({
   const [admin, used] = await Promise.all([isOrgAdmin(), countLeadsThisMonth(company.id)]);
   const plan = planFor(company);
   const trial = trialState(company);
+  const usage = scanUsage(company, used);
   const notice =
     company.subscriptionStatus === "past_due"
       ? "Je laatste betaling is mislukt. Werk je betaalmethode bij om moverAI te blijven gebruiken."
-      : planNotice(plan, scanUsage(company, used), trial);
+      : planNotice(plan, usage, trial);
+  // Rood bij een mislukte betaling of als de scans op zijn; anders oranje.
+  const urgent =
+    company.subscriptionStatus === "past_due" || (usage.over && trial.kind !== "expired");
 
   return (
     <TooltipProvider>
@@ -65,17 +69,29 @@ export default async function DashboardLayout({
 
           <main className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-8">
             {notice && (
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <div
+                className={`mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3 text-sm ${
+                  urgent
+                    ? "border-red-200 bg-red-50 text-red-900"
+                    : "border-amber-200 bg-amber-50 text-amber-900"
+                }`}
+              >
                 <span className="flex items-center gap-2">
                   <TriangleAlert className="size-4 shrink-0" />
                   {notice}
                 </span>
                 {admin ? (
-                  <Button asChild size="sm" className="bg-amber-600 hover:bg-amber-700">
+                  <Button
+                    asChild
+                    size="sm"
+                    className={urgent ? "bg-red-600 hover:bg-red-700" : "bg-amber-600 hover:bg-amber-700"}
+                  >
                     <Link href="/dashboard/abonnement">Bekijk plannen</Link>
                   </Button>
                 ) : (
-                  <span className="text-amber-700">Vraag je beheerder om te upgraden.</span>
+                  <span className={urgent ? "text-red-700" : "text-amber-700"}>
+                    Vraag je beheerder om te upgraden.
+                  </span>
                 )}
               </div>
             )}
@@ -90,8 +106,8 @@ export default async function DashboardLayout({
 }
 
 /**
- * De melding bovenaan het dashboard. De scan-limiet is zacht: er wordt nooit
- * geblokkeerd, alleen een upgrade aangeboden.
+ * De melding bovenaan het dashboard. De scan-limiet is hard: zijn de scans op,
+ * dan krijgen klanten geen directe prijs meer (alleen een contactformulier).
  */
 function planNotice(plan: Plan, usage: ScanUsage, trial: TrialState): string | null {
   if (trial.kind === "expired") {
@@ -99,14 +115,14 @@ function planNotice(plan: Plan, usage: ScanUsage, trial: TrialState): string | n
   }
   const upgrade = nextPlan(plan);
   if (usage.over && upgrade) {
-    return `Je hebt deze maand ${usage.used} inboedelscans gebruikt, meer dan de ${usage.limit} van ${plan.label}. Alles blijft gewoon werken — met ${upgrade.label} heb je ${upgrade.scans === null ? "onbeperkt" : upgrade.scans.toLocaleString("nl-NL")} inboedelscans per maand.`;
+    return `Je scans van deze maand zijn op (${usage.used} van ${usage.limit}). Nieuwe klanten krijgen geen directe prijs meer, alleen een contactformulier. Met ${upgrade.label} heb je ${upgrade.scans === null ? "onbeperkt" : upgrade.scans.toLocaleString("nl-NL")} scans per maand.`;
   }
   // Geen groter pakket (Pro, op maat): dan een pakket op maat via contact.
   if (usage.over) {
-    return `Je hebt deze maand ${usage.used} inboedelscans gebruikt, meer dan de ${usage.limit} van ${plan.label}. Alles blijft gewoon werken. Heb je structureel meer nodig? Neem contact op via ${CONTACT_EMAIL} voor een pakket op maat.`;
+    return `Je scans van deze maand zijn op (${usage.used} van ${usage.limit}). Nieuwe klanten krijgen geen directe prijs meer, alleen een contactformulier. Mail ${CONTACT_EMAIL} voor een pakket op maat.`;
   }
-  if (usage.nearLimit && upgrade) {
-    return `Je zit op ${usage.used} van de ${usage.limit} inboedelscans deze maand. Groei je door? ${upgrade.label} geeft meer ruimte.`;
+  if (usage.nearLimit) {
+    return `Je zit op ${usage.used} van de ${usage.limit} inboedelscans deze maand. Zijn ze op, dan krijgen nieuwe klanten geen directe prijs meer. ${upgrade ? `${upgrade.label} geeft meer ruimte.` : `Mail ${CONTACT_EMAIL} voor een pakket op maat.`}`;
   }
   if (trial.kind === "trial" && trial.daysLeft <= 3) {
     return `Je proefperiode loopt over ${trial.daysLeft} ${trial.daysLeft === 1 ? "dag" : "dagen"} af.`;

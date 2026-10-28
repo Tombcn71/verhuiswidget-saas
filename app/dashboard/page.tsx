@@ -189,7 +189,7 @@ export default async function DashboardOverviewPage() {
                         {Number(lead.totalVolumeM3).toFixed(1)} m³
                       </TableCell>
                       <TableCell className="text-right font-medium tabular-nums">
-                        {locked ? "—" : formatEuroCents(lead.totalCents)}
+                        {locked ? "—" : lead.totalCents > 0 ? formatEuroCents(lead.totalCents) : "Geen prijs"}
                       </TableCell>
                       <TableCell className="text-right">
                         <StatusBadge status={lead.status} />

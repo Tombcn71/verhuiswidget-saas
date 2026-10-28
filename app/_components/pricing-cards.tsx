@@ -6,6 +6,7 @@ import { ScanInfo } from "@/app/_components/scan-info";
 import {
   CHANNEL_FEATURES,
   MORE_SEATS_MAILTO,
+  OP_MAAT_FROM_EUROS,
   PLANS,
   PLAN_ORDER,
   yearlyPerMonthEuros,
@@ -238,6 +239,9 @@ export function PricingCards() {
         {/* Op maat: geen vaste prijs, in een gesprek afgesproken (bijv. Pro met extra scans). */}
         <div className="flex h-full flex-col rounded-2xl border border-dashed border-border bg-background/60 p-8">
           <h3 className="text-lg font-semibold">Op maat</h3>
+          <p className="mt-3 text-sm text-muted-foreground">
+            vanaf <span className="text-2xl font-bold text-foreground">€{OP_MAAT_FROM_EUROS}</span> per maand
+          </p>
           <p className="mt-1 min-h-11 text-sm text-muted-foreground">{PLAN_TAGLINE.premium}</p>
           <ul className="mt-6 flex-1 space-y-3 text-sm text-muted-foreground">
             {[

@@ -17,6 +17,28 @@ import { CopyBlock } from "./copy-block";
 
 export const metadata: Metadata = { title: "Widget-link" };
 
+/** Korte berichten met het linkje; de verhuizer vult alleen de naam van de klant in. */
+function messageTemplates(link: string, company: string): { title: string; text: string }[] {
+  return [
+    {
+      title: "Antwoord op een offerteplatform",
+      text: `Hallo [naam], bedankt voor je aanvraag! Dan heb je zo onze prijs: maak via deze link een paar foto's per kamer en je krijgt binnen een minuut je offerte.\n\n${link}\n\nGroet, ${company}`,
+    },
+    {
+      title: "Na een telefoontje",
+      text: `Hoi [naam], leuk je net te spreken! Hier is de link: maak een paar foto's per kamer en je hebt binnen een minuut onze prijs.\n\n${link}\n\nGroet, ${company}`,
+    },
+    {
+      title: "Vraagt iemand wat het ongeveer kost?",
+      text: `Hoi! Dat rekenen we direct voor je uit. Maak via deze link een paar foto's per kamer, dan heb je binnen een minuut je prijs.\n\n${link}\n\nGroet, ${company}`,
+    },
+    {
+      title: "In plaats van langskomen voor een opname",
+      text: `Hoi [naam], langskomen is niet nodig. Maak via deze link een paar foto's per kamer, dan krijg je binnen een minuut een offerte.\n\n${link}\n\nGroet, ${company}`,
+    },
+  ];
+}
+
 export default async function EmbedPage() {
   const company = await requireCompany();
   const base = appUrl();
@@ -74,18 +96,21 @@ export default async function EmbedPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <CopyBlock code={directLink} />
-            <div>
-              <p className="mb-1.5 text-sm font-medium">
-                Kant-en-klaar bericht, bijvoorbeeld voor een aanvraag via een offerteplatform
-              </p>
-              <CopyBlock
-                multiline
-                code={`Hoi! Bedankt voor je aanvraag. Maak via deze link een paar foto's per kamer, dan krijg je binnen een minuut onze prijs: ${directLink}\n\nGroet, ${company.name}`}
-              />
-              <p className="mt-1.5 text-xs text-muted-foreground">
-                Stuur het het liefst via WhatsApp, dan lezen klanten het meteen. Geen 06-nummer?
-                Dan per mail.
-              </p>
+            <div className="space-y-4 pt-2">
+              <div>
+                <p className="text-sm font-medium">Kant-en-klare berichten</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Kopiëren, [naam] vervangen en versturen. Het liefst via WhatsApp, dan lezen
+                  klanten het meteen. Geen 06-nummer? Dan per mail of als antwoord op het
+                  offerteplatform.
+                </p>
+              </div>
+              {messageTemplates(directLink, company.name).map((t) => (
+                <div key={t.title}>
+                  <p className="mb-1.5 text-sm font-medium">{t.title}</p>
+                  <CopyBlock multiline code={t.text} />
+                </div>
+              ))}
             </div>
             <p className="flex gap-2 text-sm text-muted-foreground">
               <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />

@@ -553,6 +553,8 @@ export function MoveFlow({
       });
       const res = await fetch("/api/widget/analyze", { method: "POST", body: fd });
       const data = await readJson(res, "De analyse duurde te lang of mislukte. Probeer het nog een keer.");
+      // Scans van de verhuizer op: opnieuw laden toont het contactformulier.
+      if (data.limitReached) return window.location.reload();
       if (!res.ok) throw new Error(data.error ?? "De analyse is mislukt.");
       setRoomInventory(data.rooms as typeof roomInventory);
       // Aantal kamers alvast invullen met de gefotografeerde kamers.
@@ -688,6 +690,7 @@ export function MoveFlow({
       const url = isClearance ? "/api/widget/clearance" : "/api/widget/submit";
       const res = await fetch(url, { method: "POST", body: fd });
       const data = await readJson(res, "Het berekenen van je offerte mislukte. Probeer het nog een keer.");
+      if (data.limitReached) return window.location.reload();
       if (!res.ok) throw new Error(data.error ?? "Er ging iets mis.");
 
       setResult(data as Result);

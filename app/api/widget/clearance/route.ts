@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { notifyIfOverScanLimit } from "@/lib/scan-alerts";
+import { notifyScanUsage } from "@/lib/scan-alerts";
 import { isAdminEmail } from "@/lib/admin";
 import { z } from "zod";
 import { isValidPhone } from "@/lib/phone";
@@ -311,8 +311,8 @@ export async function POST(request: Request) {
     vatCents,
     totalCents,
   });
-  // Voor het eerst deze maand over de scans: seintje aan moverAI (niet fataal).
-  await notifyIfOverScanLimit(company).catch(() => {});
+  // Bij 80% en 100% van de scans: mail aan de verhuizer (en moverAI). Niet fataal.
+  await notifyScanUsage(company).catch(() => {});
 
   // Proef verlopen zonder betaling: de klant krijgt z'n offerte, het bedrijf
   // krijgt de lead pas te zien na het activeren van een plan.

@@ -133,7 +133,7 @@ export default async function LeadsPage({
                         {Number(lead.totalVolumeM3).toFixed(1)} m³
                       </TableCell>
                       <TableCell className="text-right font-medium tabular-nums">
-                        {formatEuroCents(lead.totalCents)}
+                        {lead.totalCents > 0 ? formatEuroCents(lead.totalCents) : "Geen prijs"}
                       </TableCell>
                       <TableCell className="pr-6 text-right">
                         <StatusBadge status={lead.status} />

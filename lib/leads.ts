@@ -131,6 +131,8 @@ export async function countLeadsThisMonth(companyId: string): Promise<number> {
     .where(
       and(
         eq(leads.companyId, companyId),
+        // Aanvragen zonder scan (contactformulier als de scans op zijn) tellen niet mee.
+        sql`jsonb_array_length(${leads.inventory}) > 0`,
         sql`${leads.createdAt} >= date_trunc('month', now() at time zone 'Europe/Amsterdam') at time zone 'Europe/Amsterdam'`,
       ),
     );

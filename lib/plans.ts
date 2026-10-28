@@ -33,8 +33,8 @@ export const PLANS: Record<PlanId, Plan> = {
     id: "basic",
     label: "Basic",
     audience: "ZZP",
-    priceCents: 6900,
-    yearlyCents: 69000,
+    priceCents: 9900,
+    yearlyCents: 99000,
     seats: 2,
     extraSeatCents: null,
     scans: 100,
@@ -43,11 +43,11 @@ export const PLANS: Record<PlanId, Plan> = {
     id: "pro",
     label: "Pro",
     audience: "MKB",
-    priceCents: 9900,
-    yearlyCents: 99000,
+    priceCents: 14900,
+    yearlyCents: 149000,
     seats: 5,
     extraSeatCents: null,
-    scans: 500,
+    scans: 300,
   },
   // Niet te koop op de site: "Op maat" (neem contact op). Voor een groot bedrijf
   // zet je dit plan met de hand, met een eigen prijs in Stripe.
@@ -63,6 +63,9 @@ export const PLANS: Record<PlanId, Plan> = {
     fairUse: true,
   },
 };
+
+/** "Op maat" op de site: vanaf-prijs per maand (de echte prijs spreek je af). */
+export const OP_MAAT_FROM_EUROS = 249;
 
 /** De plannen die je zelf kunt kiezen (site, kies-plan, Abonnement). Premium = op maat. */
 export const PLAN_ORDER: PlanId[] = ["basic", "pro"];
@@ -139,17 +142,17 @@ export type ScanUsage = {
   limit: number | null;
   /** 0–1+, null bij onbeperkt. */
   ratio: number | null;
-  over: boolean;
+  over: boolean; // scans op (harde stop)
   nearLimit: boolean; // ≥ 80%
 };
 
 /**
- * Een scan = een offerteaanvraag. De limiet is zacht: er wordt nooit geblokkeerd,
- * alleen een upgrade aangeboden.
+ * Een scan = een offerteaanvraag. De limiet is hard: zijn de scans op, dan geen
+ * AI-analyse meer (zie lib/scan-alerts.ts); de klant laat dan alleen zijn gegevens achter.
  */
 export function scanUsage(company: Company, used: number): ScanUsage {
   const limit = planFor(company).scans;
   if (limit === null) return { used, limit, ratio: null, over: false, nearLimit: false };
   const ratio = used / limit;
-  return { used, limit, ratio, over: used > limit, nearLimit: ratio >= 0.8 };
+  return { used, limit, ratio, over: used >= limit, nearLimit: ratio >= 0.8 };
 }
