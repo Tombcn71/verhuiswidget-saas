@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import { mailer } from "@/lib/mailer";
 import type { Prospect } from "@/lib/db";
 import { appUrl } from "@/lib/app-url";
 import { CONTACT_EMAIL } from "@/lib/plans";
@@ -21,10 +21,10 @@ import {
 const SENDER = "Tom van moverAI";
 const STOPPED_STAGES = ["gesprek", "proef", "klant", "afgevallen"];
 
-function resend(): { client: Resend; from: string } | null {
+function resend(): { client: ReturnType<typeof mailer>; from: string } | null {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.QUOTE_FROM_EMAIL;
-  return apiKey && from ? { client: new Resend(apiKey), from } : null;
+  return apiKey && from ? { client: mailer(apiKey), from } : null;
 }
 
 const esc = (s: string) =>

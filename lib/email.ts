@@ -1,7 +1,8 @@
-import { Resend } from "resend";
+import { mailer } from "@/lib/mailer";
 import type { Company, InventoryItem, PriceLine } from "@/lib/db/schema";
 import { formatEuroCents, formatDate } from "@/lib/format";
 import { planningRows } from "@/lib/planning";
+import { CONTACT_EMAIL } from "@/lib/plans";
 import type { MovePlanning } from "@/lib/pricing";
 
 type QuoteData = {
@@ -78,10 +79,10 @@ function planningBlock(d: QuoteData): string {
   if (!d.planning) return "";
   const rows = planningRows(d.planning, d.totalVolumeM3);
   if (d.move.moveDate) {
-    rows.push({ icon: "📅", label: "Datum", value: formatDate(d.move.moveDate) });
+    rows.push({ label: "Datum", value: formatDate(d.move.moveDate) });
   }
   if (d.extras?.length) {
-    rows.push({ icon: "✅", label: "Extra's", value: d.extras.join(", ") });
+    rows.push({ label: "Extra's", value: d.extras.join(", ") });
   }
   return `<div style="background:#f1f5f9;border-radius:12px;padding:16px 18px;margin:16px 0">
     <p style="margin:0 0 10px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#475569">Planning</p>
@@ -89,7 +90,6 @@ function planningBlock(d: QuoteData): string {
       ${rows
         .map(
           (r) =>
-            `<tr><td style="padding:3px 8px 3px 0;width:24px;vertical-align:top">${r.icon}</td>` +
             `<td style="padding:3px 12px 3px 0;color:#64748b;white-space:nowrap;vertical-align:top">${esc(r.label)}</td>` +
             `<td style="padding:3px 0;font-weight:600">${esc(r.value)}</td></tr>`,
         )
@@ -216,7 +216,7 @@ export async function sendQuoteFollowUp(input: {
     ? `Heb je nog vragen? Antwoord gewoon op deze mail of bel ${esc(c.phone)}.`
     : "Heb je nog vragen? Antwoord gewoon op deze mail.";
 
-  const res = await new Resend(apiKey).emails.send({
+  const res = await mailer(apiKey).emails.send({
     from: `${c.name} <${from}>`,
     to: input.customerEmail,
     replyTo: c.email,
@@ -248,7 +248,7 @@ export async function sendReviewRequest(input: {
   const c = input.company;
   const what = input.moveType === "ontruiming" ? "ontruiming" : "verhuizing";
 
-  const res = await new Resend(apiKey).emails.send({
+  const res = await mailer(apiKey).emails.send({
     from: `${c.name} <${from}>`,
     to: input.customerEmail,
     replyTo: c.email,
@@ -288,8 +288,8 @@ export async function sendBookingNotification(input: {
   const c = input.company;
   const what = input.moveType === "ontruiming" ? "ontruiming" : "verhuizing";
   const subject = input.showDetails
-    ? `🎉 ${input.customerName} wil boeken (${formatEuroCents(input.totalCents)})`
-    : "🎉 Een klant wil boeken";
+    ? `${input.customerName} wil boeken`
+    : "Een klant wil boeken";
   const body = input.showDetails
     ? `<h1 style="font-size:20px">${esc(input.customerName)} wil de ${what} boeken</h1>
        <table style="font-size:14px;margin:16px 0">
@@ -303,7 +303,7 @@ export async function sendBookingNotification(input: {
        <p style="font-size:14px">Je proefperiode is afgelopen. Activeer een plan om de gegevens van deze klant te zien.</p>`;
 
   try {
-    await new Resend(apiKey).emails.send({
+    await mailer(apiKey).emails.send({
       from: `moverAI <${from}>`,
       to: c.email,
       ...(input.showDetails ? { replyTo: input.customerEmail } : {}),
@@ -354,7 +354,7 @@ export async function sendBookingConfirmation(input: {
   ].join("");
 
   try {
-    await new Resend(apiKey).emails.send({
+    await mailer(apiKey).emails.send({
       from: `${c.name} <${from}>`,
       to: input.customerEmail,
       replyTo: c.email,
@@ -447,7 +447,7 @@ export async function sendQuoteEmails(
     return { sent: false, error: "RESEND_API_KEY of QUOTE_FROM_EMAIL ontbreekt" };
   }
 
-  const resend = new Resend(apiKey);
+  const resend = mailer(apiKey);
   const fromHeader = `${d.company.name} <${from}>`;
 
   if (opts.demo) {
@@ -456,13 +456,15 @@ export async function sendQuoteEmails(
       const first = await resend.emails.send({
         from: fromHeader,
         to: d.customer.email,
-        subject: `Demo 1/2 · Je offerte-indicatie van ${d.company.name}`,
+        replyTo: CONTACT_EMAIL,
+        subject: `Demo 1/2: je offerte-indicatie van ${d.company.name}`,
         html: customerEmailHtml(d, demoBanner("Demo · Deze mail krijgt jouw klant, in jouw huisstijl.")),
       });
       const second = await resend.emails.send({
         from: `moverAI <${from}>`,
         to: d.customer.email,
-        subject: `Demo 2/2 · Nieuwe offerteaanvraag (${formatEuroCents(d.totalCents)}): zo krijg jij hem binnen`,
+        replyTo: CONTACT_EMAIL,
+        subject: `Demo 2/2: nieuwe aanvraag van ${d.customer.name}`,
         html: companyEmailHtml(
           d,
           demoBanner("Demo · Deze mail krijg jij als verhuizer bij elke nieuwe aanvraag."),
@@ -488,10 +490,12 @@ export async function sendQuoteEmails(
   if (!opts.customerOnly) {
     mails.push(
       resend.emails.send({
-        from: fromHeader,
+        // Afzender moverAI: een mail "van" je eigen bedrijfsnaam aan jezelf lijkt
+        // op vervalsing en belandt in de spam.
+        from: `moverAI <${from}>`,
         to: d.company.email,
         replyTo: d.customer.email,
-        subject: `Nieuwe offerteaanvraag — ${d.customer.name} (${formatEuroCents(d.totalCents)})`,
+        subject: `Nieuwe aanvraag van ${d.customer.name}`,
         html: companyEmailHtml(d),
       }),
     );

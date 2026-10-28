@@ -104,7 +104,7 @@ export function Widget({
       >
         <Logo className="mx-auto text-base" />
         {demoContact?.name && (
-          <p className="mt-6 text-sm font-medium text-slate-600">Hoi {demoContact.name}! 👋</p>
+          <p className="mt-6 text-sm font-medium text-slate-600">Hoi {demoContact.name}!</p>
         )}
         <h2 className={`${demoContact?.name ? "mt-2" : "mt-6"} text-3xl font-bold tracking-tight`}>
           Zo ziet <span className="text-(--accent)">jouw klant</span> het

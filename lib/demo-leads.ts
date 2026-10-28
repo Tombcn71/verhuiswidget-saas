@@ -1,5 +1,5 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
-import { Resend } from "resend";
+import { mailer } from "@/lib/mailer";
 import { db, demoLeads, type DemoLead } from "@/lib/db";
 import { appUrl } from "@/lib/app-url";
 import { formatEuroCents } from "@/lib/format";
@@ -51,10 +51,10 @@ export async function listDemoLeads(limit = 200): Promise<DemoLead[]> {
   return db.select().from(demoLeads).orderBy(desc(demoLeads.createdAt)).limit(limit);
 }
 
-function resend(): { client: Resend; from: string } | null {
+function resend(): { client: ReturnType<typeof mailer>; from: string } | null {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.QUOTE_FROM_EMAIL;
-  return apiKey && from ? { client: new Resend(apiKey), from } : null;
+  return apiKey && from ? { client: mailer(apiKey), from } : null;
 }
 
 /** Direct seintje naar moverAI: een (waarschijnlijke) verhuizer heeft de demo gedaan. */

@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import { mailer } from "@/lib/mailer";
 import type { Company } from "@/lib/db";
 import { appUrl } from "@/lib/app-url";
 import { countLeadsThisMonth } from "@/lib/leads";
@@ -26,7 +26,7 @@ export async function notifyIfOverScanLimit(company: Company): Promise<void> {
   const from = process.env.QUOTE_FROM_EMAIL;
   if (!apiKey || !from) return;
 
-  await new Resend(apiKey).emails.send({
+  await mailer(apiKey).emails.send({
     from: `moverAI <${from}>`,
     to: CONTACT_EMAIL,
     subject: `${company.name} zit boven de ${plan.scans} scans (${plan.label})`,

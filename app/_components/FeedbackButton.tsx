@@ -2,8 +2,16 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { X, Send, Loader2, CheckCircle } from "lucide-react";
+import { Bug, CheckCircle, Euro, Heart, Lightbulb, Loader2, Package, Send, X, type LucideIcon } from "lucide-react";
 import { CATEGORIEEN, type FeedbackCategorie } from "@/lib/feedback";
+
+const CATEGORIE_ICON: Record<FeedbackCategorie, LucideIcon> = {
+  prijs: Euro,
+  inventaris: Package,
+  bug: Bug,
+  idee: Lightbulb,
+  compliment: Heart,
+};
 
 export function FeedbackButton() {
   const pathname = usePathname();
@@ -86,7 +94,13 @@ export function FeedbackButton() {
                   ? "border-brand-600 bg-brand-50 text-foreground"
                   : "border-border text-muted-foreground hover:border-border"
               }`}>
-              {c.label}
+              <span className="inline-flex items-center gap-1.5">
+                {(() => {
+                  const Icon = CATEGORIE_ICON[c.value];
+                  return <Icon className="size-3.5" />;
+                })()}
+                {c.label}
+              </span>
             </button>
           ))}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Check } from "lucide-react";
 import type { ResolvedAddress } from "@/lib/geo";
 
 export type AddressValue = {
@@ -108,7 +109,9 @@ export function AddressInput({
       </div>
       <p className="mt-1.5 min-h-5 text-xs">
         {value.resolved ? (
-          <span className="text-emerald-700">✓ {addressText(value)}</span>
+          <span className="inline-flex items-center gap-1 text-emerald-700">
+            <Check className="size-3.5 shrink-0" /> {addressText(value)}
+          </span>
         ) : status === "loading" ? (
           <span className="text-slate-400">Adres zoeken…</span>
         ) : status === "notfound" && complete ? (

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Check } from "lucide-react";
 import { getCompanyById } from "@/lib/companies";
 import { getLeadForBooking } from "@/lib/leads";
 import { formatDate, formatDateTime, formatEuroCents } from "@/lib/format";
@@ -51,8 +52,8 @@ export default async function BookingPage({
           </div>
         ) : accepted ? (
           <div className="mt-8 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50 text-3xl">
-              ✓
+            <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+              <Check className="size-7" />
             </div>
             <h1 className="mt-4 text-2xl font-bold tracking-tight">Bedankt, {lead.customerName}!</h1>
             <p className="mt-2 text-slate-600">

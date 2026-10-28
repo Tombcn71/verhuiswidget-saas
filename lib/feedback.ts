@@ -4,27 +4,27 @@
 export const CATEGORIEEN = [
   {
     value: "prijs",
-    label: "💶 Prijs klopt niet",
+    label: "Prijs klopt niet",
     vraag: "Welke offerte? Wat had de prijs moeten zijn, en waarom? (bijv. te weinig uren, km of toeslag)",
   },
   {
     value: "inventaris",
-    label: "📦 AI telt verkeerd",
+    label: "AI telt verkeerd",
     vraag: "Wat herkende de AI verkeerd? (bijv. 'kast als 2 kasten geteld', 'piano gemist', volume te hoog)",
   },
   {
     value: "bug",
-    label: "🐛 Iets werkt niet",
+    label: "Iets werkt niet",
     vraag: "Wat deed je en wat ging er mis? (bijv. 'widget laadt niet op mijn site', 'geen e-mail ontvangen')",
   },
   {
     value: "idee",
-    label: "💡 Idee of wens",
+    label: "Idee of wens",
     vraag: "Wat zou je werk makkelijker maken? (bijv. een extra toeslag, koppeling met je planning)",
   },
   {
     value: "compliment",
-    label: "❤️ Compliment",
+    label: "Compliment",
     vraag: "Wat bevalt je aan moverAI?",
   },
 ] as const;

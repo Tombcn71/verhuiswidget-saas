@@ -23,7 +23,7 @@ import {
 } from "@/app/_components/icons";
 import { FLOOR_TYPES, boxCount, totalVolume, type MovePlanning } from "@/lib/pricing";
 import { planningRows } from "@/lib/planning";
-import { Clock, Globe, Info, Link2, Package, Truck, Users, type LucideIcon } from "lucide-react";
+import { CircleCheck, Clock, Globe, Info, Link2, Package, Truck, Users, type LucideIcon } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/app/_components/logo";
@@ -1796,7 +1796,9 @@ export function MoveFlow({
           ) : (
             // Slotscherm: wat de verhuizer zelf krijgt, en hoe hij het inzet.
             <div className="text-left">
-              <p className="text-center text-sm font-semibold">✓ Boeking ontvangen (demo)</p>
+              <p className="flex items-center justify-center gap-1.5 text-sm font-semibold">
+                <CircleCheck className="size-4 text-emerald-600" /> Boeking ontvangen (demo)
+              </p>
 
               {result.planning && (
                 <div className="mt-4 rounded-xl bg-slate-50 p-4">
@@ -1865,14 +1867,15 @@ export function MoveFlow({
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center">
-        <p className="text-sm font-semibold">
+        <p className="flex items-center justify-center gap-1.5 text-sm font-semibold">
+          {!preview && <CircleCheck className="size-4 text-emerald-600" />}
           {preview
             ? "Dit was een test"
             : onspot
-              ? "Opgeslagen bij je leads ✓"
+              ? "Opgeslagen bij je leads"
               : demo && result.emailSent
-                ? "Check je mailbox ✓"
-                : "Je offerte is verzonden ✓"}
+                ? "Check je mailbox"
+                : "Je offerte is verzonden"}
         </p>
         <p className="mt-1 text-xs text-slate-600">
           {preview
