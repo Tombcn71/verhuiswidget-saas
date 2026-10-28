@@ -4,6 +4,7 @@ import { DemoModal } from "@/app/_components/demo-modal";
 import { SiteHeader } from "@/app/_components/site-header";
 import { PricingCards, TrialCard } from "@/app/_components/pricing-cards";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
+import { PlatformShowcase } from "@/app/_components/platform-showcase";
 import { Globe, Keyboard, Link, MapPin, Star } from "lucide-react";
 import {
   Timer,
@@ -171,6 +172,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <PlatformShowcase />
 
         {/* Features */}
         <section

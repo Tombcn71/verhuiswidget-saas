@@ -1,4 +1,4 @@
 /** Het korte bericht met het linkje (Jouw linkje en Snelle acties op het overzicht). */
 export function linkMessage(link: string, company: string): string {
-  return `Hoi! Bedankt voor je aanvraag. Maak via deze link een paar foto's per kamer, dan heb je binnen een minuut onze prijs: ${link}\n\nGroet, ${company}`;
+  return `Hoi! Bedankt voor je aanvraag. Via deze link scan je je kamers met je telefoon, en binnen een minuut heb je onze offerte in je mailbox: ${link}\n\nGroet, ${company}`;
 }
