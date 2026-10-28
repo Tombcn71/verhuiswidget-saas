@@ -21,7 +21,7 @@ const features = [
   {
     Icon: Zap,
     title: "Sneller bij offerteplatforms",
-    body: "Krijg je een aanvraag via een offerteplatform? App of mail de klant meteen je linkje. Hij scant zijn inboedel en krijgt binnen een minuut jouw prijs: geen ruwe schatting, en je hoeft niet langs.",
+    body: "Krijg je een aanvraag via een offerteplatform? App of mail de klant meteen je linkje. Binnen een minuut heeft hij jouw prijs, zonder ruwe schatting en zonder dat je langs hoeft. Boekt hij niet meteen, dan krijgt hij na 2 dagen vanzelf een herinnering.",
   },
   {
     Icon: Timer,
