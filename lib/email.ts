@@ -288,7 +288,7 @@ export async function sendBookingNotification(input: {
   const c = input.company;
   const what = input.moveType === "ontruiming" ? "ontruiming" : "verhuizing";
   const subject = input.showDetails
-    ? `${input.customerName} wil boeken`
+    ? `${input.customerName} wil boeken: ${formatEuroCents(input.totalCents)}`
     : "Een klant wil boeken";
   const body = input.showDetails
     ? `<h1 style="font-size:20px">${esc(input.customerName)} wil de ${what} boeken</h1>
@@ -465,7 +465,7 @@ export async function sendQuoteEmails(
         from: sender("moverAI", "aanvragen") ?? `moverAI <${from}>`,
         to: d.customer.email,
         replyTo: CONTACT_EMAIL,
-        subject: `Demo 2/2: nieuwe aanvraag van ${d.customer.name}`,
+        subject: `Demo 2/2: nieuwe aanvraag van ${d.customer.name}: ${formatEuroCents(d.totalCents)}`,
         // Een minuut later: twee mails in dezelfde seconde naar één adres lijkt op bulk.
         scheduledAt: new Date(Date.now() + 60_000).toISOString(),
         html: companyEmailHtml(
@@ -498,7 +498,7 @@ export async function sendQuoteEmails(
         from: sender("moverAI", "aanvragen") ?? `moverAI <${from}>`,
         to: d.company.email,
         replyTo: d.customer.email,
-        subject: `Nieuwe aanvraag van ${d.customer.name}`,
+        subject: `Nieuwe aanvraag van ${d.customer.name}: ${formatEuroCents(d.totalCents)}`,
         html: companyEmailHtml(d),
       }),
     );
