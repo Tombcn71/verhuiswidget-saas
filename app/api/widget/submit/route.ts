@@ -281,7 +281,7 @@ export async function POST(request: Request) {
             }),
           },
           // Test je tarieven (preview) mailt nooit; alleen de echte demo.
-          { demo: true, meetingUrl: demoMeetingUrl(parsed.prospect, parsed.customer) },
+          { demo: true, meetingUrl: demoMeetingUrl(parsed.prospect) },
         );
     return json({
       ok: true,

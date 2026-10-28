@@ -51,21 +51,17 @@ export function meetingLinkFor(p: Pick<Prospect, "slug">): string {
 }
 
 /**
- * "Plan een adviesgesprek" vanuit de demo. Persoonlijke demolink: via /gesprek,
- * dat de klik vastlegt en de opvolgmail schrapt. Anders rechtstreeks naar
- * Calendly met naam en e-mail ingevuld. Null zonder CALENDLY_URL.
+ * "Plan een adviesgesprek" in de demo-mail. Persoonlijke demolink: via /gesprek
+ * (eigen domein), dat de klik vastlegt en de opvolgmail schrapt. Anders de kale
+ * Calendly-link. Null zonder CALENDLY_URL.
  */
-export function demoMeetingUrl(
-  prospect: string | undefined,
-  person: { name: string; email: string },
-): string | null {
+export function demoMeetingUrl(prospect: string | undefined): string | null {
   const calendly = process.env.CALENDLY_URL;
   if (!calendly) return null;
   if (prospect) return meetingLinkFor({ slug: prospect });
-  const url = new URL(calendly);
-  url.searchParams.set("name", person.name);
-  url.searchParams.set("email", person.email);
-  return url.toString();
+  // Kale Calendly-link: een link naar een ander domein met het e-mailadres van de
+  // ontvanger erin lijkt op phishing (demo-mail ging daardoor bij iCloud de spam in).
+  return calendly;
 }
 
 /** Mail 1: de persoonlijke demolink, na het telefoongesprek. Plant meteen de herinnering in. */
