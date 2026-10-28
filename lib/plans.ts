@@ -75,8 +75,8 @@ export const MORE_SEATS_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURICom
 
 /** De drie kanalen; zitten in elk plan. */
 export const CHANNEL_FEATURES = [
-  "Via je website: de widget op je eigen site",
   "Via een linkje: stuur het via WhatsApp, sms of mail",
+  "Via je website: de widget op je eigen site",
   "Zelf op locatie: scan ter plekke met je telefoon",
 ];
 

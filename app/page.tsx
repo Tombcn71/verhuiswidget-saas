@@ -52,14 +52,14 @@ const features = [
 
 const channels = [
   {
-    Icon: Globe,
-    t: "1. Via je website",
-    d: "Komen klanten via Google of social media op je website? Dan vragen ze daar meteen een offerte aan: een paar foto’s per kamer en binnen een minuut jouw prijs. Ook ’s avonds en in het weekend.",
+    Icon: Link,
+    t: "1. Via een linkje",
+    d: "Krijg je een aanvraag via een offerteplatform, een telefoontje of WhatsApp? Stuur de klant je eigen linkje. Hij maakt foto’s per kamer en krijgt binnen een minuut jouw prijs. Jij krijgt de inventaris en het volume binnen.",
   },
   {
-    Icon: Link,
-    t: "2. Via een linkje",
-    d: "Krijg je een aanvraag via een offerteplatform, een telefoontje of WhatsApp? Stuur de klant je eigen linkje. Hij maakt foto’s per kamer en krijgt binnen een minuut jouw prijs. Jij krijgt de inventaris en het volume binnen.",
+    Icon: Globe,
+    t: "2. Via je website",
+    d: "Komen klanten via Google of social media op je website? Dan vragen ze daar meteen een offerte aan: een paar foto’s per kamer en binnen een minuut jouw prijs. Ook ’s avonds en in het weekend.",
   },
   {
     Icon: MapPin,

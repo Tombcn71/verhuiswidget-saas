@@ -1847,8 +1847,8 @@ export function MoveFlow({
               <ul className="mt-2 space-y-2.5 text-sm text-slate-700">
                 {(
                   [
-                    [Globe, "Op je website", "de widget met jouw naam en kleuren"],
                     [Link2, "Via een linkje", "stuur het via WhatsApp aan wie belt of appt"],
+                    [Globe, "Op je website", "de widget met jouw naam en kleuren"],
                     [MapPin, "Zelf op locatie", "sta je toch bij een klant? Scan ter plekke met je telefoon"],
                   ] as const
                 ).map(([Icon, title, text]) => (
