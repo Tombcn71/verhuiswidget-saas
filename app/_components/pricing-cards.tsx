@@ -45,6 +45,10 @@ function planFeatures(plan: Plan): Feature[] {
   return [
     seats,
     scans,
+    // Pro: genoeg scans om elke aanvraag van een offerteplatform je linkje te sturen.
+    ...(plan.id === "pro"
+      ? [{ text: "Genoeg voor al je aanvragen van offerteplatforms", highlight: true }]
+      : []),
     ...CHANNEL_FEATURES.map((text) => ({ text })),
     { text: "White-label: je eigen bedrijfsnaam en huisstijlkleur" },
     { text: "Tarieven volledig instelbaar: m³, km en toeslagen" },

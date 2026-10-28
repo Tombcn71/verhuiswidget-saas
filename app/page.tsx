@@ -4,13 +4,12 @@ import { DemoModal } from "@/app/_components/demo-modal";
 import { SiteHeader } from "@/app/_components/site-header";
 import { PricingCards, TrialCard } from "@/app/_components/pricing-cards";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
-import { Globe, Link, MapPin, Star } from "lucide-react";
+import { Globe, Link, MapPin, Send, Star } from "lucide-react";
 import {
   Timer,
   Fuel,
   Truck,
   Zap,
-  Monitor,
   Sparkles,
 } from "@/app/_components/icons";
 
@@ -30,6 +29,11 @@ const features = [
     body: "Geen kilometers meer om alleen een inboedel te bekijken, ook niet voor klanten die nooit boeken.",
   },
   {
+    Icon: Send,
+    title: "Sneller bij offerteplatforms",
+    body: "Krijg je een aanvraag via een offerteplatform? App de klant meteen je linkje. Hij scant zijn inboedel en krijgt binnen een minuut jouw prijs: geen ruwe schatting, en je hoeft niet langs.",
+  },
+  {
     Icon: Truck,
     title: "Minder halflege ritten",
     body: "Je weet vooraf hoeveel m³ het is, dus je stuurt meteen de juiste wagen en de juiste ploeg.",
@@ -43,11 +47,6 @@ const features = [
     Icon: Zap,
     title: "Minder typewerk",
     body: "Geen meubels tellen of Excel-sheets invullen. De offerte gaat binnen een minuut de deur uit, met jouw naam en tarieven.",
-  },
-  {
-    Icon: Monitor,
-    title: "Meer aanvragen",
-    body: "Klanten scannen wanneer het hun uitkomt, ook 's avonds en in het weekend. Jij krijgt de aanvraag met foto's en inventarislijst.",
   },
 ];
 
