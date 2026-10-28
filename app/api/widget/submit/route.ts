@@ -26,7 +26,8 @@ import type { InventoryItem } from "@/lib/db/schema";
 import { SAMPLE_HOMES } from "@/app/widget/[companyId]/sample-homes";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+// Een groot huis (10+ foto's) kan bij Gemini ruim een minuut duren.
+export const maxDuration = 300;
 
 const MAX_PHOTOS = 14;
 const MAX_PHOTO_BYTES = 6 * 1024 * 1024;

@@ -129,6 +129,20 @@ type Result = {
   planning?: MovePlanning;
 };
 
+/**
+ * JSON van onze eigen API. Bij een time-out of serverfout stuurt Vercel een
+ * HTML-pagina; dan een begrijpelijke melding i.p.v. Safari's "The string did not
+ * match the expected pattern".
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function readJson(res: Response, fallback: string): Promise<any> {
+  try {
+    return await res.json();
+  } catch {
+    throw new Error(fallback);
+  }
+}
+
 /** Kubieke meters met een Nederlandse komma, bijv. "30,1". */
 const m3 = (value: number, decimals: number) =>
   value.toLocaleString("nl-NL", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -538,7 +552,7 @@ export function MoveFlow({
         fd.append("photoRooms", p.room);
       });
       const res = await fetch("/api/widget/analyze", { method: "POST", body: fd });
-      const data = await res.json();
+      const data = await readJson(res, "De analyse duurde te lang of mislukte. Probeer het nog een keer.");
       if (!res.ok) throw new Error(data.error ?? "De analyse is mislukt.");
       setRoomInventory(data.rooms as typeof roomInventory);
       // Aantal kamers alvast invullen met de gefotografeerde kamers.
@@ -673,7 +687,7 @@ export function MoveFlow({
 
       const url = isClearance ? "/api/widget/clearance" : "/api/widget/submit";
       const res = await fetch(url, { method: "POST", body: fd });
-      const data = await res.json();
+      const data = await readJson(res, "Het berekenen van je offerte mislukte. Probeer het nog een keer.");
       if (!res.ok) throw new Error(data.error ?? "Er ging iets mis.");
 
       setResult(data as Result);

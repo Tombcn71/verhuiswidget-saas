@@ -24,7 +24,8 @@ import {
 import type { InventoryItem, PriceLine } from "@/lib/db/schema";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+// Een groot huis (10+ foto's) kan bij Gemini ruim een minuut duren.
+export const maxDuration = 300;
 
 export function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
