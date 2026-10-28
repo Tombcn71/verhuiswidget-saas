@@ -12,9 +12,9 @@ function esc(s: string): string {
 }
 
 /**
- * Demo afgerond: opslaan voor /admin en moverAI direct een seintje geven. Geen
- * aparte opvolgmail; de uitnodiging voor een gesprek staat in de demo-mail zelf
- * (die heeft de bezoeker aangevraagd). Mailfouten zijn niet fataal voor de demo.
+ * Demo afgerond: opslaan voor /admin en moverAI direct een seintje geven. De
+ * opvolgmail loopt via de verkoop-CRM (handleDemoCompleted). Mailfouten zijn
+ * niet fataal voor de demo.
  */
 export async function recordDemoLead(input: {
   name: string;
@@ -69,7 +69,7 @@ async function notifyMoverAI(lead: DemoLead): Promise<void> {
     html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px">
       <p><strong>${esc(lead.name)}</strong> heeft de demo afgerond.</p>
       <p>E-mail: ${esc(lead.email)}<br>Telefoon: ${esc(lead.phone ?? "—")}<br>Demo: ${esc(lead.moveType)}, ${formatEuroCents(lead.totalCents)}</p>
-      <p>Er gaat geen automatische opvolgmail; volg zelf op als je wilt. Alle demo-leads: <a href="${esc(appUrl())}/admin">${esc(appUrl())}/admin</a></p>
+      <p>Staat in het CRM op Demo gedaan. Morgenochtend gaat vanzelf "Wat vond je van de demo?", tenzij hij al een gesprek inplant. CRM: <a href="${esc(appUrl())}/admin">${esc(appUrl())}/admin</a></p>
     </div>`,
   });
 }

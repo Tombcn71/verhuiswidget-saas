@@ -8,6 +8,7 @@ import { hasAccess } from "@/lib/plans";
 import { demoBookingUrl, isDemoCompany } from "@/lib/demo";
 import { recordDemoLead } from "@/lib/demo-leads";
 import { demoMeetingUrl, handleDemoCompleted } from "@/lib/prospect-mails";
+import { prospectForWebsiteDemo } from "@/lib/prospects";
 import { appUrl } from "@/lib/app-url";
 import { bookingUrl, createLead } from "@/lib/leads";
 import { analyzePhotos, type PhotoInput } from "@/lib/gemini";
@@ -233,12 +234,16 @@ export async function POST(request: Request) {
   if (demo) {
     const fake =
       preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
-    // Persoonlijke demolink: in de verkoop-CRM op "Demo gedaan" zetten.
-    if (isDemo && !preview && parsed.prospect) await handleDemoCompleted(parsed.prospect);
     // Demo met echt e-mailadres: verhuizer-lead voor moverAI (/admin). Niet als
     // een beheerder zelf test, anders krijg je een seintje over jezelf.
+    const realLead = isDemo && !fake && !isAdminEmail(parsed.customer.email);
+    // In de verkoop-CRM op "Demo gedaan" zetten, met de opvolgmail de ochtend erna.
+    // Zonder persoonlijke demolink (via de website) komt het bedrijf er nu in.
+    const prospect =
+      parsed.prospect ?? (realLead ? await prospectForWebsiteDemo(parsed.customer) : undefined);
+    if (isDemo && !preview && prospect) await handleDemoCompleted(prospect);
     const demoLead =
-      isDemo && !fake && !isAdminEmail(parsed.customer.email)
+      realLead
         ? await recordDemoLead({
             name: parsed.customer.name,
             email: parsed.customer.email,
@@ -280,11 +285,11 @@ export async function POST(request: Request) {
               toAddress: parsed.move.toAddress,
               volumeM3: price.totalVolumeM3,
               demoLeadId: demoLead?.id,
-              prospect: parsed.prospect,
+              prospect,
             }),
           },
           // Test je tarieven (preview) mailt nooit; alleen de echte demo.
-          { demo: true, meetingUrl: demoMeetingUrl(parsed.prospect) },
+          { demo: true, meetingUrl: demoMeetingUrl(prospect) },
         );
     return json({
       ok: true,

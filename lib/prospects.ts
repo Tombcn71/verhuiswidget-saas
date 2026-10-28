@@ -168,6 +168,32 @@ export async function getProspect(id: string): Promise<Prospect | null> {
   return p ?? null;
 }
 
+/**
+ * Demo via de website (zonder persoonlijke demolink): het bedrijf terugvinden op
+ * e-mailadres, of nieuw in de CRM zetten. Geeft de slug, voor dezelfde opvolging
+ * als een demo vanuit de CRM.
+ */
+export async function prospectForWebsiteDemo(input: {
+  name: string;
+  email: string;
+  phone?: string | null;
+}): Promise<string> {
+  const [found] = await db
+    .select({ slug: prospects.slug })
+    .from(prospects)
+    .where(sql`lower(${prospects.email}) = ${input.email.trim().toLowerCase()}`)
+    .limit(1);
+  if (found) return found.slug;
+  const p = await createProspect({
+    companyName: input.name,
+    contactName: input.name,
+    email: input.email.trim(),
+    notes: "Demo gedaan via de website.",
+  });
+  if (input.phone) await updateProspect(p.id, { mobile: input.phone });
+  return p.slug;
+}
+
 export async function getProspectBySlug(slug: string): Promise<Prospect | null> {
   const [p] = await db.select().from(prospects).where(eq(prospects.slug, slug)).limit(1);
   return p ?? null;

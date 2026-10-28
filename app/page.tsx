@@ -138,13 +138,12 @@ export default function HomePage() {
                 AI-software voor verhuizers
               </p>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-                Offertes in 1 minuut.{" "}
-                <span className="text-brand-600">Zonder voorinspectie.</span>
+                Win meer klussen.{" "}
+                <span className="text-brand-600">Bespaar uren en brandstof.</span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground">
-                Je klant maakt met zijn telefoon een paar foto&apos;s per kamer en
-                krijgt direct een offerte met jouw tarieven. Zo bespaar je personeelsuren en
-                brandstof. Werkt meteen, geen gedoe.
+                Offertes in 1 minuut, zonder voorinspectie. Je klant scant zijn inboedel met de
+                telefoon en krijgt direct een offerte met jouw tarieven. Werkt meteen, geen gedoe.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <a
