@@ -466,8 +466,6 @@ export async function sendQuoteEmails(
         to: d.customer.email,
         replyTo: CONTACT_EMAIL,
         subject: `Zo krijg jij de aanvraag binnen: ${formatEuroCents(d.totalCents)}`,
-        // Een minuut later: twee mails in dezelfde seconde naar één adres lijkt op bulk.
-        scheduledAt: new Date(Date.now() + 60_000).toISOString(),
         html: companyEmailHtml(
           d,
           demoBanner("Demo · Deze mail krijg jij als verhuizer bij elke nieuwe aanvraag."),

@@ -1191,7 +1191,7 @@ export function MoveFlow({
             {onspot
               ? "De offerte komt bij je leads en wordt naar de klant gemaild."
               : demo
-                ? "Vul je eigen e-mailadres in. Je krijgt twee mails: de offerte zoals je klant hem krijgt, en een minuut later de aanvraag zoals jij hem binnenkrijgt."
+                ? "Vul je eigen e-mailadres in. Je krijgt meteen twee mails: de offerte zoals je klant hem krijgt, en de aanvraag zoals jij hem binnenkrijgt."
                 : "Vul je naam en e-mail in — je prijsindicatie verschijnt op het scherm en komt ook in je mailbox."}
           </p>
         </div>
@@ -1895,7 +1895,7 @@ export function MoveFlow({
           {preview
             ? "Er is niets opgeslagen of verstuurd. Klopt de prijs niet? Pas je tarieven aan en test opnieuw."
             : demo && result.emailSent
-              ? `De offerte zoals je klant hem krijgt staat in ${email}. Binnen een minuut volgt de tweede mail: de aanvraag zoals jij hem binnenkrijgt.`
+              ? `Er staan twee mails in ${email}: de offerte zoals je klant hem krijgt, en de aanvraag zoals jij hem binnenkrijgt.`
             : onspot
             ? result.emailSent
               ? `De offerte is gemaild naar ${email}.`
