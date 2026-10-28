@@ -81,6 +81,9 @@ export const companies = pgTable("companies", {
   // Laatst in Clerk gezette gebruikerslimiet; wijkt die af van het plan, dan
   // werkt de app 'm bij (zie lib/current-company#requireCompany).
   clerkSeatLimit: integer("clerk_seat_limit"),
+  // Korte naam voor het deellinkje: moverai.nl/offerte/<slug>. Wordt bij het eerste
+  // bezoek aan Widget-link aangemaakt uit de bedrijfsnaam (zie ensureCompanySlug).
+  slug: text("slug").unique(),
   stripeCustomerId: text("stripe_customer_id").unique(),
   stripeSubscriptionId: text("stripe_subscription_id"),
 

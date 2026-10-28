@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Globe, Info, MessageCircle, ShieldCheck } from "lucide-react";
 import { requireCompany } from "@/lib/current-company";
+import { ensureCompanySlug } from "@/lib/companies";
 import { appUrl } from "@/lib/app-url";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,7 +22,8 @@ export default async function EmbedPage() {
   const base = appUrl();
   const loaderScript = `<script src="${base}/embed.js" async></script>`;
   const popupLink = `${base}/widget/${company.id}?popup`;
-  const directLink = `${base}/widget/${company.id}`;
+  // Kort deellinkje voor WhatsApp/sms/socials; zonder "www." voor de leesbaarheid.
+  const directLink = `${base.replace("://www.", "://")}/offerte/${await ensureCompanySlug(company)}`;
 
   return (
     <div className="max-w-3xl">

@@ -3,6 +3,7 @@ import { adminState, db, prospects, type NewProspect, type Prospect } from "@/li
 import { NL_CITIES, searchMovers } from "@/lib/places";
 import { findEmails } from "@/lib/website-email";
 import { appUrl } from "@/lib/app-url";
+import { slugify } from "@/lib/slug";
 
 /** Fases in de verkoop-pijplijn van moverAI, in volgorde. */
 export const STAGES = [
@@ -24,19 +25,6 @@ export function isStage(value: unknown): value is StageKey {
 
 export function stageLabel(key: string): string {
   return STAGES.find((s) => s.key === key)?.label ?? key;
-}
-
-/** "Jansen Verhuizingen B.V." → "jansen-verhuizingen-bv" */
-function slugify(name: string): string {
-  return (
-    name
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 40) || "verhuizer"
-  );
 }
 
 async function uniqueSlug(name: string): Promise<string> {

@@ -232,6 +232,13 @@
       "when": 1793117222148,
       "tag": "0032_colorful_starhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1793186642871,
+      "tag": "0033_nasty_sandman",
+      "breakpoints": true
     }
   ]
 }

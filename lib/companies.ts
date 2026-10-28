@@ -8,6 +8,7 @@ import {
   DEMO_COMPANY_PUBLIC,
 } from "@/lib/demo";
 import { seatLimit, type PlanId } from "@/lib/plans";
+import { slugify } from "@/lib/slug";
 import type { SubscriptionStatus } from "@/lib/stripe";
 
 export async function getCompanyByOrgId(clerkOrgId: string): Promise<Company | null> {
@@ -245,6 +246,34 @@ export async function setCompanyPlan(id: string, plan: PlanId): Promise<Company>
     .returning();
   await syncSeatLimit(row);
   return row;
+}
+
+export async function getCompanyBySlug(slug: string): Promise<Company | null> {
+  const [row] = await db.select().from(companies).where(eq(companies.slug, slug)).limit(1);
+  return row ?? null;
+}
+
+/**
+ * Korte naam voor het deellinkje (moverai.nl/offerte/<slug>), eenmalig gemaakt uit de
+ * bedrijfsnaam; bezet → "-2", "-3". Blijft daarna vast, ook als de naam verandert,
+ * zodat verstuurde linkjes blijven werken.
+ */
+export async function ensureCompanySlug(company: Company): Promise<string> {
+  if (company.slug) return company.slug;
+  const base = slugify(company.name);
+  for (let n = 1; n < 50; n++) {
+    const candidate = n === 1 ? base : `${base}-${n}`;
+    const [row] = await db
+      .update(companies)
+      .set({ slug: candidate })
+      .where(and(eq(companies.id, company.id), isNull(companies.slug)))
+      .returning({ slug: companies.slug })
+      .catch(() => [] as { slug: string | null }[]); // al bezet (unique) → volgende
+    if (row?.slug) return row.slug;
+    const fresh = await getCompanyById(company.id);
+    if (fresh?.slug) return fresh.slug; // tegelijk al gezet
+  }
+  throw new Error("Kon geen korte link maken.");
 }
 
 export async function getCompanyByStripeCustomerId(customerId: string): Promise<Company | null> {
