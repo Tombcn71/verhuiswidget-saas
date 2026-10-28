@@ -35,8 +35,13 @@ export function htmlToText(html: string): string {
  * - offerte@… (QUOTE_FROM_EMAIL): mails aan klanten, op naam van de verhuizer
  * - aanvragen@…: mails van moverAI aan verhuizers en meldingen aan moverAI
  * - tom@…: persoonlijke mails uit de verkoop-CRM ("Tom van moverAI")
+ * - demo-offerte@ / demo-aanvraag@: de twee demo-mails, zodat de bezoeker in zijn
+ *   inbox meteen ziet welke de klant krijgt en welke hijzelf
  */
-export function sender(name: string, local: "aanvragen" | "tom"): string | null {
+export function sender(
+  name: string,
+  local: "aanvragen" | "tom" | "demo-offerte" | "demo-aanvraag",
+): string | null {
   const quoteFrom = process.env.QUOTE_FROM_EMAIL;
   const domain = quoteFrom?.split("@")[1];
   return domain ? `${name} <${local}@${domain}>` : null;
