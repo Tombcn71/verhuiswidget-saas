@@ -9,6 +9,11 @@ function adminEmails(): string[] {
     .filter(Boolean);
 }
 
+/** Of dit e-mailadres van een moverAI-beheerder is (bijv. om eigen testdemo's niet te tellen). */
+export function isAdminEmail(email: string): boolean {
+  return adminEmails().includes(email.trim().toLowerCase());
+}
+
 /**
  * Alleen moverAI-beheerders (ADMIN_EMAILS). Niet ingelogd → inloggen; ingelogd
  * maar geen beheerder → 404, zodat de pagina voor anderen niet bestaat.

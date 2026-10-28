@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { notifyIfOverScanLimit } from "@/lib/scan-alerts";
+import { isAdminEmail } from "@/lib/admin";
 import { z } from "zod";
 import { isValidPhone } from "@/lib/phone";
 import { ensureDemoCompany, getCompanyById } from "@/lib/companies";
@@ -249,9 +250,10 @@ export async function POST(request: Request) {
       preview || /@(voorbeeld\.nl|example\.(com|nl|org)|test\.)/i.test(parsed.customer.email);
     // Persoonlijke demolink: in de verkoop-CRM op "Demo gedaan" zetten.
     if (isDemo && !preview && parsed.prospect) await handleDemoCompleted(parsed.prospect);
-    // Demo met echt e-mailadres: verhuizer-lead voor moverAI (/admin).
+    // Demo met echt e-mailadres: verhuizer-lead voor moverAI (/admin). Niet als
+    // een beheerder zelf test, anders krijg je een seintje over jezelf.
     const demoLead =
-      isDemo && !fake
+      isDemo && !fake && !isAdminEmail(parsed.customer.email)
         ? await recordDemoLead({
             name: parsed.customer.name,
             email: parsed.customer.email,
