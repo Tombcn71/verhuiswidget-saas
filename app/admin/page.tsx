@@ -135,8 +135,13 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
           <MessageCircle className="size-4 text-emerald-600" />
           Vandaag geappt: {appedToday} / {WA_DAILY}
         </div>
-        <div className="flex items-center gap-2 rounded-lg border bg-background px-4 py-2 text-sm font-medium">
-          <Send className="size-4 text-primary" />
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium",
+            demosToday > 0 ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-border bg-background",
+          )}
+        >
+          <Send className="size-4 text-emerald-600" />
           Vandaag demo&apos;s gestuurd: {demosToday}
         </div>
         </div>
