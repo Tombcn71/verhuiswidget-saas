@@ -119,7 +119,7 @@ export function PlatformShowcase() {
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             Aanvraag binnen? Tik het e-mailadres in en klik. Binnen een minuut heeft je klant jouw
-            prijs.
+            offerte.
           </p>
           <ul className="mt-8 space-y-4">
             {POINTS.map(({ Icon, text }) => (
