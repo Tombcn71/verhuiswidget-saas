@@ -23,24 +23,11 @@ import { deleteAction, updateAction } from "../../actions";
 import { StageBadge } from "../../stage-badge";
 import { ContactButtons } from "../../contact-buttons";
 
-/**
- * Openingsbericht voor WhatsApp: drie varianten met de bedrijfsnaam, zodat niet elk
- * bericht hetzelfde is. Hetzelfde bedrijf krijgt altijd dezelfde variant.
- */
-function whatsappOpening(p: { slug: string; companyName: string; city: string | null }): string {
+/** Openingsbericht voor WhatsApp, met de bedrijfsnaam. */
+function whatsappOpening(companyName: string): string {
   // "Verhuisbedrijf Direct | Verhuisservice met…" → "Verhuisbedrijf Direct"
-  const name = p.companyName.split(/\s[|–-]\s/)[0].trim();
-  const hour = Number(
-    new Date().toLocaleString("en-GB", { hour: "numeric", hour12: false, timeZone: "Europe/Amsterdam" }),
-  );
-  const greeting = hour < 12 ? "Goedemorgen" : hour < 18 ? "Goedemiddag" : "Goedenavond";
-  const variants = [
-    `Hoi ${name}! Ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt binnen een minuut een offerte met jouw tarieven, zonder huisbezoek.\nVooral handig bij aanvragen via offerteplatforms, want dan ben je als eerste met een offerte.\nMag ik je een linkje naar de demo sturen? Duurt een minuut.`,
-    `${greeting} ${name}, Tom hier van moverAI. Ik help verhuizers ${p.city ? `in ${p.city}` : "in de regio"} sneller offertes maken: de klant fotografeert zijn kamers en krijgt binnen een minuut jullie offerte, zonder dat je langs hoeft. Mag ik je de demo sturen? Kost je een minuut.`,
-    `Hoi ${name}, ik ben Tom van moverAI. Krijgen jullie ook aanvragen via offerteplatforms? Met mijn software stuur je de klant een linkje, hij maakt een paar foto's en heeft binnen een minuut jullie offerte. Zal ik je de demo sturen?`,
-  ];
-  const hash = [...p.slug].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0);
-  return variants[hash % variants.length];
+  const name = companyName.split(/\s[|–-]\s/)[0].trim();
+  return `Hoi ${name}! Ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Minder voorinspecties, dus minder uren en brandstof. Ook handig voor snelle reacties op offerteplatforms.\nMag ik je een linkje naar de demo sturen? Duurt een minuut.`;
 }
 
 function Field({
@@ -68,7 +55,7 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
   if (!p) notFound();
   // Nummer bekend: WhatsApp direct openen; "ja" = alleen een chat op hun website.
   const waNumber = p.whatsapp && /^\d{8,}$/.test(p.whatsapp) ? p.whatsapp : null;
-  const opening = whatsappOpening(p);
+  const opening = whatsappOpening(p.companyName);
 
   const timeline = [
     { label: "Toegevoegd", at: p.createdAt },
