@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, MessageCircle } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import {
   STAGES,
   demoLinkFor,
@@ -22,6 +22,7 @@ import { CopyBlock } from "@/app/dashboard/embed/copy-block";
 import { deleteAction, updateAction } from "../../actions";
 import { StageBadge } from "../../stage-badge";
 import { ContactButtons } from "../../contact-buttons";
+import { WhatsappMessages } from "./whatsapp-card";
 
 /** Openingsbericht voor WhatsApp (zonder bedrijfsnaam: je appt een persoon). */
 const WHATSAPP_OPENING = `Hallo 👋 ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Minder voorinspecties, dus minder uren en brandstof. Ook handig voor snelle reacties op offerteplatforms.
@@ -55,7 +56,9 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
 
   const timeline = [
     { label: "Toegevoegd", at: p.createdAt },
-    { label: "📤 Demo gestuurd", at: p.demoSentAt },
+    { label: "💬 WhatsApp gestuurd", at: p.whatsappSentAt },
+    { label: "📤 Demo gemaild", at: p.demoSentAt },
+    { label: "📤 Demo gestuurd via WhatsApp", at: p.whatsappDemoAt },
     { label: "👀 Demolink geopend", at: p.demoOpenedAt },
     { label: "✅ Demo afgerond", at: p.demoCompletedAt },
     { label: "🔥 Klikte op boeken", at: p.demoBookedAt },
@@ -192,32 +195,13 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {waNumber ? (
-                <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-                  <a
-                    href={`https://wa.me/${waNumber}?text=${encodeURIComponent(WHATSAPP_OPENING)}`}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <MessageCircle /> Open WhatsApp met openingsbericht
-                  </a>
-                </Button>
-              ) : (
-                p.whatsapp &&
-                p.website && (
-                  <Button asChild variant="outline">
-                    <a href={p.website} target="_blank" rel="noopener">
-                      <ExternalLink /> Open hun website
-                    </a>
-                  </Button>
-                )
-              )}
-              <p className="text-sm font-medium">Openingsbericht</p>
-              <CopyBlock multiline code={WHATSAPP_OPENING} />
-              <p className="text-sm font-medium">Zegt hij ja</p>
-              <CopyBlock multiline code={`Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`} />
-              <p className="text-sm font-medium">Demo gedaan</p>
-              <CopyBlock multiline code="Hoi! Ik zag dat je de demo hebt gedaan. Wat vond je ervan?" />
+              <WhatsappMessages
+                id={p.id}
+                waNumber={waNumber}
+                website={p.whatsapp ? p.website : null}
+                opening={WHATSAPP_OPENING}
+                demoReply={`Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`}
+              />
             </CardContent>
           </Card>
 

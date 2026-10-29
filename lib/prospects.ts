@@ -8,7 +8,7 @@ import { slugify } from "@/lib/slug";
 /** Fases in de verkoop-pijplijn van moverAI, in volgorde. */
 export const STAGES = [
   { key: "nieuw", label: "Nieuw" },
-  { key: "gebeld", label: "Gebeld" },
+  { key: "gebeld", label: "Benaderd" }, // gebeld of geappt
   { key: "demo_gestuurd", label: "Demo gestuurd" },
   { key: "demo_gedaan", label: "Demo gedaan" },
   { key: "gesprek", label: "Gesprek gepland" },
@@ -224,6 +224,33 @@ export async function markDemoSent(id: string): Promise<void> {
     .update(prospects)
     .set({ stage: "demo_gestuurd" })
     .where(and(eq(prospects.id, id), inArray(prospects.stage, ["nieuw", "gebeld"])));
+}
+
+/**
+ * WhatsApp vanuit het CRM: "opening" = openingsbericht gestuurd (fase Benaderd),
+ * "demo" = demolink gestuurd (fase Demo gestuurd). Alleen de eerste keer telt.
+ */
+export async function markWhatsapp(id: string, kind: "opening" | "demo"): Promise<void> {
+  const now = new Date();
+  if (kind === "opening") {
+    await db
+      .update(prospects)
+      .set({ whatsappSentAt: now, updatedAt: now })
+      .where(and(eq(prospects.id, id), isNull(prospects.whatsappSentAt)));
+    await db
+      .update(prospects)
+      .set({ stage: "gebeld" })
+      .where(and(eq(prospects.id, id), eq(prospects.stage, "nieuw")));
+  } else {
+    await db
+      .update(prospects)
+      .set({ whatsappDemoAt: now, updatedAt: now })
+      .where(and(eq(prospects.id, id), isNull(prospects.whatsappDemoAt)));
+    await db
+      .update(prospects)
+      .set({ stage: "demo_gestuurd" })
+      .where(and(eq(prospects.id, id), inArray(prospects.stage, ["nieuw", "gebeld"])));
+  }
 }
 
 /** Eerste keer dat de demolink geopend wordt. */

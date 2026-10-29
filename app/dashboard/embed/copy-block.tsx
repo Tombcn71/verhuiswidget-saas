@@ -4,14 +4,26 @@ import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/** `multiline`: tekst met regels (bijv. een kant-en-klaar bericht) in plaats van één regel code. */
-export function CopyBlock({ code, multiline = false }: { code: string; multiline?: boolean }) {
+/**
+ * `multiline`: tekst met regels (bijv. een kant-en-klaar bericht) in plaats van één regel code.
+ * `onCopy`: na het kopiëren, bijv. om in het CRM bij te houden dat een bericht is gestuurd.
+ */
+export function CopyBlock({
+  code,
+  multiline = false,
+  onCopy,
+}: {
+  code: string;
+  multiline?: boolean;
+  onCopy?: () => void;
+}) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
+      onCopy?.();
       setTimeout(() => setCopied(false), 2000);
     } catch {
       /* clipboard niet beschikbaar */

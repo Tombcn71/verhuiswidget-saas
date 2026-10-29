@@ -150,7 +150,7 @@ export async function handleDemoCompleted(slug: string): Promise<void> {
   // Demo via WhatsApp gestuurd (niet gemaild): Tom volgt zelf op in WhatsApp.
   if (
     !p.email ||
-    (p.whatsapp && !p.demoSentAt) ||
+    ((p.whatsapp || p.whatsappDemoAt) && !p.demoSentAt) ||
     p.autoMailOff ||
     p.followUpEmailId ||
     p.meetingClickedAt ||

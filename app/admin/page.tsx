@@ -40,7 +40,9 @@ function DemoSignals({ p }: { p: Prospect }) {
     p.demoBookedAt && { icon: "🔥", label: "Wil boeken", at: p.demoBookedAt },
     p.demoCompletedAt && { icon: "✅", label: "Demo gedaan", at: p.demoCompletedAt },
     p.demoOpenedAt && { icon: "👀", label: "Geopend", at: p.demoOpenedAt },
-    p.demoSentAt && { icon: "📤", label: "Gestuurd", at: p.demoSentAt },
+    p.demoSentAt && { icon: "📤", label: "Demo gemaild", at: p.demoSentAt },
+    p.whatsappDemoAt && { icon: "📤", label: "Demo geappt", at: p.whatsappDemoAt },
+    p.whatsappSentAt && { icon: "💬", label: "WhatsApp gestuurd", at: p.whatsappSentAt },
   ].filter(Boolean) as { icon: string; label: string; at: Date }[];
   if (items.length === 0) return <span className="text-muted-foreground">—</span>;
   const latest = items[0];
@@ -104,7 +106,11 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
   );
 
   const count = (key: string) => scope.filter((p) => p.stage === key).length;
-  const withDemo = all.filter((p) => p.demoSentAt).length;
+  const withDemo = all.filter((p) => p.demoSentAt || p.whatsappDemoAt).length;
+  // Openingsberichten via WhatsApp vandaag (Nederlandse tijd); doel: 20 per dag.
+  const nlDay = (d: Date) => d.toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
+  const appedToday = all.filter((p) => p.whatsappSentAt && nlDay(p.whatsappSentAt) === nlDay(new Date())).length;
+  const WA_DAILY = 20;
   const demoDone = all.filter((p) => p.demoCompletedAt).length;
   const customers = all.filter((p) => p.stage === "klant").length;
   const withWa = all.filter((p) => inWaView(p) && p.stage !== "afgevallen").length;
@@ -119,6 +125,17 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
             Verhuisbedrijven die je klant wilt maken. Openen, afronden en &ldquo;boeken&rdquo; in
             de demo worden automatisch bijgehouden.
           </p>
+        </div>
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium",
+            appedToday >= WA_DAILY
+              ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+              : "border-border bg-background",
+          )}
+        >
+          <MessageCircle className="size-4 text-emerald-600" />
+          Vandaag geappt: {appedToday} / {WA_DAILY}
         </div>
         <p className="text-sm text-muted-foreground">
           {withDemo} demo&apos;s gestuurd · {demoDone} gedaan · {customers}{" "}

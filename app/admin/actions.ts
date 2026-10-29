@@ -11,6 +11,7 @@ import {
   getProspect,
   importProspects,
   isStage,
+  markWhatsapp,
   parseProspectTable,
   updateProspect,
 } from "@/lib/prospects";
@@ -169,4 +170,12 @@ export async function fetchProspectsAction(_prev: FetchState, formData: FormData
           : `Ophalen mislukt: ${err instanceof Error ? err.message : "onbekende fout"}`,
     };
   }
+}
+
+/** Openingsbericht of demolink via WhatsApp gestuurd (klik of kopieer in het CRM). */
+export async function whatsappAction(id: string, kind: "opening" | "demo"): Promise<void> {
+  await requireAdmin();
+  await markWhatsapp(id, kind);
+  revalidatePath("/admin");
+  revalidatePath(`/admin/prospects/${id}`);
 }
