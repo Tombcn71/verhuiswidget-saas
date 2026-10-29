@@ -23,6 +23,10 @@ import { deleteAction, updateAction } from "../../actions";
 import { StageBadge } from "../../stage-badge";
 import { ContactButtons } from "../../contact-buttons";
 
+const WHATSAPP_OPENING = `Hoi! Ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt binnen een minuut een offerte met jouw tarieven, zonder huisbezoek.
+Vooral handig bij aanvragen via offerteplatforms, want dan ben je als eerste met een offerte.
+Mag ik je een linkje naar de demo sturen? Duurt een minuut. 🚚`;
+
 function Field({
   label,
   name,
@@ -173,6 +177,19 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
         </form>
 
         <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>WhatsApp</CardTitle>
+              <CardDescription>Kopieer en plak in het WhatsApp-gesprek.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm font-medium">Openingsbericht</p>
+              <CopyBlock multiline code={WHATSAPP_OPENING} />
+              <p className="text-sm font-medium">Zegt hij ja</p>
+              <CopyBlock multiline code={`Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`} />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Eigen demolink</CardTitle>
