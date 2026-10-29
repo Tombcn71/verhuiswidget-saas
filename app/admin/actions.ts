@@ -151,14 +151,14 @@ export async function fetchProspectsAction(_prev: FetchState, formData: FormData
           ? city
             ? `Geen nieuwe verhuisbedrijven meer gevonden in ${city}.`
             : "Alle plaatsen in de lijst zijn doorzocht."
-          : "Geen nieuwe bedrijven gevonden; probeer het nog eens of kies een plaats.",
+          : "Geen nieuwe bedrijven met WhatsApp gevonden; probeer het nog eens of kies een plaats.",
       };
     }
     return {
       status: "success",
       message: `${r.added} nieuwe ${r.added === 1 ? "verhuisbedrijf" : "verhuisbedrijven"} toegevoegd (${r.cities.join(", ")}).${
         r.skipped ? ` ${r.skipped} overgeslagen (stonden er al in).` : ""
-      }`,
+      }${r.noWhatsapp ? ` ${r.noWhatsapp} zonder WhatsApp overgeslagen.` : ""}`,
     };
   } catch (err) {
     return {

@@ -23,9 +23,25 @@ import { deleteAction, updateAction } from "../../actions";
 import { StageBadge } from "../../stage-badge";
 import { ContactButtons } from "../../contact-buttons";
 
-const WHATSAPP_OPENING = `Hoi! Ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt binnen een minuut een offerte met jouw tarieven, zonder huisbezoek.
-Vooral handig bij aanvragen via offerteplatforms, want dan ben je als eerste met een offerte.
-Mag ik je een linkje naar de demo sturen? Duurt een minuut. 🚚`;
+/**
+ * Openingsbericht voor WhatsApp: drie varianten met de bedrijfsnaam, zodat niet elk
+ * bericht hetzelfde is. Hetzelfde bedrijf krijgt altijd dezelfde variant.
+ */
+function whatsappOpening(p: { slug: string; companyName: string; city: string | null }): string {
+  // "Verhuisbedrijf Direct | Verhuisservice met…" → "Verhuisbedrijf Direct"
+  const name = p.companyName.split(/\s[|–-]\s/)[0].trim();
+  const hour = Number(
+    new Date().toLocaleString("en-GB", { hour: "numeric", hour12: false, timeZone: "Europe/Amsterdam" }),
+  );
+  const greeting = hour < 12 ? "Goedemorgen" : hour < 18 ? "Goedemiddag" : "Goedenavond";
+  const variants = [
+    `Hoi ${name}! Ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt binnen een minuut een offerte met jouw tarieven, zonder huisbezoek.\nVooral handig bij aanvragen via offerteplatforms, want dan ben je als eerste met een offerte.\nMag ik je een linkje naar de demo sturen? Duurt een minuut.`,
+    `${greeting} ${name}, Tom hier van moverAI. Ik help verhuizers ${p.city ? `in ${p.city}` : "in de regio"} sneller offertes maken: de klant fotografeert zijn kamers en krijgt binnen een minuut jullie offerte, zonder dat je langs hoeft. Mag ik je de demo sturen? Kost je een minuut.`,
+    `Hoi ${name}, ik ben Tom van moverAI. Krijgen jullie ook aanvragen via offerteplatforms? Met mijn software stuur je de klant een linkje, hij maakt een paar foto's en heeft binnen een minuut jullie offerte. Zal ik je de demo sturen?`,
+  ];
+  const hash = [...p.slug].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0);
+  return variants[hash % variants.length];
+}
 
 function Field({
   label,
@@ -52,6 +68,7 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
   if (!p) notFound();
   // Nummer bekend: WhatsApp direct openen; "ja" = alleen een chat op hun website.
   const waNumber = p.whatsapp && /^\d{8,}$/.test(p.whatsapp) ? p.whatsapp : null;
+  const opening = whatsappOpening(p);
 
   const timeline = [
     { label: "Toegevoegd", at: p.createdAt },
@@ -195,7 +212,7 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
               {waNumber ? (
                 <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
                   <a
-                    href={`https://wa.me/${waNumber}?text=${encodeURIComponent(WHATSAPP_OPENING)}`}
+                    href={`https://wa.me/${waNumber}?text=${encodeURIComponent(opening)}`}
                     target="_blank"
                     rel="noopener"
                   >
@@ -213,7 +230,7 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
                 )
               )}
               <p className="text-sm font-medium">Openingsbericht</p>
-              <CopyBlock multiline code={WHATSAPP_OPENING} />
+              <CopyBlock multiline code={opening} />
               <p className="text-sm font-medium">Zegt hij ja</p>
               <CopyBlock multiline code={`Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`} />
               <p className="text-sm font-medium">Demo gedaan</p>

@@ -59,20 +59,21 @@ const today = () => new Date().toLocaleDateString("sv-SE");
 
 export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
   const { fase, q, pagina, wa } = await searchParams;
-  const onlyWa = wa === "1";
+  // Standaard alleen bedrijven met WhatsApp (Tom benadert via WhatsApp); ?wa=0 toont alles.
+  const onlyWa = wa !== "0";
   const [all, nextCity] = await Promise.all([listProspects(), nextPlacesCity()]);
   const active = isStage(fase) ? fase : null;
   // Zoeken (naam, contact, plaats, telefoon, e-mail) en 100 per pagina: werkbaar met grote lijsten.
   const query = typeof q === "string" ? q.trim().toLowerCase() : "";
-  const filtered = (active ? all.filter((p) => p.stage === active) : all.filter((p) => p.stage !== "afgevallen"))
+  const scope = onlyWa ? all.filter((p) => p.whatsapp) : all;
+  const filtered = (active ? scope.filter((p) => p.stage === active) : scope.filter((p) => p.stage !== "afgevallen"))
     .filter(
       (p) =>
         !query ||
         [p.companyName, p.contactName, p.city, p.phone, p.email]
           .filter(Boolean)
           .some((v) => v!.toLowerCase().includes(query)),
-    )
-    .filter((p) => !onlyWa || p.whatsapp);
+    );
   const PAGE_SIZE = 100;
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const page = Math.min(pages, Math.max(1, Number(pagina) || 1));
@@ -81,7 +82,7 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
     const params = new URLSearchParams();
     if (active) params.set("fase", active);
     if (query) params.set("q", query);
-    if (onlyWa) params.set("wa", "1");
+    if (!onlyWa) params.set("wa", "0");
     if (n > 1) params.set("pagina", String(n));
     const qs = params.toString();
     return qs ? `/admin?${qs}` : "/admin";
@@ -98,10 +99,10 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
         (p.nextActionOn && p.nextActionOn <= today())),
   );
 
-  const count = (key: string) => all.filter((p) => p.stage === key).length;
+  const count = (key: string) => scope.filter((p) => p.stage === key).length;
   const withDemo = all.filter((p) => p.demoSentAt).length;
   const demoDone = all.filter((p) => p.demoCompletedAt).length;
-  const customers = count("klant");
+  const customers = all.filter((p) => p.stage === "klant").length;
   const withWa = all.filter((p) => p.whatsapp && p.stage !== "afgevallen").length;
   const sitesToCheck = all.filter((p) => p.website && !p.siteCheckedAt && p.stage !== "afgevallen").length;
 
@@ -165,7 +166,7 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
 
       <form action="/admin" className="mb-3 flex max-w-md gap-2">
         {active && <input type="hidden" name="fase" value={active} />}
-        {onlyWa && <input type="hidden" name="wa" value="1" />}
+        {!onlyWa && <input type="hidden" name="wa" value="0" />}
         <Input
           name="q"
           defaultValue={query}
@@ -179,11 +180,11 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
 
       <div className="mb-4 flex flex-wrap gap-1.5">
         <Button asChild size="sm" variant={active ? "outline" : "default"}>
-          <Link href="/admin">Actief ({all.length - count("afgevallen")})</Link>
+          <Link href={onlyWa ? "/admin" : "/admin?wa=0"}>Actief ({scope.length - count("afgevallen")})</Link>
         </Button>
         {STAGES.map((s) => (
           <Button key={s.key} asChild size="sm" variant={active === s.key ? "default" : "outline"}>
-            <Link href={`/admin?fase=${s.key}`}>
+            <Link href={`/admin?fase=${s.key}${onlyWa ? "" : "&wa=0"}`}>
               {s.label} ({count(s.key)})
             </Link>
           </Button>
@@ -199,12 +200,12 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
               const params = new URLSearchParams();
               if (active) params.set("fase", active);
               if (query) params.set("q", query);
-              if (!onlyWa) params.set("wa", "1");
+              if (onlyWa) params.set("wa", "0");
               const qs = params.toString();
               return qs ? `/admin?${qs}` : "/admin";
             })()}
           >
-            <MessageCircle /> WhatsApp ({withWa})
+            <MessageCircle /> {onlyWa ? `Alleen WhatsApp (${withWa})` : "Toon alleen WhatsApp"}
           </Link>
         </Button>
       </div>

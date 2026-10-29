@@ -279,15 +279,15 @@ export async function nextPlacesCity(): Promise<string | null> {
 }
 
 /**
- * Haalt `count` nieuwe verhuisbedrijven op en voegt ze toe als "Nieuw".
- * Dubbelen (zelfde Google-ID, naam of telefoonnummer) worden overgeslagen; er
+ * Haalt `count` nieuwe verhuisbedrijven met WhatsApp op hun website op en voegt ze
+ * toe als "Nieuw" (zonder WhatsApp: overgeslagen). Dubbelen (zelfde Google-ID, naam of telefoonnummer) worden overgeslagen; er
  * wordt doorgezocht tot er genoeg nieuwe zijn. Zonder `city` worden de plaatsen
  * uit NL_CITIES afgewerkt en onthoudt de app waar hij was gebleven.
  */
 export async function fetchNewProspects(input: {
   count: number;
   city?: string | null;
-}): Promise<{ added: number; skipped: number; cities: string[]; done: boolean }> {
+}): Promise<{ added: number; skipped: number; noWhatsapp: number; cities: string[]; done: boolean }> {
   const existing = await db
     .select({ placeId: prospects.placeId, name: prospects.companyName, phone: prospects.phone, slug: prospects.slug })
     .from(prospects);
@@ -301,6 +301,7 @@ export async function fetchNewProspects(input: {
   const toInsert: NewProspect[] = [];
   const cities = new Set<string>();
   let skipped = 0;
+  let noWhatsapp = 0;
   let done = false;
 
   // Max. 10 zoekopdrachten per klik: houdt de kosten voorspelbaar.
@@ -313,14 +314,23 @@ export async function fetchNewProspects(input: {
     cities.add(city);
     const { places, nextPageToken } = await searchMovers(city, cursor.pageToken);
 
-    for (const p of places) {
-      if (toInsert.length >= input.count) break;
-      const n = nameKey(p.name);
+    // Alleen bedrijven met WhatsApp op hun website: die benadert Tom via WhatsApp.
+    const fresh = places.filter((p) => {
       const ph = phoneKey(p.phone);
-      if (placeIds.has(p.placeId) || names.has(n) || (ph && phones.has(ph))) {
-        skipped++;
+      const dup = placeIds.has(p.placeId) || names.has(nameKey(p.name)) || (ph && phones.has(ph));
+      if (dup) skipped++;
+      return !dup && p.website;
+    });
+    const scans = await scanWebsites(fresh.map((p) => p.website), 10);
+
+    for (const [i, p] of fresh.entries()) {
+      if (toInsert.length >= input.count) break;
+      if (!scans[i].whatsapp) {
+        noWhatsapp++;
         continue;
       }
+      const n = nameKey(p.name);
+      const ph = phoneKey(p.phone);
       placeIds.add(p.placeId);
       names.add(n);
       if (ph) phones.add(ph);
@@ -338,6 +348,9 @@ export async function fetchNewProspects(input: {
         placeId: p.placeId,
         rating: p.rating,
         reviewCount: p.reviewCount,
+        email: scans[i].email,
+        whatsapp: scans[i].whatsapp,
+        siteCheckedAt: new Date(),
       });
     }
 
@@ -352,17 +365,9 @@ export async function fetchNewProspects(input: {
     }
   }
 
-  // E-mailadres (voor "Demo mailen") en WhatsApp van hun website halen; gratis, geen Google-zoekopdracht.
-  const scans = await scanWebsites(toInsert.map((p) => p.website ?? null));
-  toInsert.forEach((p, i) => {
-    if (scans[i].email) p.email = scans[i].email;
-    p.whatsapp = scans[i].whatsapp;
-    if (p.website) p.siteCheckedAt = new Date();
-  });
-
   if (toInsert.length) await db.insert(prospects).values(toInsert);
   if (!manual) await writeCursor(cursor);
-  return { added: toInsert.length, skipped, cities: [...cities], done };
+  return { added: toInsert.length, skipped, noWhatsapp, cities: [...cities], done };
 }
 
 /**
