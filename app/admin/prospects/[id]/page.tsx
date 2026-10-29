@@ -27,7 +27,7 @@ import { ContactButtons } from "../../contact-buttons";
 function whatsappOpening(companyName: string): string {
   // "Verhuisbedrijf Direct | Verhuisservice met…" → "Verhuisbedrijf Direct"
   const name = companyName.split(/\s[|–-]\s/)[0].trim();
-  return `Hoi ${name}! Ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Minder voorinspecties, dus minder uren en brandstof. Ook handig voor snelle reacties op offerteplatforms.\nMag ik je een linkje naar de demo sturen? Duurt een minuut.`;
+  return `Hallo ${name}! Ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Minder voorinspecties, dus minder uren en brandstof. Ook handig voor snelle reacties op offerteplatforms.\nMag ik je een linkje naar de demo sturen? Duurt een minuut.`;
 }
 
 function Field({
