@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageCircle, Plus, Upload } from "lucide-react";
+import { MessageCircle, Plus, Send, Upload } from "lucide-react";
 import {
   STAGES,
   isStage,
@@ -111,6 +111,9 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
   const nlDay = (d: Date) => d.toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
   const appedToday = all.filter((p) => p.whatsappSentAt && nlDay(p.whatsappSentAt) === nlDay(new Date())).length;
   const WA_DAILY = 20;
+  // Demolink vandaag gestuurd, via WhatsApp of gemaild.
+  const isToday = (d: Date | null) => !!d && nlDay(d) === nlDay(new Date());
+  const demosToday = all.filter((p) => isToday(p.whatsappDemoAt) || isToday(p.demoSentAt)).length;
   const demoDone = all.filter((p) => p.demoCompletedAt).length;
   const customers = all.filter((p) => p.stage === "klant").length;
   const withWa = all.filter((p) => inWaView(p) && p.stage !== "afgevallen").length;
@@ -119,13 +122,8 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
   return (
     <>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Verkoop-CRM</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Verhuisbedrijven die je klant wilt maken. Openen, afronden en &ldquo;boeken&rdquo; in
-            de demo worden automatisch bijgehouden.
-          </p>
-        </div>
+        <h1 className="text-2xl font-semibold tracking-tight">Verkoop-CRM</h1>
+        <div className="flex flex-wrap gap-2">
         <div
           className={cn(
             "flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium",
@@ -136,6 +134,11 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
         >
           <MessageCircle className="size-4 text-emerald-600" />
           Vandaag geappt: {appedToday} / {WA_DAILY}
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border bg-background px-4 py-2 text-sm font-medium">
+          <Send className="size-4 text-primary" />
+          Vandaag demo&apos;s gestuurd: {demosToday}
+        </div>
         </div>
         <p className="text-sm text-muted-foreground">
           {withDemo} demo&apos;s gestuurd · {demoDone} gedaan · {customers}{" "}
