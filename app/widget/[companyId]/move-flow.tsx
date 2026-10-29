@@ -1898,7 +1898,7 @@ export function MoveFlow({
           {preview
             ? "Er is niets opgeslagen of verstuurd. Klopt de prijs niet? Pas je tarieven aan en test opnieuw."
             : demo && result.emailSent
-              ? `Er staan twee mails in ${email}: de offerte zoals je klant hem krijgt, en de aanvraag zoals jij hem binnenkrijgt.`
+              ? `Er staan twee mails in ${email}: de offerte zoals je klant hem krijgt, en de aanvraag zoals jij hem binnenkrijgt. Zo krijg jij straks elke aanvraag binnen, met foto's en inventarislijst.`
             : onspot
             ? result.emailSent
               ? `De offerte is gemaild naar ${email}.`

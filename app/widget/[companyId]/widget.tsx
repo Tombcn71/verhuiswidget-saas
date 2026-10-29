@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { LeadSource } from "@/lib/leads";
-import { Calculator, Camera, Mail } from "lucide-react";
+import { Bell, Calculator, Camera, Inbox, Mail, Send, Zap } from "lucide-react";
 import { Logo, LogoMark } from "@/app/_components/logo";
 import { MoveFlow, type DemoContact } from "./move-flow";
 import { ContactFallback } from "./contact-fallback";
@@ -33,6 +33,30 @@ const DEMO_STEPS = [
     Icon: Mail,
     title: "Meteen in je mailbox",
     text: "De offerte van je klant, én de aanvraag zoals jij hem binnenkrijgt.",
+  },
+];
+
+// Eerste scherm van de marketing-demo: wat moverAI voor de verhuizer zelf doet.
+const MOVER_STEPS = [
+  {
+    Icon: Inbox,
+    title: "Aanvraag binnen",
+    text: "Via een offerteplatform, je website, de telefoon of WhatsApp.",
+  },
+  {
+    Icon: Send,
+    title: "Eén klik en je linkje is verstuurd",
+    text: "Tik het e-mailadres in of stuur het via WhatsApp. Het bericht staat al klaar. Via je website gaat het vanzelf.",
+  },
+  {
+    Icon: Zap,
+    title: "Je klant krijgt direct jouw prijs",
+    text: "Nog voordat je concurrent heeft teruggebeld.",
+  },
+  {
+    Icon: Bell,
+    title: "Boekt hij niet meteen?",
+    text: "Na 2 dagen krijgt hij vanzelf een herinnering.",
   },
 ];
 
@@ -79,6 +103,8 @@ export function Widget({
 
   // Het startscherm tonen we alleen in de losse marketing-demo.
   const [started, setStarted] = useState(!demo);
+  // Demo-intro: eerst "Zo werkt het voor jou", dan "Zo ziet jouw klant het".
+  const [introScreen, setIntroScreen] = useState<"jou" | "klant">("jou");
   const [moveType, setMoveType] = useState<"verhuizing" | "ontruiming">(
     forcedType ?? "verhuizing",
   );
@@ -100,23 +126,47 @@ export function Widget({
   }, [company.id, started, moveType]);
 
   if (demo && !started) {
+    const forMover = introScreen === "jou";
+    const steps = forMover ? MOVER_STEPS : DEMO_STEPS;
     return (
       <div
         ref={rootRef}
         style={accentStyle}
         className="flex h-full min-h-dvh flex-col justify-center bg-linear-to-b from-slate-50 to-white px-6 py-10 text-center text-slate-900"
       >
+        {!forMover && (
+          <button
+            onClick={() => setIntroScreen("jou")}
+            className="mx-auto mb-4 block w-full max-w-sm text-left text-xs text-slate-500 hover:text-slate-700"
+          >
+            ‹ Terug
+          </button>
+        )}
         <Logo className="mx-auto text-base" />
-        {demoContact?.name && (
+        {forMover && demoContact?.name && (
           <p className="mt-6 text-sm font-medium text-slate-600">Hoi {demoContact.name}!</p>
         )}
-        <h2 className={`${demoContact?.name ? "mt-2" : "mt-6"} text-3xl font-bold tracking-tight`}>
-          Zo ziet <span className="text-(--accent)">jouw klant</span> het
+        <h2
+          className={`${forMover && demoContact?.name ? "mt-2" : "mt-6"} text-3xl font-bold tracking-tight`}
+        >
+          {forMover ? (
+            <>
+              Zo werkt het voor <span className="text-(--accent)">jou</span>
+            </>
+          ) : (
+            <>
+              Zo ziet <span className="text-(--accent)">jouw klant</span> het
+            </>
+          )}
         </h2>
-        <p className="mt-2 text-sm text-slate-500">Probeer het zelf, het duurt een minuut.</p>
+        <p className="mt-2 text-sm text-slate-500">
+          {forMover
+            ? "Reageer op elke aanvraag binnen een minuut."
+            : "Probeer het zelf, het duurt een minuut."}
+        </p>
 
         <ol className="mx-auto mt-8 w-full max-w-sm space-y-2.5 text-left">
-          {DEMO_STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <li
               key={s.title}
               className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
@@ -135,12 +185,12 @@ export function Widget({
         </ol>
 
         <button
-          onClick={() => setStarted(true)}
+          onClick={() => (forMover ? setIntroScreen("klant") : setStarted(true))}
           className={`mx-auto mt-8 block w-full max-w-sm rounded-full px-10 py-3.5 text-sm font-semibold text-white shadow-lg ${ACCENT_BG}`}
         >
-          Start de demo
+          {forMover ? "Volgende: zo ziet je klant het →" : "Start de demo"}
         </button>
-        <p className="mt-3 text-xs text-slate-400">Werkt het best op je telefoon</p>
+        {!forMover && <p className="mt-3 text-xs text-slate-400">Werkt het best op je telefoon</p>}
       </div>
     );
   }
