@@ -50,7 +50,7 @@ const MOVER_STEPS = [
   },
   {
     Icon: Zap,
-    title: "Je klant krijgt direct jouw prijs",
+    title: "Je klant krijgt direct jouw offerte",
     text: "Nog voordat je concurrent heeft teruggebeld.",
   },
   {

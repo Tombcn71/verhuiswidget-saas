@@ -22,12 +22,12 @@ const features = [
   {
     Icon: Zap,
     title: "Sneller bij offerteplatforms",
-    body: "Krijg je een aanvraag via een offerteplatform? App of mail de klant meteen je linkje. Binnen een minuut heeft hij jouw prijs, zonder ruwe schatting en zonder dat je langs hoeft. Boekt hij niet meteen, dan krijgt hij na 2 dagen vanzelf een herinnering.",
+    body: "App of mail de klant meteen je linkje. Binnen een minuut heeft hij jouw offerte, zonder dat je langs hoeft.",
   },
   {
     Icon: Timer,
     title: "Minder personeelsuren",
-    body: "Niemand hoeft meer langs voor een opname. Je mensen blijven aan het werk: op de wagen of op kantoor.",
+    body: "Geen bezoek aan huis meer nodig. Je mensen blijven aan het werk: op de wagen of op kantoor.",
   },
   {
     Icon: Fuel,
@@ -55,12 +55,12 @@ const channels = [
   {
     Icon: Link,
     t: "1. Via een linkje",
-    d: "Krijg je een aanvraag via een offerteplatform, een telefoontje of WhatsApp? Stuur de klant je eigen linkje. Hij maakt foto’s per kamer en krijgt binnen een minuut jouw prijs. Jij krijgt de inventaris en het volume binnen.",
+    d: "Krijg je een aanvraag via een offerteplatform, een telefoontje of WhatsApp? Stuur de klant je eigen linkje. Hij maakt foto’s per kamer en krijgt binnen een minuut jouw offerte. Jij krijgt de inventaris en het volume binnen.",
   },
   {
     Icon: Globe,
     t: "2. Via je website",
-    d: "Komen klanten via Google of social media op je website? Dan vragen ze daar meteen een offerte aan: een paar foto’s per kamer en binnen een minuut jouw prijs. Ook ’s avonds en in het weekend.",
+    d: "Komen klanten via Google of social media op je website? Dan vragen ze daar meteen een offerte aan: een paar foto’s per kamer en binnen een minuut jouw offerte. Ook ’s avonds en in het weekend.",
   },
   {
     Icon: MapPin,
@@ -181,7 +181,7 @@ export default function HomePage() {
           className="scroll-mt-20 border-t border-border bg-muted py-20">
           <div className="mx-auto w-full max-w-6xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Wat win je met <span className="text-primary">AI</span>-offertes?
+              Wat win je met mover<span className="text-primary">AI</span>?
             </h2>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {features.map((f) => (
@@ -206,17 +206,11 @@ export default function HomePage() {
               Klaar om te besparen op uren en brandstof?
             </h2>
             <p className="mt-3">
-              Elke opname bij een klant thuis kost al snel anderhalf uur, met
+              Elk bezoek aan huis kost al snel anderhalf uur, met
               rijden, parkeren en rondlopen, ook als de klant uiteindelijk niet
               boekt. Met moverAI maakt de klant zelf de foto&apos;s en krijgt hij
               binnen een minuut jouw offerte. Jij rijdt alleen nog voor klussen
               die doorgaan.
-            </p>
-            <p className="mt-4 text-sm italic">
-              Rekenvoorbeeld: 20 opnames per maand × 1,5 uur = 30 uur × €45 per
-              uur = €1.350. 20 ritten × 10 km heen en terug = 200 km × €0,20
-              brandstof per km = €40. Samen €1.390 per maand. moverAI kost vanaf
-              €99 per maand.
             </p>
             <a
               href="#prijzen"
@@ -265,8 +259,10 @@ export default function HomePage() {
               Na je proefperiode: kies het pakket dat bij je past
             </h3>
             <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
-              In elk pakket werk je op alle 3 manieren: via je website, via een
-              linkje en zelf op locatie. Betaal per maand of per jaar; prijzen exclusief btw.
+              Met Basic geef je al 100 klanten per maand binnen een minuut jouw
+              offerte, zonder langs te gaan. Dat scheelt al uren en brandstof: twee
+              bezoeken aan huis minder en je hebt de €99 al terug. Elke extra klus
+              is winst.
             </p>
             <PricingCards />
           </div>

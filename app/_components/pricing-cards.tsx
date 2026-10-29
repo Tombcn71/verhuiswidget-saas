@@ -165,15 +165,6 @@ export function PricingCards() {
               }`}
             >
               {o.label}
-              {o.key === "year" && (
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    interval === "year" ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-700"
-                  }`}
-                >
-                  2 maanden gratis
-                </span>
-              )}
             </button>
           ))}
         </div>
@@ -216,6 +207,11 @@ export function PricingCards() {
                   ) : (
                     "Maandelijks opzegbaar"
                   )}
+                </p>
+                <p className="mt-2">
+                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                    {interval === "year" ? "2 maanden gratis" : "Jaarlijks: 2 maanden gratis"}
+                  </span>
                 </p>
                 <ul className="mt-6 flex-1 space-y-3 text-sm text-muted-foreground">
                   {planFeatures(plan).map((f) => (

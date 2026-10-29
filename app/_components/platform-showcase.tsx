@@ -7,7 +7,7 @@ const EMAIL = "sanne@gmail.com";
 const LINK = "moverai.nl/offerte/jouw-bedrijf";
 
 const POINTS = [
-  { Icon: Zap, text: "Als eerste een echte prijs, nog voordat je concurrent terugbelt." },
+  { Icon: Zap, text: "Als eerste een offerte, nog voordat je concurrent terugbelt." },
   { Icon: House, text: "Geen bezoek aan huis nodig." },
   { Icon: BellRing, text: "Boekt de klant niet meteen? Na 2 dagen krijgt hij vanzelf een herinnering." },
 ];

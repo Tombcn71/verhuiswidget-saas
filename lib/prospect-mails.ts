@@ -168,8 +168,10 @@ export async function handleDemoCompleted(slug: string): Promise<void> {
     scheduledAt: followUpAt.toISOString(),
     html: layout(`
       <p>${hi}</p>
-      <p>Je hebt de demo van moverAI uitgeprobeerd. Wat vond je ervan?</p>
-      <p>Zullen we vrijblijvend 15 minuten kijken hoe moverAI werkt met <strong>jouw</strong> tarieven? Kan ook 's avonds.</p>
+      <p>Je hebt gisteren de demo van moverAI gedaan. Wat vond je ervan?</p>
+      <p>Met het Basic-pakket van €99 per maand geef je al 100 klanten binnen een minuut jouw offerte, zonder langs te gaan. Dat scheelt uren en brandstof: twee bezoeken aan huis minder en je hebt het al terug. Elke extra klus is winst.</p>
+      <p>Krijg je aanvragen via offerteplatforms? Stuur de klant meteen je linkje, dan ben jij als eerste met een offerte.</p>
+      <p>Zullen we vrijblijvend 15 minuten kijken hoe het werkt met <strong>jouw</strong> tarieven? Kan ook 's avonds.</p>
       <p style="margin:24px 0">${button(meetingLinkFor(p), "Plan een vrijblijvend adviesgesprek")}</p>
       <p>Of begin direct zelf: <a href="${esc(appUrl())}/kies-plan?plan=pro" style="color:#1a73e8">14 dagen gratis, zonder betaalgegevens</a>.</p>`),
   });
