@@ -23,12 +23,9 @@ import { deleteAction, updateAction } from "../../actions";
 import { StageBadge } from "../../stage-badge";
 import { ContactButtons } from "../../contact-buttons";
 
-/** Openingsbericht voor WhatsApp, met de bedrijfsnaam. */
-function whatsappOpening(companyName: string): string {
-  // "Verhuisbedrijf Direct | Verhuisservice met…" → "Verhuisbedrijf Direct"
-  const name = companyName.split(/\s[|–-]\s/)[0].trim();
-  return `Hallo ${name}! Ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Minder voorinspecties, dus minder uren en brandstof. Ook handig voor snelle reacties op offerteplatforms.\nMag ik je een linkje naar de demo sturen? Duurt een minuut.`;
-}
+/** Openingsbericht voor WhatsApp (zonder bedrijfsnaam: je appt een persoon). */
+const WHATSAPP_OPENING = `Hallo, ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Minder voorinspecties, dus minder uren en brandstof. Ook handig voor snelle reacties op offerteplatforms.
+Mag ik je een linkje naar de demo sturen? Duurt een minuut.`;
 
 function Field({
   label,
@@ -55,7 +52,6 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
   if (!p) notFound();
   // Nummer bekend: WhatsApp direct openen; "ja" = alleen een chat op hun website.
   const waNumber = p.whatsapp && /^\d{8,}$/.test(p.whatsapp) ? p.whatsapp : null;
-  const opening = whatsappOpening(p.companyName);
 
   const timeline = [
     { label: "Toegevoegd", at: p.createdAt },
@@ -199,7 +195,7 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
               {waNumber ? (
                 <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
                   <a
-                    href={`https://wa.me/${waNumber}?text=${encodeURIComponent(opening)}`}
+                    href={`https://wa.me/${waNumber}?text=${encodeURIComponent(WHATSAPP_OPENING)}`}
                     target="_blank"
                     rel="noopener"
                   >
@@ -217,7 +213,7 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
                 )
               )}
               <p className="text-sm font-medium">Openingsbericht</p>
-              <CopyBlock multiline code={opening} />
+              <CopyBlock multiline code={WHATSAPP_OPENING} />
               <p className="text-sm font-medium">Zegt hij ja</p>
               <CopyBlock multiline code={`Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`} />
               <p className="text-sm font-medium">Demo gedaan</p>
