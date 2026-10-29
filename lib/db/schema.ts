@@ -339,6 +339,9 @@ export const prospects = pgTable("prospects", {
   mobile: text("mobile"), // optioneel 06-nummer uit het gesprek (om te bellen)
   email: text("email"),
   website: text("website"),
+  // WhatsApp op hun website: nummer (bijv. "31612345678") of "ja" als het nummer onbekend is.
+  whatsapp: text("whatsapp"),
+  siteCheckedAt: timestamp("site_checked_at", { withTimezone: true }),
   city: text("city"),
   address: text("address"),
   // Gevonden via Google Places: ID (om dubbelen over te slaan) en beoordeling.

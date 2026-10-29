@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { adminState, db, prospects, type NewProspect, type Prospect } from "@/lib/db";
 import { NL_CITIES, searchMovers } from "@/lib/places";
-import { findEmails } from "@/lib/website-email";
+import { scanWebsites } from "@/lib/website-email";
 import { appUrl } from "@/lib/app-url";
 import { slugify } from "@/lib/slug";
 
@@ -352,13 +352,49 @@ export async function fetchNewProspects(input: {
     }
   }
 
-  // E-mailadres van hun website halen (voor "Demo mailen"); gratis, geen Google-zoekopdracht.
-  const emails = await findEmails(toInsert.map((p) => p.website ?? null));
+  // E-mailadres (voor "Demo mailen") en WhatsApp van hun website halen; gratis, geen Google-zoekopdracht.
+  const scans = await scanWebsites(toInsert.map((p) => p.website ?? null));
   toInsert.forEach((p, i) => {
-    if (emails[i]) p.email = emails[i];
+    if (scans[i].email) p.email = scans[i].email;
+    p.whatsapp = scans[i].whatsapp;
+    if (p.website) p.siteCheckedAt = new Date();
   });
 
   if (toInsert.length) await db.insert(prospects).values(toInsert);
   if (!manual) await writeCursor(cursor);
   return { added: toInsert.length, skipped, cities: [...cities], done };
+}
+
+/**
+ * Bestaande bedrijven met een website die nog niet zijn bekeken: WhatsApp (en een
+ * ontbrekend e-mailadres) van hun site halen. Per klik een deel, zodat het binnen
+ * de tijdslimiet blijft.
+ */
+export async function checkProspectSites(
+  limit = 30,
+): Promise<{ checked: number; whatsapp: number; remaining: number }> {
+  const todo = await db
+    .select({ id: prospects.id, website: prospects.website, email: prospects.email })
+    .from(prospects)
+    .where(and(isNull(prospects.siteCheckedAt), sql`${prospects.website} is not null`, sql`${prospects.stage} <> 'afgevallen'`))
+    .limit(limit);
+  const scans = await scanWebsites(todo.map((p) => p.website), 8);
+  const now = new Date();
+  await Promise.all(
+    todo.map((p, i) =>
+      db
+        .update(prospects)
+        .set({
+          whatsapp: scans[i].whatsapp,
+          ...(!p.email && scans[i].email ? { email: scans[i].email } : {}),
+          siteCheckedAt: now,
+        })
+        .where(eq(prospects.id, p.id)),
+    ),
+  );
+  const [{ n }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(prospects)
+    .where(and(isNull(prospects.siteCheckedAt), sql`${prospects.website} is not null`, sql`${prospects.stage} <> 'afgevallen'`));
+  return { checked: todo.length, whatsapp: scans.filter((s) => s.whatsapp).length, remaining: n };
 }

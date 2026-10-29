@@ -239,6 +239,13 @@
       "when": 1793186642871,
       "tag": "0033_nasty_sandman",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1793283006129,
+      "tag": "0034_light_johnny_blaze",
+      "breakpoints": true
     }
   ]
 }

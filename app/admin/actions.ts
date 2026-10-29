@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
 import {
+  checkProspectSites,
   createProspect,
   deleteProspect,
   fetchNewProspects,
@@ -60,6 +61,14 @@ export async function createAction(formData: FormData): Promise<void> {
 }
 
 /** Gegevens, fase, notities en volgende actie bijwerken. */
+/** WhatsApp-veld: "06 1234 5678" → "31612345678"; anders "ja" (chat op hun site) of leeg. */
+function whatsappValue(v: string | null): string | null {
+  if (!v) return null;
+  const digits = v.replace(/\D/g, "");
+  if (digits.length < 8) return "ja";
+  return digits.startsWith("0") ? `31${digits.replace(/^0+/, "")}` : digits;
+}
+
 export async function updateAction(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = String(formData.get("id") ?? "");
@@ -71,6 +80,7 @@ export async function updateAction(formData: FormData): Promise<void> {
     phone: text(formData, "phone"),
     email: text(formData, "email"),
     website: text(formData, "website"),
+    whatsapp: whatsappValue(text(formData, "whatsapp")),
     city: text(formData, "city"),
     notes: text(formData, "notes"),
     nextAction: text(formData, "nextAction"),
@@ -111,6 +121,20 @@ export async function demoMailAction(id: string): Promise<{ ok: boolean; message
 }
 
 export type FetchState = { status: "idle" | "success" | "error"; message?: string };
+
+/** "Check websites": WhatsApp (en ontbrekende e-mail) van bestaande bedrijven ophalen. */
+export async function checkSitesAction(): Promise<FetchState> {
+  await requireAdmin();
+  const r = await checkProspectSites();
+  revalidatePath("/admin");
+  if (r.checked === 0) return { status: "success", message: "Alle websites zijn al bekeken." };
+  return {
+    status: "success",
+    message: `${r.checked} websites bekeken, ${r.whatsapp} met WhatsApp.${
+      r.remaining ? ` Nog ${r.remaining} te doen: klik nog eens.` : ""
+    }`,
+  };
+}
 
 /** "Haal 20 nieuwe verhuisbedrijven" via Google Places (dubbelen overgeslagen). */
 export async function fetchProspectsAction(_prev: FetchState, formData: FormData): Promise<FetchState> {

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Upload } from "lucide-react";
+import { MessageCircle, Plus, Upload } from "lucide-react";
 import {
   STAGES,
   isStage,
@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { createAction } from "./actions";
 import { ImportForm } from "./import-form";
 import { FetchForm } from "./fetch-form";
+import { CheckSitesButton } from "./check-sites-button";
 import { ContactButtons } from "./contact-buttons";
 import { StageBadge } from "./stage-badge";
 
@@ -51,10 +52,14 @@ function DemoSignals({ p }: { p: Prospect }) {
   );
 }
 
+// "Check websites op WhatsApp" bekijkt tientallen sites per klik.
+export const maxDuration = 300;
+
 const today = () => new Date().toLocaleDateString("sv-SE");
 
 export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
-  const { fase, q, pagina } = await searchParams;
+  const { fase, q, pagina, wa } = await searchParams;
+  const onlyWa = wa === "1";
   const [all, nextCity] = await Promise.all([listProspects(), nextPlacesCity()]);
   const active = isStage(fase) ? fase : null;
   // Zoeken (naam, contact, plaats, telefoon, e-mail) en 100 per pagina: werkbaar met grote lijsten.
@@ -66,7 +71,8 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
         [p.companyName, p.contactName, p.city, p.phone, p.email]
           .filter(Boolean)
           .some((v) => v!.toLowerCase().includes(query)),
-    );
+    )
+    .filter((p) => !onlyWa || p.whatsapp);
   const PAGE_SIZE = 100;
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const page = Math.min(pages, Math.max(1, Number(pagina) || 1));
@@ -75,6 +81,7 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
     const params = new URLSearchParams();
     if (active) params.set("fase", active);
     if (query) params.set("q", query);
+    if (onlyWa) params.set("wa", "1");
     if (n > 1) params.set("pagina", String(n));
     const qs = params.toString();
     return qs ? `/admin?${qs}` : "/admin";
@@ -95,6 +102,8 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
   const withDemo = all.filter((p) => p.demoSentAt).length;
   const demoDone = all.filter((p) => p.demoCompletedAt).length;
   const customers = count("klant");
+  const withWa = all.filter((p) => p.whatsapp && p.stage !== "afgevallen").length;
+  const sitesToCheck = all.filter((p) => p.website && !p.siteCheckedAt && p.stage !== "afgevallen").length;
 
   return (
     <>
@@ -150,11 +159,13 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
         </CardHeader>
         <CardContent>
           <FetchForm nextCity={nextCity} />
+          <CheckSitesButton remaining={sitesToCheck} />
         </CardContent>
       </Card>
 
       <form action="/admin" className="mb-3 flex max-w-md gap-2">
         {active && <input type="hidden" name="fase" value={active} />}
+        {onlyWa && <input type="hidden" name="wa" value="1" />}
         <Input
           name="q"
           defaultValue={query}
@@ -177,6 +188,25 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
             </Link>
           </Button>
         ))}
+        <Button
+          asChild
+          size="sm"
+          variant={onlyWa ? "default" : "outline"}
+          className={onlyWa ? "" : "border-emerald-300 text-emerald-700"}
+        >
+          <Link
+            href={(() => {
+              const params = new URLSearchParams();
+              if (active) params.set("fase", active);
+              if (query) params.set("q", query);
+              if (!onlyWa) params.set("wa", "1");
+              const qs = params.toString();
+              return qs ? `/admin?${qs}` : "/admin";
+            })()}
+          >
+            <MessageCircle /> WhatsApp ({withWa})
+          </Link>
+        </Button>
       </div>
 
       <Card className="py-0">
@@ -215,6 +245,11 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
                       >
                         {p.companyName}
                       </Link>
+                      {p.whatsapp && (
+                        <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 align-middle text-xs font-medium text-emerald-700">
+                          <MessageCircle className="size-3" /> WhatsApp
+                        </span>
+                      )}
                       <div className="text-xs text-muted-foreground">
                         {[
                           p.contactName,

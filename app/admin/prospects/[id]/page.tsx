@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, MessageCircle } from "lucide-react";
 import {
   STAGES,
   demoLinkFor,
@@ -50,6 +50,8 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
   const { id } = await params;
   const p = await getProspect(id);
   if (!p) notFound();
+  // Nummer bekend: WhatsApp direct openen; "ja" = alleen een chat op hun website.
+  const waNumber = p.whatsapp && /^\d{8,}$/.test(p.whatsapp) ? p.whatsapp : null;
 
   const timeline = [
     { label: "Toegevoegd", at: p.createdAt },
@@ -149,6 +151,7 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
               <Field label="Mobiel" name="mobile" defaultValue={p.mobile} />
               <Field label="E-mail" name="email" type="email" defaultValue={p.email} />
               <Field label="Website" name="website" defaultValue={p.website} />
+              <Field label="WhatsApp (nummer, of 'ja')" name="whatsapp" defaultValue={p.whatsapp} />
               <Field label="Plaats" name="city" defaultValue={p.city} />
               {(p.address || p.placeId) && (
                 <p className="text-sm text-muted-foreground sm:col-span-2">
@@ -180,13 +183,41 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
           <Card>
             <CardHeader>
               <CardTitle>WhatsApp</CardTitle>
-              <CardDescription>Kopieer en plak in het WhatsApp-gesprek.</CardDescription>
+              <CardDescription>
+                {waNumber
+                  ? "Open WhatsApp met het openingsbericht, of kopieer en plak."
+                  : p.whatsapp
+                    ? "Ze hebben WhatsApp op hun website. Kopieer en plak het bericht daar."
+                    : "Kopieer en plak in het WhatsApp-gesprek."}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              {waNumber ? (
+                <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                  <a
+                    href={`https://wa.me/${waNumber}?text=${encodeURIComponent(WHATSAPP_OPENING)}`}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <MessageCircle /> Open WhatsApp met openingsbericht
+                  </a>
+                </Button>
+              ) : (
+                p.whatsapp &&
+                p.website && (
+                  <Button asChild variant="outline">
+                    <a href={p.website} target="_blank" rel="noopener">
+                      <ExternalLink /> Open hun website
+                    </a>
+                  </Button>
+                )
+              )}
               <p className="text-sm font-medium">Openingsbericht</p>
               <CopyBlock multiline code={WHATSAPP_OPENING} />
               <p className="text-sm font-medium">Zegt hij ja</p>
               <CopyBlock multiline code={`Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`} />
+              <p className="text-sm font-medium">Demo gedaan</p>
+              <CopyBlock multiline code="Hoi! Ik zag dat je de demo hebt gedaan. Wat vond je ervan?" />
             </CardContent>
           </Card>
 

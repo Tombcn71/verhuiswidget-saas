@@ -147,8 +147,10 @@ export async function handleDemoCompleted(slug: string): Promise<void> {
   if (!p) return;
   if (p.reminderEmailId) await cancelAutoMails(p, "reminder");
   // Al op "Plan een adviesgesprek" geklikt: geen uitnodiging meer nodig.
+  // Demo via WhatsApp gestuurd (niet gemaild): Tom volgt zelf op in WhatsApp.
   if (
     !p.email ||
+    (p.whatsapp && !p.demoSentAt) ||
     p.autoMailOff ||
     p.followUpEmailId ||
     p.meetingClickedAt ||

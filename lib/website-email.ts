@@ -1,11 +1,15 @@
 /**
- * Zoekt een e-mailadres op de website van een bedrijf (homepage, anders de
- * contactpagina). Gebruikt bij het ophalen van verhuisbedrijven via Google.
+ * Zoekt een e-mailadres en WhatsApp op de website van een bedrijf (homepage,
+ * anders de contactpagina). Gebruikt bij het ophalen van verhuisbedrijven via Google.
  */
 
 const EMAIL = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi;
 // Geen plaatjes ("logo@2x.png") of adressen van websitebouwers/trackers.
 const IGNORE = /\.(png|jpe?g|gif|svg|webp)$|@(example|sentry|wixpress|domain|email)\.|^(noreply|no-reply)@/i;
+// Chatlink met nummer: wa.me/316…, api.whatsapp.com/send?phone=316…
+const WA_NUMBER = /(?:wa\.me\/|whatsapp\.com\/send\/?\?phone=|whatsapp:\/\/send\/?\?phone=)\+?(\d[\d\s-]{7,16}\d)/i;
+
+export type SiteScan = { email: string | null; whatsapp: string | null };
 
 async function fetchHtml(url: string): Promise<string | null> {
   try {
@@ -34,34 +38,52 @@ function pickEmail(html: string, host: string): string | null {
   return pool.find((e) => /^(info|contact|planning|offerte)@/.test(e)) ?? pool[0];
 }
 
-export async function findEmailOnWebsite(website: string): Promise<string | null> {
+/** WhatsApp-nummer uit een chatlink, of "ja" als WhatsApp alleen genoemd wordt (bijv. een chatwidget). */
+function pickWhatsapp(html: string): string | null {
+  const m = html.match(WA_NUMBER);
+  if (m) {
+    const digits = m[1].replace(/\D/g, "");
+    return digits.startsWith("06") ? `31${digits.slice(1)}` : digits;
+  }
+  return /whatsapp/i.test(html) ? "ja" : null;
+}
+
+export async function scanWebsite(website: string): Promise<SiteScan> {
   let base: URL;
   try {
     base = new URL(/^https?:\/\//i.test(website) ? website : `https://${website}`);
   } catch {
-    return null;
+    return { email: null, whatsapp: null };
   }
+  let email: string | null = null;
+  let whatsapp: string | null = null;
   for (const path of ["", "/contact", "/contact/", "/over-ons"]) {
     const html = await fetchHtml(new URL(path || base.pathname, base).toString());
-    const email = html && pickEmail(html, base.hostname);
-    if (email) return email;
+    if (!html) continue;
+    email ??= pickEmail(html, base.hostname);
+    const wa = pickWhatsapp(html);
+    // Een nummer gaat voor "ja".
+    if (wa && (!whatsapp || whatsapp === "ja")) whatsapp = wa;
+    if (email && whatsapp && whatsapp !== "ja") break;
+    // Homepage en contactpagina zijn genoeg voor WhatsApp; verder alleen voor het e-mailadres.
+    if (email && path) break;
   }
-  return null;
+  return { email, whatsapp };
 }
 
 /** Voor een lijst websites, max. `concurrency` tegelijk. */
-export async function findEmails(
+export async function scanWebsites(
   websites: (string | null)[],
   concurrency = 5,
-): Promise<(string | null)[]> {
-  const out: (string | null)[] = new Array(websites.length).fill(null);
+): Promise<SiteScan[]> {
+  const out: SiteScan[] = websites.map(() => ({ email: null, whatsapp: null }));
   let next = 0;
   await Promise.all(
     Array.from({ length: concurrency }, async () => {
       while (next < websites.length) {
         const i = next++;
         const w = websites[i];
-        if (w) out[i] = await findEmailOnWebsite(w);
+        if (w) out[i] = await scanWebsite(w);
       }
     }),
   );
