@@ -65,7 +65,11 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
   const active = isStage(fase) ? fase : null;
   // Zoeken (naam, contact, plaats, telefoon, e-mail) en 100 per pagina: werkbaar met grote lijsten.
   const query = typeof q === "string" ? q.trim().toLowerCase() : "";
-  const scope = onlyWa ? all.filter((p) => p.whatsapp) : all;
+  // Zonder WhatsApp alleen verbergen als er nog niks mee gebeurd is: een demo via de
+  // website (bijv. na Facebook) of een bedrijf verder in de fases blijft zichtbaar.
+  const inWaView = (p: Prospect) =>
+    !!p.whatsapp || p.stage !== "nieuw" || !!p.demoSentAt || !!p.demoOpenedAt || !!p.demoCompletedAt;
+  const scope = onlyWa ? all.filter(inWaView) : all;
   const filtered = (active ? scope.filter((p) => p.stage === active) : scope.filter((p) => p.stage !== "afgevallen"))
     .filter(
       (p) =>
@@ -103,7 +107,7 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
   const withDemo = all.filter((p) => p.demoSentAt).length;
   const demoDone = all.filter((p) => p.demoCompletedAt).length;
   const customers = all.filter((p) => p.stage === "klant").length;
-  const withWa = all.filter((p) => p.whatsapp && p.stage !== "afgevallen").length;
+  const withWa = all.filter((p) => inWaView(p) && p.stage !== "afgevallen").length;
   const sitesToCheck = all.filter((p) => p.website && !p.siteCheckedAt && p.stage !== "afgevallen").length;
 
   return (
