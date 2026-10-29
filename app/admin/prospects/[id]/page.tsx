@@ -24,7 +24,7 @@ import { StageBadge } from "../../stage-badge";
 import { ContactButtons } from "../../contact-buttons";
 
 /** Openingsbericht voor WhatsApp (zonder bedrijfsnaam: je appt een persoon). */
-const WHATSAPP_OPENING = `Hallo, ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Minder voorinspecties, dus minder uren en brandstof. Ook handig voor snelle reacties op offerteplatforms.
+const WHATSAPP_OPENING = `Hallo 👋 ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Minder voorinspecties, dus minder uren en brandstof. Ook handig voor snelle reacties op offerteplatforms.
 Mag ik je een linkje naar de demo sturen? Duurt een minuut.`;
 
 function Field({
