@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/next";
 import { nlNL } from "@clerk/localizations";
 // Clerk-onderdelen volgen de shadcn-kleuren, ook in de donkere modus van het dashboard.
 import { shadcn } from "@clerk/themes";
@@ -31,7 +32,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <html lang="nl" suppressHydrationWarning className={`${geistSans.variable} h-full antialiased`}>
         <body className="min-h-full bg-background text-foreground">
           {/* Licht of donker zoals het systeem staat, vóór de eerste weergave (geen flits). */}
-          <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />{children}</body>
+          <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />{children}
+          {/* Bezoekersstatistieken van Vercel (zonder cookies). */}
+          <Analytics />
+        </body>
       </html>
     </ClerkProvider>
   );
