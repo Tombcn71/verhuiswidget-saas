@@ -24,11 +24,6 @@ export function FetchForm({ nextCity }: { nextCity: string | null }) {
           <MapPin /> {pending ? "Zoeken…" : "Haal nieuwe"}
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">
-        Laat de plaats leeg en de app werkt Nederland af van groot naar klein, en gaat de volgende
-        keer verder waar hij stopte. Alleen bedrijven met WhatsApp op hun website; wie al in je lijst
-        staat, wordt overgeslagen.
-      </p>
       {state.message && (
         <p className={state.status === "error" ? "text-sm text-destructive" : "text-sm text-emerald-600"}>
           {state.message}
