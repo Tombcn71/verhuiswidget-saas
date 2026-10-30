@@ -25,7 +25,9 @@ import { ContactButtons } from "../../contact-buttons";
 import { WhatsappMessages } from "./whatsapp-card";
 
 /** Openingsbericht voor WhatsApp (zonder bedrijfsnaam: je appt een persoon). */
-const WHATSAPP_OPENING = `Hallo 👋 ik ben Tom van moverAI. Ik heb AI-software gebouwd voor verhuisbedrijven: je klant maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Minder voorinspecties, dus minder uren en brandstof. Ook handig voor snelle reacties op offerteplatforms.
+// De eerste regel moet in de melding passen (ca. 45 tekens): een vraag over hún werk.
+const WHATSAPP_OPENING = `Hallo 👋 werken jullie met offerteplatforms?
+Ik ben Tom van moverAI. Bij een aanvraag via een platform wint vaak wie als eerste een offerte stuurt. Met mijn AI-software stuur je de klant meteen een linkje: hij maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Zonder voorinspectie, dus ook minder uren en brandstof.
 Mag ik je een linkje naar de demo sturen? Duurt een minuut.`;
 
 function Field({
