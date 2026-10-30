@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@vercel/analytics";
 import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import type { LeadSource } from "@/lib/leads";
 import { isValidPhone } from "@/lib/phone";
@@ -695,6 +696,7 @@ export function MoveFlow({
 
       setResult(data as Result);
       setStep(RESULT_STEP);
+      if (demo && !preview) track("Demo afgerond", { via: prospect ? "CRM-link" : "website" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Er ging iets mis.");
     } finally {

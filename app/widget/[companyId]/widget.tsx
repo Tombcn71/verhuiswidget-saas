@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { LeadSource } from "@/lib/leads";
+import { track } from "@vercel/analytics";
 import { Bell, Calculator, Camera, Inbox, Mail, Send, Zap } from "lucide-react";
 import { Logo, LogoMark } from "@/app/_components/logo";
 import { MoveFlow, type DemoContact } from "./move-flow";
@@ -185,7 +186,12 @@ export function Widget({
         </ol>
 
         <button
-          onClick={() => (forMover ? setIntroScreen("klant") : setStarted(true))}
+          onClick={() => {
+            if (forMover) return setIntroScreen("klant");
+            // Vercel Analytics: hoeveel bezoekers de demo echt starten (website of CRM-link).
+            track("Demo gestart", { via: prospect ? "CRM-link" : "website" });
+            setStarted(true);
+          }}
           className={`mx-auto mt-8 block w-full max-w-sm rounded-full px-10 py-3.5 text-sm font-semibold text-white shadow-lg ${ACCENT_BG}`}
         >
           {forMover ? "Volgende: zo ziet je klant het →" : "Start de demo"}
