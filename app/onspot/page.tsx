@@ -18,7 +18,7 @@ export default function OnspotPage() {
         Icon: MapPin,
         title: (
           <>
-            Scan zelf ter plekke.{" "}
+            Scan ter plekke.{" "}
             <span className="text-brand-600">Jouw klant direct een offerte.</span>
           </>
         ),
