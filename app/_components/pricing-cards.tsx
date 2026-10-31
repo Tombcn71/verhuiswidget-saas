@@ -137,7 +137,7 @@ const euro = (cents: number) =>
 /**
  * Prijskaarten met de schakelaar Maandelijks / Jaarlijks. Met `demo` (pagina
  * Pakketten) geen bedragen: die noemt Tom in het demogesprek; elke kaart krijgt
- * dan een knop "Plan een demo".
+ * dan een knop "Plan een demogesprek".
  */
 export function PricingCards({ demo }: { demo?: { href: string | null } } = {}) {
   const [interval, setInterval] = useState<BillingInterval>("month");

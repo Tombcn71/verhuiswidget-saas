@@ -214,7 +214,7 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
                 openings={WHATSAPP_OPENINGS}
                 replies={{
                   A: `Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`,
-                  B: `Top! Hier is hij: ${appUrl()}/rekenhulp\nSchuif naar hoeveel bezoeken je per week doet. Daarna kun je meteen een demo van 5 minuten plannen.\n\nGroet, Tom`,
+                  B: `Top! Hier is hij: ${appUrl()}/rekenhulp\nSchuif naar hoeveel bezoeken je per week doet. Daarna kun je meteen een demogesprek van 5 minuten plannen.\n\nGroet, Tom`,
                 }}
                 // Geappt vóór de vergelijking van A en B: verder met het vervolg van A.
                 sentVariant={

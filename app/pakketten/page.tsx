@@ -6,7 +6,7 @@ import { PricingCards } from "@/app/_components/pricing-cards";
 
 export const metadata: Metadata = {
   title: "Pakketten",
-  description: "Basic, Pro of Op maat. In een demo van 5 minuten zie je welk pakket bij je past.",
+  description: "Basic, Pro of Op maat. In een demogesprek van 5 minuten zie je welk pakket bij je past.",
 };
 
 export default function PackagesPage() {
@@ -20,11 +20,11 @@ export default function PackagesPage() {
           <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
             Met Basic geef je al 100 klanten per maand binnen een minuut jouw offerte, zonder langs te
             gaan. Twee bezoeken aan huis minder en je hebt het al terugverdiend. Elke extra klus is
-            winst. In een demo van 5 minuten laat ik zien welk pakket bij je past.
+            winst. In een demogesprek van 5 minuten laat ik zien welk pakket bij je past.
           </p>
           <PricingCards demo={{ href: calendlyUrl }} />
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Demo: 5 minuten · vrijblijvend
+            Demogesprek: 5 minuten · vrijblijvend
           </p>
         </div>
       </main>

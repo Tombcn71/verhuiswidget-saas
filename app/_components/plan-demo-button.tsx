@@ -5,14 +5,14 @@ import { cn } from "@/lib/utils";
 import { CONTACT_EMAIL } from "@/lib/plans";
 
 /**
- * "Plan een demo": opent de agenda (Calendly) voor een demogesprek van 5 minuten.
+ * "Plan een demogesprek": opent de agenda (Calendly) voor een demogesprek van 5 minuten.
  * Het doel van de site: een gesprek, niet zelf even rondklikken.
  */
 export function PlanDemoButton({
   href,
   from,
   className,
-  children = "Plan een demo",
+  children = "Plan een demogesprek",
 }: {
   href: string | null;
   /** Waar op de site, voor Vercel Analytics. */

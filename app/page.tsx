@@ -291,7 +291,7 @@ export default function HomePage() {
             <div>
               <p className="text-lg">
                 &ldquo;Ik ben Tom, oprichter van moverAI. Ik bouw het samen met verhuizers, zodat het
-                past bij hoe jullie werken. In een demo van 5 minuten laat ik zien wat het voor jouw
+                past bij hoe jullie werken. In een demogesprek van 5 minuten laat ik zien wat het voor jouw
                 bedrijf doet.&rdquo;
               </p>
               <PlanDemoButton href={calendlyUrl} from="home tom" className="mt-5" />

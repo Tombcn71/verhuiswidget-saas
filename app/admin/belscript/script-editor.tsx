@@ -20,6 +20,23 @@ function sections(text: string): Section[] {
   return out.filter((s) => s.title || s.lines.length);
 }
 
+/** Links in het script klikbaar maken (om ze te openen of te kopiëren). */
+function Linkify({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(https?:\/\/[^\s·,)]*[^\s·,).])/g).map((part, i) =>
+        /^https?:\/\//.test(part) ? (
+          <a key={i} href={part} target="_blank" rel="noopener" className="text-primary underline">
+            {part}
+          </a>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
 function Line({ line }: { line: string }) {
   // "vraag | antwoord" (bezwaren)
   const bar = line.indexOf(" | ");
@@ -45,7 +62,9 @@ function Line({ line }: { line: string }) {
           {hasTitle ? (
             <>
               <span className="font-semibold">{step[2].slice(0, colon)}</span>
-              <span className="block text-muted-foreground">{step[2].slice(colon + 2)}</span>
+              <span className="block text-muted-foreground">
+                <Linkify text={step[2].slice(colon + 2)} />
+              </span>
             </>
           ) : (
             step[2]
@@ -55,20 +74,33 @@ function Line({ line }: { line: string }) {
     );
   }
   if (line.startsWith("- ")) {
-    return <p className="relative py-0.5 pl-5 before:absolute before:left-1 before:content-['•']">{line.slice(2)}</p>;
+    return (
+      <p className="relative py-0.5 pl-5 before:absolute before:left-1 before:content-['•']">
+        <Linkify text={line.slice(2)} />
+      </p>
+    );
   }
   return <p className="py-1 text-muted-foreground">{line}</p>;
 }
 
 /** Belscript tonen, en met Bewerken zelf aanpassen (opgeslagen in de database). */
-export function ScriptEditor({ text, isDefault }: { text: string; isDefault: boolean }) {
+export function ScriptEditor({
+  text,
+  isDefault,
+  scriptKey,
+}: {
+  text: string;
+  isDefault: boolean;
+  /** admin_state-sleutel; standaard het belscript. */
+  scriptKey?: string;
+}) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(text);
   const [pending, startTransition] = useTransition();
 
   const save = (value: string) =>
     startTransition(async () => {
-      await saveCallScript(value);
+      await saveCallScript(value, scriptKey);
       setEditing(false);
     });
 
@@ -104,7 +136,7 @@ export function ScriptEditor({ text, isDefault }: { text: string; isDefault: boo
               className="ml-auto text-muted-foreground"
               disabled={pending}
               onClick={() => {
-                if (confirm("Je eigen versie wissen en terug naar het standaard belscript?")) save("");
+                if (confirm("Je eigen versie wissen en terug naar de standaardversie?")) save("");
               }}
             >
               Terug naar standaard

@@ -47,7 +47,8 @@ export function WebsiteVisual() {
   const atButton = t >= T_MOVE && t < T_CLOSE;
   const clicking = t >= T_CLICK && t < T_OPEN + 1;
   const open = t >= T_OPEN && t < T_CLOSE;
-  const pointerVisible = t >= 3 && t < T_CLOSE;
+  // De pijl staat al op de site en zwerft even rond voordat hij naar de knop gaat.
+  const pointer = atButton ? "translate(0, 0)" : t >= 4 && t < T_MOVE ? "translate(115px, 0px)" : "translate(160px, 45px)";
 
   return (
     <div ref={ref} className="overflow-hidden rounded-2xl border border-border bg-background shadow-xl">
@@ -92,13 +93,11 @@ export function WebsiteVisual() {
             >
               Offerte in 1 minuut
             </span>
-            {/* Muispijl: komt van rechtsonder naar de knop */}
+            {/* Muispijl: staat al op de site, zwerft even en gaat dan naar de knop */}
             <MousePointer2
               aria-hidden="true"
-              className={`absolute top-1/2 left-2/3 size-6 fill-white text-slate-900 drop-shadow transition-all duration-900 ease-out ${
-                pointerVisible ? "opacity-100" : "opacity-0"
-              }`}
-              style={{ transform: atButton ? "translate(0, 0)" : "translate(170px, 110px)" }}
+              className="absolute top-1/2 left-2/3 size-6 fill-white text-slate-900 drop-shadow transition-transform duration-900 ease-in-out"
+              style={{ transform: pointer }}
             />
           </span>
         </div>

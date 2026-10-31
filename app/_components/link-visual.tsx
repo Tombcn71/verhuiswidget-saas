@@ -124,7 +124,7 @@ export function LinkVisual() {
                 <Check className="size-3.5" /> Binnen 1 minuut
               </p>
               <span className="mx-auto mt-4 block w-3/4 rounded-full bg-brand-600 py-2.5 text-center text-sm font-semibold text-white">
-                Boek nu
+                Nu boeken
               </span>
             </div>
           </div>

@@ -99,3 +99,30 @@ export const DEFAULT_SCRIPT = [
   ...AFTER.map((t, i) => `${i + 1}. ${t}`),
   "Bijhouden: zet na elk gesprek de fase en een notitie bij het bedrijf, ook als je niemand bereikt. Zo zie je vrijdag in het CRM welke tijden en welke aanpak het meeste opleverden.",
 ].join("\n");
+
+/** Sleutel in admin_state voor Toms eigen versie van het demogesprek. */
+export const DEMO_SCRIPT_KEY = "demogesprek";
+
+const SITE = "https://www.moverai.nl";
+
+/** Demogesprek via WhatsApp-bellen: de site is de demo, de verhuizer klikt zelf mee. */
+export const DEFAULT_DEMO_SCRIPT = [
+  "Demogesprek van 5 à 10 minuten via WhatsApp-bellen. Geen scherm delen: je stuurt de links in de chat, hij klikt zelf mee, jij vertelt.",
+  "",
+  "# Voorbereiding",
+  "- Open het bedrijf in het CRM: daar staat zijn eigen demolink.",
+  `- Links klaar om te plakken: ${SITE}/rekenhulp · ${SITE}/onlink · ${SITE}/onsite · ${SITE}/onspot · ${SITE}/pakketten`,
+  "",
+  "# Het gesprek",
+  "1. Opening: \"Fijn dat je tijd hebt! Ik laat je in een paar minuten zien wat het voor jullie doet, en ik ben vooral benieuwd hoe jullie het nu doen. Goed?\"",
+  `2. Rekenhulp: Stuur ${SITE}/rekenhulp. "Hoeveel bezoeken aan huis doen jullie per week? Schuif maar. Dat kost je dus zo'n € … per maand, ook aan klanten die nooit boeken."`,
+  `3. Hoe komen aanvragen binnen?: "Via offerteplatforms, je website of de telefoon?" Stuur de pagina die past: ${SITE}/onlink (platforms, telefoon, WhatsApp), ${SITE}/onsite (website) of ${SITE}/onspot (zelf op locatie).`,
+  "4. Zelf proberen: Stuur zijn eigen demolink uit het CRM. \"Probeer het even zelf: scan een kamer, dan zie je binnen een minuut de offerte. Ik pak ondertussen een kop koffie, over 3 minuten bespreken we wat je zag.\" Blijf in het gesprek, microfoon uit.",
+  "5. Wat zag hij?: \"En, wat vond je? Klopte het volume een beetje?\" Twijfel over de prijs: \"In de demo staan voorbeeldtarieven. Met jullie eigen tarieven komt er jullie prijs uit.\"",
+  `6. Afsluiten: Stuur ${SITE}/pakketten. "Welk pakket past bij jullie, Basic of Pro?" Noem nu de prijs met het terugverdienen: twee bezoeken aan huis minder en je hebt het terug. "Je begint met 14 dagen gratis, zonder betaalgegevens. Zal ik je account meteen met je opzetten?"`,
+  "",
+  "# Na het gesprek",
+  "- In het CRM: Proef gestart, of Gesprek gepland als hij nog wil nadenken.",
+  "- Zelfde dag een appje: \"Dank voor het gesprek! Vragen? App me gewoon.\"",
+  "- Bij elke stap één vraag stellen en hem laten praten: dan is het een gesprek, geen presentatie.",
+].join("\n");

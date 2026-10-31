@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     "Schuif naar hoeveel bezoeken aan huis je per week doet en zie wat ze je per maand kosten aan uren en brandstof.",
 };
 
-/** Losse rekenhulp: om via WhatsApp of een advertentie te delen. Doel: een demo plannen. */
+/** Losse rekenhulp: om via WhatsApp of een advertentie te delen. Doel: een demogesprek plannen. */
 export default function CalculatorPage() {
   const calendlyUrl = process.env.CALENDLY_URL ?? null;
   return (

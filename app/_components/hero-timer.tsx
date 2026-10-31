@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Timer } from "lucide-react";
+import { Check } from "lucide-react";
+import { LogoMark } from "./logo";
 
 const DONE_AT = 52; // seconden: "klaar in 0:52"
 
@@ -32,10 +33,10 @@ export function HeroTimer() {
       <span
         className={`flex size-8 items-center justify-center rounded-full ${done ? "bg-emerald-600" : "bg-brand-600"} text-white`}
       >
-        {done ? <Check className="size-4" /> : <Timer className="size-4" />}
+        {done ? <Check className="size-4" /> : <LogoMark className="size-4.5" />}
       </span>
       <span>
-        <span className="block text-xs text-slate-500">{done ? "Offerte klaar in" : "Offerte maken…"}</span>
+        <span className="block text-xs text-slate-500">{done ? "Offerte klaar in" : "AI maakt offerte…"}</span>
         <span className="block font-mono text-base font-bold tabular-nums">
           0:{String(sec).padStart(2, "0")}
         </span>
