@@ -139,7 +139,7 @@ export function WebsiteVisual() {
                   </div>
                 ))}
               </div>
-              <span className="mt-auto flex items-center justify-center gap-1 rounded-full bg-brand-600/40 py-2 text-[11px] font-semibold text-white">
+              <span className="mt-auto flex items-center justify-center gap-1 rounded-full bg-brand-600 py-2 text-[11px] font-semibold text-white">
                 <Sparkles className="size-3" /> Start AI-analyse
               </span>
             </div>
