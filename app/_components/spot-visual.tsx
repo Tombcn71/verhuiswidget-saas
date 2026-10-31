@@ -2,18 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, Camera, Check, ImageIcon, Loader2, Minus, Plus, Send, Sparkles } from "lucide-react";
+import { ArrowLeft, Camera, Check, ImageIcon, Minus, Plus, Send, Sparkles } from "lucide-react";
 import woonkamer from "@/public/voorbeeldwoningen/appartement/woonkamer.jpg";
 import slaapkamer from "@/public/voorbeeldwoningen/appartement/slaapkamer.jpg";
 import keuken from "@/public/voorbeeldwoningen/appartement/keuken.jpg";
 
-// Tijdlijn in stappen van 100 ms (ca. 14 s): startscherm, camera, analyse,
-// "Check de inboedel" (labels en + tikken), offerte versturen.
+// Tijdlijn in stappen van 100 ms (ca. 16 s): startscherm, camera, AI-analyse
+// (in het echt ca. een halve minuut), "Check de inboedel" (labels en + tikken),
+// offerte versturen.
 const T_CAMERA = 20;
 const T_PHOTO_DONE = 40;
-const T_CHECK = 60;
-const T_OFFER = 100;
-const T_END = 140;
+const T_ANALYSE = 52;
+const T_CHECK = 78;
+const T_OFFER = 118;
+const T_END = 158;
 
 /** Blauwe labels op de foto, zoals de app ze na de analyse toont (positie in %). */
 const LABELS = [
@@ -21,17 +23,25 @@ const LABELS = [
   { name: "Salontafel", x: 50, y: 74 },
   { name: "Eettafel", x: 80, y: 52 },
   { name: "Boekenkast", x: 78, y: 22 },
+  { name: "Stoel", x: 36, y: 26 },
+  { name: "Tv", x: 88, y: 74 },
+  { name: "Kastje", x: 80, y: 98 },
 ];
+// Alles wat de AI in de woonkamer herkende (zelfde als de labels op de foto).
 const ITEMS = [
   { name: "Bank", qty: 1 },
   { name: "Stoel", qty: 4 },
+  { name: "Salontafel", qty: 1 },
   { name: "Eettafel", qty: 1 },
+  { name: "Boekenkast", qty: 1 },
+  { name: "Tv", qty: 1 },
+  { name: "Kastje", qty: 1 },
 ];
 // Het hele appartement is gescand: de offerte geldt voor alle ruimtes samen.
 const ROOMS = [
-  { label: "Woonkamer", photo: woonkamer, photos: 3, items: 7 },
-  { label: "Slaapkamer", photo: slaapkamer, photos: 2, items: 9 },
-  { label: "Keuken", photo: keuken, photos: 2, items: 6 },
+  { label: "Woonkamer", photo: woonkamer, photos: 3 },
+  { label: "Slaapkamer", photo: slaapkamer, photos: 2 },
+  { label: "Keuken", photo: keuken, photos: 2 },
 ];
 
 /** Waar de vinger tikt (in % van het scherm) en wanneer. */
@@ -39,9 +49,9 @@ const TAPS = [
   { at: 13, left: "27%", top: "42%" }, // Camera
   { at: 30, left: "50%", top: "88%" }, // sluiterknop
   { at: 50, left: "50%", top: "91%" }, // Start AI-analyse
-  { at: 82, left: "86%", top: "58%" }, // + bij Stoel
-  { at: 95, left: "50%", top: "91%" }, // Volgende
-  { at: 120, left: "50%", top: "91%" }, // Offerte versturen
+  { at: 100, left: "86%", top: "56%" }, // + bij Stoel
+  { at: 113, left: "50%", top: "91%" }, // Volgende
+  { at: 138, left: "50%", top: "91%" }, // Offerte versturen
 ];
 
 /**
@@ -76,15 +86,15 @@ export function SpotVisual() {
     };
   }, []);
 
-  const screen = t < T_CAMERA ? 0 : t < T_PHOTO_DONE ? 1 : t < T_CHECK ? 2 : t < T_OFFER ? 3 : 4;
+  const screen =
+    t < T_CAMERA ? 0 : t < T_PHOTO_DONE ? 1 : t < T_ANALYSE ? 2 : t < T_CHECK ? 5 : t < T_OFFER ? 3 : 4;
   const tap = TAPS.find((x) => t <= x.at + 3) ?? TAPS[TAPS.length - 1];
   const tapping = t >= tap.at && t <= tap.at + 3;
-  const fingerVisible = t <= tap.at + 6;
+  const fingerVisible = screen !== 5 && t <= tap.at + 6;
   const flash = t >= 31 && t <= 32;
-  const analysing = t >= 52 && t < T_CHECK;
   const labelsShown = Math.min(LABELS.length, Math.max(0, Math.floor((t - T_CHECK) / 3) + 1));
-  const plusDone = t >= 83;
-  const sent = t >= 123;
+  const plusDone = t >= 101;
+  const sent = t >= 141;
 
   return (
     <div
@@ -139,15 +149,7 @@ export function SpotVisual() {
               screen === 0 ? "bg-brand-600/40" : "bg-brand-600"
             }`}
           >
-            {analysing ? (
-              <>
-                <Loader2 className="size-3.5 animate-spin" /> Bezig…
-              </>
-            ) : (
-              <>
-                <Sparkles className="size-3.5" /> Start AI-analyse
-              </>
-            )}
+            <Sparkles className="size-3.5" /> Start AI-analyse
           </span>
         </div>
       )}
@@ -165,29 +167,42 @@ export function SpotVisual() {
         </div>
       )}
 
+      {screen === 5 && (
+        // Zoals in de app tijdens de analyse.
+        <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+          <span className="flex size-14 animate-pulse items-center justify-center rounded-2xl bg-brand-600 text-white">
+            <ImageIcon className="size-7" />
+          </span>
+          <p className="text-base font-semibold">AI analyseert je foto&apos;s…</p>
+          <p className="text-xs leading-snug text-slate-600">
+            We herkennen je meubels en stellen een inventarislijst samen. Dit duurt ongeveer een halve
+            minuut, bij een groot huis iets langer.
+          </p>
+        </div>
+      )}
+
       {screen === 3 && (
         <div className="flex h-full flex-col px-3 pt-9 pb-4">
           <p className="text-center text-base font-bold">
             Check de <span className="text-brand-600">inboedel</span>
-          </p>
-          <p className="mt-1 rounded-lg border border-slate-200 py-1 text-center text-[10px]">
-            Totaal volume: <strong>{plusDone ? "24,2" : "23,7"} m³</strong>
-            <span className="block text-[9px] text-slate-500">Alleen zichtbaar voor jou</span>
           </p>
           <div className="mt-2 overflow-hidden rounded-xl border border-slate-200">
             <div className="flex items-center gap-2 px-2.5 py-1.5">
               <Image src={woonkamer} alt="" width={24} height={24} className="size-6 rounded-full object-cover" />
               <span className="text-[11px]">
                 <span className="font-semibold">Woonkamer</span>
-                <span className="text-slate-500"> · 3 foto&apos;s · {plusDone ? 8 : 7} items</span>
+                <span className="text-slate-500">
+                  {" "}
+                  · 3 foto&apos;s · {ITEMS.reduce((n, it) => n + it.qty, 0) + (plusDone ? 1 : 0)} items
+                </span>
               </span>
             </div>
-            <div className="relative h-20 bg-slate-100">
+            <div className="relative h-28 bg-slate-100">
               <Image src={woonkamer} alt="" fill sizes="17rem" className="object-cover object-[center_60%]" />
               {LABELS.slice(0, labelsShown).map((l) => (
                 <span
                   key={l.name}
-                  className="absolute -translate-x-1/2 -translate-y-full rounded-full bg-brand-600 px-1.5 py-0.5 text-[9px] font-semibold text-white shadow animate-in fade-in zoom-in-75"
+                  className="absolute -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-full bg-brand-600 px-1.5 py-0.5 text-[9px] font-semibold text-white shadow animate-in fade-in zoom-in-75"
                   style={{ left: `${l.x}%`, top: `${l.y}%` }}
                 >
                   {l.name}
@@ -214,15 +229,6 @@ export function SpotVisual() {
               })}
             </ul>
           </div>
-          {ROOMS.slice(1).map((r) => (
-            <div key={r.label} className="mt-1.5 flex items-center gap-2 rounded-xl border border-slate-200 px-2.5 py-1.5 text-[11px]">
-              <Image src={r.photo} alt="" width={24} height={24} className="size-6 rounded-full object-cover" />
-              <span className="font-semibold">{r.label}</span>
-              <span className="text-slate-500">
-                · {r.photos} foto&apos;s · {r.items} items
-              </span>
-            </div>
-          ))}
           <span className="mt-auto flex items-center justify-center rounded-full bg-brand-600 py-2.5 text-xs font-semibold text-white">
             Volgende
           </span>
