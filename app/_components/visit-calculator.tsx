@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, Fuel, Wallet } from "lucide-react";
 
 // Aannames, ook onder de rekenhulp vermeld.
@@ -12,9 +12,25 @@ const WEEKS_PER_MONTH = 4.33;
 
 const euro = (n: number) => `€${Math.round(n).toLocaleString("nl-NL")}`;
 
-/** "Wat kosten bezoeken aan huis jou?": één schuifje, direct de kosten per maand. */
-export function VisitCalculator() {
-  const [perWeek, setPerWeek] = useState(5);
+// Autoplay (reel): omhoog naar 5 (kleine verhuizers doen er niet meer), even stilstaan, terug.
+const AUTOPLAY = [1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2];
+
+/**
+ * "Wat kosten bezoeken aan huis jou?": één schuifje, direct de kosten per maand.
+ * Met `autoplay` beweegt het schuifje vanzelf (voor de reel).
+ */
+export function VisitCalculator({ autoplay = false }: { autoplay?: boolean }) {
+  const [perWeek, setPerWeek] = useState(autoplay ? 1 : 5);
+
+  useEffect(() => {
+    if (!autoplay) return;
+    let i = 0;
+    const id = setInterval(() => {
+      i = (i + 1) % AUTOPLAY.length;
+      setPerWeek(AUTOPLAY[i]);
+    }, 250);
+    return () => clearInterval(id);
+  }, [autoplay]);
   const visits = perWeek * WEEKS_PER_MONTH;
   const hours = visits * HOURS_PER_VISIT;
   const fuel = visits * KM_PER_VISIT * FUEL_PER_KM;
