@@ -118,8 +118,8 @@ export function LinkVisual() {
               <p className="flex items-center gap-1.5 font-semibold">
                 <FileText className="size-4 text-brand-600" /> Je offerte van Jouw Verhuisbedrijf
               </p>
-              <p className="mt-1 text-sm text-slate-600">23,7 m³ · 3 verhuizers · 6 uur</p>
-              <p className="mt-1 text-2xl font-bold">€ 1.240</p>
+              <p className="mt-1 text-sm text-slate-600">23,7 m³ · 3 verhuizers · 5 uur</p>
+              <p className="mt-1 text-2xl font-bold">€ 830</p>
               <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
                 <Check className="size-3.5" /> Binnen 1 minuut
               </p>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Building2, ClipboardList, MapPin, Timer } from "lucide-react";
 import { SolutionPage } from "@/app/_components/solution-page";
-import { SpotVisual } from "@/app/_components/solution-visuals";
+import { SpotVisual } from "@/app/_components/spot-visual";
 
 export const metadata: Metadata = {
   title: "Onspot: scannen op locatie",
