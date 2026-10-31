@@ -226,26 +226,35 @@ export async function markDemoSent(id: string): Promise<void> {
     .where(and(eq(prospects.id, id), inArray(prospects.stage, ["nieuw", "gebeld"])));
 }
 
+export type WhatsappVariant = "A" | "B";
+
 /**
- * WhatsApp vanuit het CRM: "opening" = openingsbericht gestuurd (fase Benaderd),
- * "demo" = demolink gestuurd (fase Demo gestuurd). Alleen de eerste keer telt.
+ * WhatsApp vanuit het CRM. "opening" = openingsbericht A of B gestuurd (fase
+ * Benaderd), "replied" = hij heeft geantwoord, "demo" = vervolg gestuurd (demolink
+ * of rekenhulp; telt ook als antwoord). Alleen de eerste keer telt.
  */
-export async function markWhatsapp(id: string, kind: "opening" | "demo"): Promise<void> {
+export async function markWhatsapp(
+  id: string,
+  kind: "opening" | "replied" | "demo",
+  variant?: WhatsappVariant,
+): Promise<void> {
   const now = new Date();
-  if (kind === "opening") {
-    await db
+  const first = async (values: Partial<NewProspect>, col: Parameters<typeof isNull>[0]) =>
+    db
       .update(prospects)
-      .set({ whatsappSentAt: now, updatedAt: now })
-      .where(and(eq(prospects.id, id), isNull(prospects.whatsappSentAt)));
+      .set({ ...values, updatedAt: now })
+      .where(and(eq(prospects.id, id), isNull(col)));
+  if (kind === "opening") {
+    await first({ whatsappSentAt: now, whatsappVariant: variant ?? null }, prospects.whatsappSentAt);
     await db
       .update(prospects)
       .set({ stage: "gebeld" })
       .where(and(eq(prospects.id, id), eq(prospects.stage, "nieuw")));
-  } else {
-    await db
-      .update(prospects)
-      .set({ whatsappDemoAt: now, updatedAt: now })
-      .where(and(eq(prospects.id, id), isNull(prospects.whatsappDemoAt)));
+    return;
+  }
+  await first({ whatsappRepliedAt: now }, prospects.whatsappRepliedAt);
+  if (kind === "demo") {
+    await first({ whatsappDemoAt: now }, prospects.whatsappDemoAt);
     await db
       .update(prospects)
       .set({ stage: "demo_gestuurd" })

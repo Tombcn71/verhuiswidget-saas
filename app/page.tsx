@@ -1,11 +1,15 @@
 import Image from "next/image";
+import NextLink from "next/link";
 import heroImage from "@/public/hero.jpg";
-import { DemoModal } from "@/app/_components/demo-modal";
 import { SiteHeader } from "@/app/_components/site-header";
-import { PricingCards, TrialCard } from "@/app/_components/pricing-cards";
+import { SiteFooter } from "@/app/_components/site-footer";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
 import { PlatformShowcase } from "@/app/_components/platform-showcase";
-import { Globe, Keyboard, Link, MapPin, Star } from "lucide-react";
+import { PlanDemoButton } from "@/app/_components/plan-demo-button";
+import { HeroTimer } from "@/app/_components/hero-timer";
+import { VisitCalculator } from "@/app/_components/visit-calculator";
+import { SOLUTIONS } from "@/app/_components/solutions";
+import { ArrowRight, Check, Keyboard, Star, X } from "lucide-react";
 import {
   Timer,
   Fuel,
@@ -13,10 +17,6 @@ import {
   Zap,
   Sparkles,
 } from "@/app/_components/icons";
-
-// Hoofdknop: effen merkblauw.
-const aiButton =
-  "bg-brand-600 text-white shadow-sm transition hover:bg-brand-700";
 
 const features = [
   {
@@ -51,22 +51,28 @@ const features = [
   },
 ];
 
-const channels = [
-  {
-    Icon: Link,
-    t: "1. Via een linkje",
-    d: "Krijg je een aanvraag via een offerteplatform, een telefoontje of WhatsApp? Stuur de klant je eigen linkje. Hij maakt foto’s per kamer en krijgt binnen een minuut jouw offerte. Jij krijgt de inventaris en het volume binnen.",
-  },
-  {
-    Icon: Globe,
-    t: "2. Via je website",
-    d: "Komen klanten via Google of social media op je website? Dan vragen ze daar meteen een offerte aan: een paar foto’s per kamer en binnen een minuut jouw offerte. Ook ’s avonds en in het weekend.",
-  },
-  {
-    Icon: MapPin,
-    t: "3. Zelf op locatie",
-    d: "Sta je bij een groot pand of een lastige klus? Open moverAI in de browser op je telefoon, scan de ruimtes ter plekke en zie de kubieke meters direct oplopen. Geen app nodig.",
-  },
+// "Kies hoe jij werkt": korte uitleg per oplossing; de eigen pagina vertelt de rest.
+const SOLUTION_BLURB: Record<string, string> = {
+  "/onlink":
+    "Aanvraag via een offerteplatform, telefoon of WhatsApp? Stuur je klant een linkje en binnen een minuut heeft hij jouw offerte.",
+  "/onsite":
+    "Een knop op je eigen website. Bezoekers vragen meteen een offerte aan, ook 's avonds en in het weekend.",
+  "/onspot":
+    "Scan zelf bij de klant of bij een groot pand. Zie de m³ direct oplopen en heb de offerte ter plekke klaar.",
+};
+
+// Voor en na: herkenbaar voor elke verhuizer.
+const WITHOUT = [
+  "Een bezoek aan huis plannen, vaak pas over een paar dagen",
+  "Rijden, parkeren en 1,5 uur rondlopen",
+  "Daarna nog de offerte uitwerken, binnen 24 uur",
+  "De klant heeft intussen een ander gekozen",
+];
+const WITH = [
+  "Aanvraag binnen: stuur je linkje",
+  "Je klant maakt een paar foto's per kamer",
+  "Binnen een minuut jouw offerte, met jouw tarieven",
+  "Jij rijdt alleen nog voor klussen die doorgaan",
 ];
 
 const faqs = [
@@ -124,7 +130,7 @@ const faqJsonLd = {
 };
 
 export default function HomePage() {
-  const calendlyUrl = process.env.CALENDLY_URL;
+  const calendlyUrl = process.env.CALENDLY_URL ?? null;
   return (
     <div className="flex min-h-full flex-col">
       <SiteHeader />
@@ -146,17 +152,10 @@ export default function HomePage() {
                 Offertes in 1 minuut, zonder voorinspectie. Je klant scant zijn inboedel met de
                 telefoon en krijgt direct een offerte met jouw tarieven. Werkt meteen, geen gedoe.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
-                <a
-                  href="#prijzen"
-                  className={`w-full rounded-full px-6 py-3 text-center font-semibold sm:w-auto ${aiButton}`}>
-                  Probeer 14 dagen gratis
-                </a>
-                <DemoModal calendlyUrl={calendlyUrl ?? null} />
+              <div className="mt-8">
+                <PlanDemoButton href={calendlyUrl} from="home kop" className="w-full sm:w-auto" />
+                <p className="mt-3 text-sm text-muted-foreground">5 minuten · vrijblijvend</p>
               </div>
-              <p className="mt-3 text-sm text-muted-foreground/80">
-                Geen betaalgegevens nodig
-              </p>
             </div>
 
             <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl shadow-xl ring-1 ring-border lg:order-last">
@@ -169,6 +168,90 @@ export default function HomePage() {
                 sizes="(min-width: 1024px) 45vw, 100vw"
                 className="object-cover object-center"
               />
+              <HeroTimer />
+            </div>
+          </div>
+        </section>
+
+        {/* Voor en na */}
+        <section className="border-t border-border bg-muted py-20">
+          <div className="mx-auto w-full max-w-5xl px-6">
+            <h2 className="text-center text-3xl font-bold tracking-tight">
+              Van dagen naar <span className="text-primary">één minuut</span>
+            </h2>
+            <div className="mt-12 grid gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-background p-6">
+                <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Zonder moverAI
+                </p>
+                <ul className="mt-4 space-y-3">
+                  {WITHOUT.map((t) => (
+                    <li key={t} className="flex gap-3 text-muted-foreground">
+                      <X className="mt-0.5 size-5 shrink-0 text-red-500" />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-2xl border-2 border-brand-600 bg-background p-6 shadow-sm">
+                <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">
+                  Met moverAI
+                </p>
+                <ul className="mt-4 space-y-3">
+                  {WITH.map((t) => (
+                    <li key={t} className="flex gap-3 font-medium">
+                      <Check className="mt-0.5 size-5 shrink-0 text-emerald-600" />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Rekenhulp */}
+        <section className="py-20">
+          <div className="mx-auto w-full max-w-3xl px-6">
+            <h2 className="text-center text-3xl font-bold tracking-tight">
+              Wat kosten bezoeken aan huis <span className="text-primary">jou</span>?
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-center text-muted-foreground">
+              Schuif naar hoeveel bezoeken je per week doet.
+            </p>
+            <div className="mt-10">
+              <VisitCalculator />
+            </div>
+            <div className="mt-8 text-center">
+              <p className="font-semibold">Benieuwd hoeveel jij daarvan kunt besparen?</p>
+              <PlanDemoButton href={calendlyUrl} from="home rekenhulp" className="mt-4" />
+            </div>
+          </div>
+        </section>
+
+        {/* Kies hoe jij werkt */}
+        <section id="hoe-het-werkt" className="scroll-mt-20 border-t border-border bg-muted py-20">
+          <div className="mx-auto w-full max-w-6xl px-6">
+            <h2 className="text-center text-3xl font-bold tracking-tight">Kies hoe jij werkt</h2>
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {SOLUTIONS.map((s) => (
+                <NextLink
+                  key={s.href}
+                  href={s.href}
+                  className="group flex flex-col rounded-xl border border-border bg-background p-6 shadow-sm transition hover:border-brand-600"
+                >
+                  <div className="inline-flex w-fit rounded-xl bg-brand-600 p-2.5 text-white">
+                    <s.Icon className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold">
+                    {s.name} <span className="font-normal text-muted-foreground">· {s.sub}</span>
+                  </h3>
+                  <p className="mt-2 flex-1 text-sm text-muted-foreground">{SOLUTION_BLURB[s.href]}</p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">
+                    Bekijk hoe <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
+                  </span>
+                </NextLink>
+              ))}
             </div>
           </div>
         </section>
@@ -199,72 +282,20 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CTA: besparing */}
-        <section className="bg-brand-600 py-16">
-          <div className="mx-auto w-full max-w-3xl px-6 text-center text-white">
-            <h2 className="text-3xl font-bold tracking-tight">
-              Klaar om te besparen op uren en brandstof?
-            </h2>
-            <p className="mt-3">
-              Elk bezoek aan huis kost al snel anderhalf uur, met
-              rijden, parkeren en rondlopen, ook als de klant uiteindelijk niet
-              boekt. Met moverAI maakt de klant zelf de foto&apos;s en krijgt hij
-              binnen een minuut jouw offerte. Jij rijdt alleen nog voor klussen
-              die doorgaan.
-            </p>
-            <a
-              href="#prijzen"
-              className="mt-6 inline-block rounded-full bg-background px-6 py-3 font-semibold text-brand-700 shadow-sm hover:bg-muted">
-              Probeer 14 dagen gratis
-            </a>
-          </div>
-        </section>
-
-        {/* Hoe het werkt */}
-        <section id="hoe-het-werkt" className="scroll-mt-20 py-20">
-          <div className="mx-auto w-full max-w-6xl px-6">
-            <h2 className="text-center text-3xl font-bold tracking-tight">
-              Hoe het werkt: 3 manieren om mover<span className="text-primary">AI</span> in te zetten
-            </h2>
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {channels.map((c) => (
-                <div
-                  key={c.t}
-                  className="rounded-xl border border-border bg-background p-6 shadow-sm">
-                  <div className="inline-flex rounded-xl bg-brand-600 p-2.5 text-white">
-                    <c.Icon className="h-6 w-6" aria-hidden="true" />
-                  </div>
-                  <h3 className="mt-4 font-semibold">{c.t}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{c.d}</p>
-                </div>
-              ))}
+        {/* Persoonlijk */}
+        <section className="py-20">
+          <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-6 text-center sm:flex-row sm:text-left">
+            <div className="flex size-24 shrink-0 items-center justify-center rounded-full bg-brand-600 text-3xl font-bold text-white">
+              T
             </div>
-          </div>
-        </section>
-
-        {/* Prijzen */}
-        <section
-          id="prijzen"
-          className="scroll-mt-20 border-t border-border bg-muted py-20">
-          <div className="mx-auto w-full max-w-5xl px-6">
-            <h2 className="text-center text-3xl font-bold tracking-tight">
-              Probeer mover<span className="text-primary">AI</span> 14 dagen gratis
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
-              Alle functies, geen betaalgegevens nodig en er wordt niets automatisch afgeschreven.
-              Bevalt het? Dan kies je daarna pas een pakket.
-            </p>
-            <TrialCard primaryButton={aiButton} calendlyUrl={calendlyUrl ?? null} />
-            <h3 className="mt-16 text-center text-xl font-semibold tracking-tight">
-              Na je proefperiode: kies het pakket dat bij je past
-            </h3>
-            <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
-              Met Basic geef je al 100 klanten per maand binnen een minuut jouw
-              offerte, zonder langs te gaan. Dat scheelt al uren en brandstof: twee
-              bezoeken aan huis minder en je hebt de €99 al terug. Elke extra klus
-              is winst.
-            </p>
-            <PricingCards />
+            <div>
+              <p className="text-lg">
+                &ldquo;Ik ben Tom, oprichter van moverAI. Ik bouw het samen met verhuizers, zodat het
+                past bij hoe jullie werken. In een demo van 5 minuten laat ik zien wat het voor jouw
+                bedrijf doet.&rdquo;
+              </p>
+              <PlanDemoButton href={calendlyUrl} from="home tom" className="mt-5" />
+            </div>
           </div>
         </section>
 
@@ -296,12 +327,26 @@ export default function HomePage() {
           />
         </section>
 
+        {/* Afsluiter */}
+        <section className="bg-brand-600 py-16">
+          <div className="mx-auto w-full max-w-3xl px-6 text-center text-white">
+            <h2 className="text-3xl font-bold tracking-tight">
+              Klaar om te besparen op uren en brandstof?
+            </h2>
+            <p className="mt-3">
+              In 5 minuten laat ik zien hoe je klant binnen een minuut jouw offerte krijgt, met jouw
+              tarieven. Jij rijdt alleen nog voor klussen die doorgaan.
+            </p>
+            <PlanDemoButton
+              href={calendlyUrl}
+              from="home onderaan"
+              className="mt-6 bg-background text-brand-700 hover:bg-muted"
+            />
+          </div>
+        </section>
       </main>
 
-      <footer className="mx-auto w-full max-w-6xl px-6 py-8 text-sm text-muted-foreground">
-        © {new Date().getFullYear()} moverAI · White-label AI-widget voor
-        verhuizers
-      </footer>
+      <SiteFooter />
       <WhatsAppButton />
     </div>
   );

@@ -17,7 +17,7 @@ export default async function SignUpPage({
   // en kiezen geen plan. Alle anderen beginnen bij de plankeuze. Sub-stappen van
   // Clerk (`/registreren/verify-…`) laten we met rust.
   const invited = typeof query.__clerk_ticket === "string";
-  if (!rest && !invited && typeof query.plan !== "string") redirect("/#prijzen");
+  if (!rest && !invited && typeof query.plan !== "string") redirect("/pakketten");
 
   const plan = typeof query.plan === "string" ? PLANS[normalizePlan(query.plan)] : null;
   const redirectUrl = plan ? `/kies-plan?plan=${plan.id}` : "/dashboard";

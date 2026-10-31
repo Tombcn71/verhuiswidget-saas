@@ -7,6 +7,7 @@ import {
   getProspect,
 } from "@/lib/prospects";
 import { formatDateTime } from "@/lib/format";
+import { appUrl } from "@/lib/app-url";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,11 +25,19 @@ import { StageBadge } from "../../stage-badge";
 import { ContactButtons } from "../../contact-buttons";
 import { WhatsappMessages } from "./whatsapp-card";
 
-/** Openingsbericht voor WhatsApp (zonder bedrijfsnaam: je appt een persoon). */
-// De eerste regel moet in de melding passen (ca. 45 tekens): een vraag over hún werk.
-const WHATSAPP_OPENING = `Hallo 👋 werken jullie met offerteplatforms?
+/**
+ * Openingsberichten voor WhatsApp (zonder bedrijfsnaam: je appt een persoon). De
+ * eerste regel moet in de melding passen (ca. 45 tekens): een vraag over hún werk.
+ * A en B worden om de beurt gestuurd om te zien welke vaker antwoord krijgt.
+ */
+const WHATSAPP_OPENINGS = {
+  A: `Hallo 👋 werken jullie met offerteplatforms?
 Ik ben Tom van moverAI. Bij een aanvraag via een platform wint vaak wie als eerste een offerte stuurt. Met mijn AI-software stuur je de klant meteen een linkje: hij maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Zonder voorinspectie, dus ook minder uren en brandstof.
-Mag ik je een linkje naar de demo sturen? Duurt een minuut.`;
+Mag ik je een linkje naar de demo sturen? Duurt een minuut.`,
+  B: `Hallo 👋 wat kosten bezoeken aan huis jou?
+Ik ben Tom van moverAI. Met mijn AI-software maakt je klant zelf een paar foto's per kamer en krijgt hij d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Zonder voorinspectie, dus minder uren en brandstof.
+Zal ik je de rekenhulp sturen? Kost 10 seconden.`,
+};
 
 function Field({
   label,
@@ -58,7 +67,8 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
 
   const timeline = [
     { label: "Toegevoegd", at: p.createdAt },
-    { label: "💬 WhatsApp gestuurd", at: p.whatsappSentAt },
+    { label: `💬 WhatsApp gestuurd${p.whatsappVariant ? ` (opening ${p.whatsappVariant})` : ""}`, at: p.whatsappSentAt },
+    { label: "↩️ Reageerde op WhatsApp", at: p.whatsappRepliedAt },
     { label: "📤 Demo gemaild", at: p.demoSentAt },
     { label: "📤 Demo gestuurd via WhatsApp", at: p.whatsappDemoAt },
     { label: "👀 Demolink geopend", at: p.demoOpenedAt },
@@ -201,8 +211,20 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
                 id={p.id}
                 waNumber={waNumber}
                 website={p.whatsapp ? p.website : null}
-                opening={WHATSAPP_OPENING}
-                demoReply={`Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`}
+                openings={WHATSAPP_OPENINGS}
+                replies={{
+                  A: `Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`,
+                  B: `Top! Hier is hij: ${appUrl()}/rekenhulp\nSchuif naar hoeveel bezoeken je per week doet. Daarna kun je meteen een demo van 5 minuten plannen.\n\nGroet, Tom`,
+                }}
+                // Geappt vóór de vergelijking van A en B: verder met het vervolg van A.
+                sentVariant={
+                  p.whatsappVariant === "A" || p.whatsappVariant === "B"
+                    ? p.whatsappVariant
+                    : p.whatsappSentAt
+                      ? "A"
+                      : null
+                }
+                replied={!!p.whatsappRepliedAt}
               />
             </CardContent>
           </Card>

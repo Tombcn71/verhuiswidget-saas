@@ -114,6 +114,12 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
   // Demolink vandaag gestuurd, via WhatsApp of gemaild.
   const isToday = (d: Date | null) => !!d && nlDay(d) === nlDay(new Date());
   const demosToday = all.filter((p) => isToday(p.whatsappDemoAt) || isToday(p.demoSentAt)).length;
+  // Vergelijking van de openingsberichten: gestuurd en gereageerd per variant.
+  const abStats = (["A", "B"] as const).map((v) => {
+    const sent = all.filter((p) => p.whatsappVariant === v);
+    const replied = sent.filter((p) => p.whatsappRepliedAt).length;
+    return { v, sent: sent.length, replied, pct: sent.length ? Math.round((replied / sent.length) * 100) : 0 };
+  });
   const demoDone = all.filter((p) => p.demoCompletedAt).length;
   const customers = all.filter((p) => p.stage === "klant").length;
   const withWa = all.filter((p) => inWaView(p) && p.stage !== "afgevallen").length;
@@ -144,6 +150,19 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
           <Send className="size-4 text-emerald-600" />
           Vandaag demo&apos;s gestuurd: {demosToday}
         </div>
+        {abStats.some((x) => x.sent > 0) && (
+          <div
+            className="flex items-center gap-3 rounded-lg border bg-background px-4 py-2 text-sm font-medium"
+            title="A = offerteplatforms, B = kosten bezoeken aan huis"
+          >
+            {abStats.map((x) => (
+              <span key={x.v}>
+                {x.v}: {x.replied}/{x.sent} gereageerd
+                <span className="text-muted-foreground"> ({x.pct}%)</span>
+              </span>
+            ))}
+          </div>
+        )}
         </div>
         <p className="text-sm text-muted-foreground">
           {withDemo} demo&apos;s gestuurd · {demoDone} gedaan · {customers}{" "}

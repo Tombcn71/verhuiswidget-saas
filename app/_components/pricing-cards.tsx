@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ScanInfo } from "@/app/_components/scan-info";
+import { PlanDemoButton } from "./plan-demo-button";
 import {
   CHANNEL_FEATURES,
   MORE_SEATS_MAILTO,
@@ -134,14 +135,17 @@ const euro = (cents: number) =>
   );
 
 /**
- * Prijskaarten van de homepage met de schakelaar Maandelijks / Jaarlijks. Zonder
- * knoppen: starten gaat via `TrialCard`, het pakket kies je pas na de proef.
+ * Prijskaarten met de schakelaar Maandelijks / Jaarlijks. Met `demo` (pagina
+ * Pakketten) geen bedragen: die noemt Tom in het demogesprek; elke kaart krijgt
+ * dan een knop "Plan een demo".
  */
-export function PricingCards() {
+export function PricingCards({ demo }: { demo?: { href: string | null } } = {}) {
   const [interval, setInterval] = useState<BillingInterval>("month");
+  const showPrices = !demo;
 
   return (
     <>
+      {showPrices && (
       <div className="mt-8 flex justify-center">
         <div
           role="radiogroup"
@@ -169,8 +173,9 @@ export function PricingCards() {
           ))}
         </div>
       </div>
+      )}
 
-      <div className="mt-10 grid gap-6 md:grid-cols-3">
+      <div className={`${showPrices ? "mt-10" : "mt-12"} grid gap-6 md:grid-cols-3`}>
         {PLAN_ORDER.map((id) => PLANS[id]).map((plan) => {
           const featured = plan.id === "pro";
           return (
@@ -192,6 +197,8 @@ export function PricingCards() {
                   {plan.label} <span className="font-normal text-muted-foreground">({plan.audience})</span>
                 </h3>
                 <p className="mt-1 min-h-11 text-sm text-muted-foreground">{PLAN_TAGLINE[plan.id]}</p>
+                {showPrices ? (
+                <>
                 <p className="mt-5 flex items-baseline gap-1">
                   <span className="text-4xl font-bold tracking-tight">
                     €{interval === "year" ? yearlyPerMonthEuros(plan) : plan.priceCents / 100}
@@ -213,6 +220,10 @@ export function PricingCards() {
                     {interval === "year" ? "2 maanden gratis" : "Jaarlijks: 2 maanden gratis"}
                   </span>
                 </p>
+                </>
+                ) : (
+                  <p className="mt-5 text-sm font-semibold text-brand-700">Prijs in het demogesprek</p>
+                )}
                 <ul className="mt-6 flex-1 space-y-3 text-sm text-muted-foreground">
                   {planFeatures(plan).map((f) => (
                     <li
@@ -227,6 +238,9 @@ export function PricingCards() {
                     </li>
                   ))}
                 </ul>
+                {demo && (
+                  <PlanDemoButton href={demo.href} from={`pakket ${plan.id}`} className="mt-8 w-full" />
+                )}
               </div>
             </div>
           );
@@ -235,9 +249,11 @@ export function PricingCards() {
         {/* Op maat: geen vaste prijs, in een gesprek afgesproken (bijv. Pro met extra scans). */}
         <div className="flex h-full flex-col rounded-2xl border border-dashed border-border bg-background/60 p-8">
           <h3 className="text-lg font-semibold">Op maat</h3>
-          <p className="mt-3 text-sm text-muted-foreground">
-            vanaf <span className="text-2xl font-bold text-foreground">€{OP_MAAT_FROM_EUROS}</span> per maand
-          </p>
+          {showPrices && (
+            <p className="mt-3 text-sm text-muted-foreground">
+              vanaf <span className="text-2xl font-bold text-foreground">€{OP_MAAT_FROM_EUROS}</span> per maand
+            </p>
+          )}
           <p className="mt-1 min-h-11 text-sm text-muted-foreground">{PLAN_TAGLINE.premium}</p>
           <ul className="mt-6 flex-1 space-y-3 text-sm text-muted-foreground">
             {[
@@ -252,12 +268,16 @@ export function PricingCards() {
               </li>
             ))}
           </ul>
-          <a
-            href={MORE_SEATS_MAILTO}
-            className="mt-8 rounded-full border border-border px-6 py-3 text-center font-semibold text-foreground/80 hover:bg-muted"
-          >
-            Neem contact op
-          </a>
+          {demo ? (
+            <PlanDemoButton href={demo.href} from="pakket op maat" className="mt-8 w-full" />
+          ) : (
+            <a
+              href={MORE_SEATS_MAILTO}
+              className="mt-8 rounded-full border border-border px-6 py-3 text-center font-semibold text-foreground/80 hover:bg-muted"
+            >
+              Neem contact op
+            </a>
+          )}
         </div>
       </div>
     </>

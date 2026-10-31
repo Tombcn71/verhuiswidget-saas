@@ -38,7 +38,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/inloggen/
       <Link href="/" className="mb-8">
         <Logo />
       </Link>
-      <SignIn path="/inloggen" signUpUrl="/#prijzen" fallbackRedirectUrl={next} />
+      <SignIn path="/inloggen" signUpUrl="/pakketten" fallbackRedirectUrl={next} />
     </div>
   );
 }

@@ -362,6 +362,9 @@ export const prospects = pgTable("prospects", {
   // Benaderd via WhatsApp (openingsbericht) en de demolink via WhatsApp gestuurd.
   whatsappSentAt: timestamp("whatsapp_sent_at", { withTimezone: true }),
   whatsappDemoAt: timestamp("whatsapp_demo_at", { withTimezone: true }),
+  // Welk openingsbericht ("A" offerteplatforms, "B" kosten bezoeken) en of er antwoord kwam: om A en B te vergelijken.
+  whatsappVariant: text("whatsapp_variant"),
+  whatsappRepliedAt: timestamp("whatsapp_replied_at", { withTimezone: true }),
   // Klikte op "Plan een adviesgesprek" (Calendly) in de opvolgmail.
   meetingClickedAt: timestamp("meeting_clicked_at", { withTimezone: true }),
   // Automatische opvolgmails via Resend (ingepland; ID's om te kunnen annuleren).

@@ -253,6 +253,13 @@
       "when": 1793293822473,
       "tag": "0035_slippery_magneto",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1793428414741,
+      "tag": "0036_blushing_mikhail_rasputin",
+      "breakpoints": true
     }
   ]
 }

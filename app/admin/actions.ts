@@ -14,6 +14,7 @@ import {
   markWhatsapp,
   parseProspectTable,
   updateProspect,
+  type WhatsappVariant,
 } from "@/lib/prospects";
 import { PlacesConfigError } from "@/lib/places";
 import { cancelAutoMails, sendDemoMail } from "@/lib/prospect-mails";
@@ -172,10 +173,14 @@ export async function fetchProspectsAction(_prev: FetchState, formData: FormData
   }
 }
 
-/** Openingsbericht of demolink via WhatsApp gestuurd (klik of kopieer in het CRM). */
-export async function whatsappAction(id: string, kind: "opening" | "demo"): Promise<void> {
+/** WhatsApp in het CRM: opening (A/B) gestuurd, antwoord gekregen of vervolg gestuurd. */
+export async function whatsappAction(
+  id: string,
+  kind: "opening" | "replied" | "demo",
+  variant?: WhatsappVariant,
+): Promise<void> {
   await requireAdmin();
-  await markWhatsapp(id, kind);
+  await markWhatsapp(id, kind, variant);
   revalidatePath("/admin");
   revalidatePath(`/admin/prospects/${id}`);
 }
