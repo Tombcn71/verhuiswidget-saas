@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Clock, Globe, Palette, Wrench } from "lucide-react";
 import { SolutionPage } from "@/app/_components/solution-page";
-import { WebsiteVisual } from "@/app/_components/solution-visuals";
+import { WebsiteVisual } from "@/app/_components/website-visual";
 
 export const metadata: Metadata = {
   title: "Onsite: offertes op je website",

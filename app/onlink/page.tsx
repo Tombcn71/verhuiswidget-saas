@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { BellRing, House, Link, Trophy, UserRound } from "lucide-react";
 import { SolutionPage } from "@/app/_components/solution-page";
-import { LinkVisual } from "@/app/_components/solution-visuals";
+import { LinkVisual } from "@/app/_components/link-visual";
 import { PlatformShowcase } from "@/app/_components/platform-showcase";
 
 export const metadata: Metadata = {
