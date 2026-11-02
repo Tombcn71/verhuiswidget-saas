@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, FileText, Inbox, Mail } from "lucide-react";
 
 const REPLY =
-  "Hoi! Bedankt voor je aanvraag. Via deze link scan je je kamers met je telefoon, en binnen een minuut heb je onze offerte in je mailbox: moverai.nl/offerte/jouw-bedrijf\nEen bezoek aan huis is niet nodig.";
+  "Hoi! Bedankt voor je aanvraag. Via deze link scan je je kamers met je telefoon, en binnen een minuut heb je onze offerte in je mailbox: moverai.nl/offerte/jouw-bedrijf\nEen huisbezoek is niet nodig.";
 const LINK = "moverai.nl/offerte/jouw-bedrijf";
 const STEPS = ["Aanvraag", "Linkje", "Offerte"];
 // Oudere, gelezen mails onder de nieuwe aanvraag: maakt de inbox echt.

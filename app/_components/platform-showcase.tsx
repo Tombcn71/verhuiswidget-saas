@@ -8,7 +8,7 @@ const LINK = "moverai.nl/offerte/jouw-bedrijf";
 
 const POINTS = [
   { Icon: Zap, text: "Als eerste een offerte, nog voordat je concurrent terugbelt." },
-  { Icon: House, text: "Geen bezoek aan huis nodig." },
+  { Icon: House, text: "Geen huisbezoek nodig." },
   { Icon: BellRing, text: "Boekt de klant niet meteen? Na 2 dagen krijgt hij vanzelf een herinnering." },
 ];
 

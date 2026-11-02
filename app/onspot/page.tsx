@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Building2, ClipboardList, MapPin, Timer } from "lucide-react";
 import { SolutionPage } from "@/app/_components/solution-page";
 import { SpotVisual } from "@/app/_components/spot-visual";
+import { AppShowcase } from "@/app/_components/app-showcase";
 
 export const metadata: Metadata = {
   title: "Onspot: scannen op locatie",
@@ -25,6 +26,7 @@ export default function OnspotPage() {
         intro:
           "Sta je bij de klant, of bij een groot pand zoals een kantoor of ontruiming? Open moverAI in de browser op je telefoon, scan de ruimtes en heb de offerte ter plekke klaar.",
         visual: <SpotVisual />,
+        extra: <AppShowcase />,
         steps: [
           { title: "Open moverAI", text: "In de browser op je telefoon." },
           { title: "Foto's per ruimte", text: "Loop door het pand en fotografeer elke ruimte." },

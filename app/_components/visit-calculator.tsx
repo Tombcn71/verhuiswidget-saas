@@ -16,7 +16,7 @@ const euro = (n: number) => `€${Math.round(n).toLocaleString("nl-NL")}`;
 const AUTOPLAY = [1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2];
 
 /**
- * "Wat kosten bezoeken aan huis jou?": één schuifje, direct de kosten per maand.
+ * "Wat kosten huisbezoeken jou?": één schuifje, direct de kosten per maand.
  * Met `autoplay` beweegt het schuifje vanzelf (voor de reel).
  */
 export function VisitCalculator({ autoplay = false }: { autoplay?: boolean }) {
@@ -39,7 +39,7 @@ export function VisitCalculator({ autoplay = false }: { autoplay?: boolean }) {
   return (
     <div className="rounded-2xl border border-border bg-background p-6 shadow-sm sm:p-8">
       <label htmlFor="bezoeken" className="flex items-baseline justify-between gap-4 font-semibold">
-        Bezoeken aan huis per week
+        Huisbezoeken per week
         <span className="text-3xl font-bold text-brand-600 tabular-nums">{perWeek}</span>
       </label>
       <input
@@ -69,10 +69,9 @@ export function VisitCalculator({ autoplay = false }: { autoplay?: boolean }) {
         ))}
       </div>
 
-      <p className="mt-4 text-xs text-muted-foreground">
-        Uitgaande van {HOURS_PER_VISIT.toLocaleString("nl-NL")} uur per bezoek à €{HOURLY_RATE} en{" "}
-        {KM_PER_VISIT / 2} km enkele reis ({KM_PER_VISIT} km heen en terug) à €{FUEL_PER_KM.toLocaleString("nl-NL", { minimumFractionDigits: 2 })} brandstof per km. Ook voor
-        klanten die uiteindelijk niet boeken.
+      <p className="mt-4 text-sm leading-relaxed text-slate-600">
+        Per bezoek: {HOURS_PER_VISIT.toLocaleString("nl-NL")} uur à €{HOURLY_RATE} en {KM_PER_VISIT} km heen en terug à €
+        {FUEL_PER_KM.toLocaleString("nl-NL", { minimumFractionDigits: 2 })} per km. Ook bij klanten die niet boeken.
       </p>
     </div>
   );

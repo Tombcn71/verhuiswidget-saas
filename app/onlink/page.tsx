@@ -3,6 +3,7 @@ import { BellRing, House, Link, Trophy, UserRound } from "lucide-react";
 import { SolutionPage } from "@/app/_components/solution-page";
 import { LinkVisual } from "@/app/_components/link-visual";
 import { PlatformShowcase } from "@/app/_components/platform-showcase";
+import { AppShowcase } from "@/app/_components/app-showcase";
 
 export const metadata: Metadata = {
   title: "Onlink: offerte via een linkje",
@@ -35,7 +36,12 @@ export default function OnlinkPage() {
             text: "Je klant krijgt jouw offerte. Jij krijgt de aanvraag met foto's en inventarislijst.",
           },
         ],
-        extra: <PlatformShowcase />,
+        extra: (
+          <>
+            <PlatformShowcase />
+            <AppShowcase />
+          </>
+        ),
         benefits: [
           {
             Icon: Trophy,
@@ -44,7 +50,7 @@ export default function OnlinkPage() {
           },
           {
             Icon: House,
-            title: "Geen bezoek aan huis",
+            title: "Geen huisbezoek",
             text: "Je klant maakt zelf de foto's. Dat scheelt uren en brandstof, ook bij klanten die niet boeken.",
           },
           {

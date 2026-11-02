@@ -36,7 +36,7 @@ const OBJECTIONS = [
   ],
   [
     "Dat is duur.",
-    "Eén bezoek aan huis kost je al anderhalf uur plus de rit. Win je er één extra opdracht per maand mee, dan heb je het ruim terugverdiend. Probeer het 14 dagen gratis, dan zie je het zelf.",
+    "Eén huisbezoek kost je al anderhalf uur plus de rit. Win je er één extra opdracht per maand mee, dan heb je het ruim terugverdiend. Probeer het 14 dagen gratis, dan zie je het zelf.",
   ],
   [
     "We zitten al bij een offerteplatform.",
@@ -115,11 +115,11 @@ export const DEFAULT_DEMO_SCRIPT = [
   "",
   "# Het gesprek",
   "1. Opening: \"Fijn dat je tijd hebt! Ik laat je in een paar minuten zien wat het voor jullie doet, en ik ben vooral benieuwd hoe jullie het nu doen. Goed?\"",
-  `2. Rekenhulp: Stuur ${SITE}/rekenhulp. "Hoeveel bezoeken aan huis doen jullie per week? Schuif maar. Dat kost je dus zo'n € … per maand, ook aan klanten die nooit boeken."`,
+  `2. Rekenhulp: Stuur ${SITE}/rekenhulp. "Hoeveel huisbezoeken doen jullie per week? Schuif maar. Dat kost je dus zo'n € … per maand, ook aan klanten die nooit boeken."`,
   `3. Hoe komen aanvragen binnen?: "Via offerteplatforms, je website of de telefoon?" Stuur de pagina die past: ${SITE}/onlink (platforms, telefoon, WhatsApp), ${SITE}/onsite (website) of ${SITE}/onspot (zelf op locatie).`,
   "4. Zelf proberen: Stuur zijn eigen demolink uit het CRM. \"Probeer het even zelf: scan een kamer, dan zie je binnen een minuut de offerte. Ik pak ondertussen een kop koffie, over 3 minuten bespreken we wat je zag.\" Blijf in het gesprek, microfoon uit.",
   "5. Wat zag hij?: \"En, wat vond je? Klopte het volume een beetje?\" Twijfel over de prijs: \"In de demo staan voorbeeldtarieven. Met jullie eigen tarieven komt er jullie prijs uit.\"",
-  `6. Afsluiten: Stuur ${SITE}/pakketten. "Welk pakket past bij jullie, Basic of Pro?" Noem nu de prijs met het terugverdienen: twee bezoeken aan huis minder en je hebt het terug. "Je begint met 14 dagen gratis, zonder betaalgegevens. Zal ik je account meteen met je opzetten?"`,
+  `6. Afsluiten: Stuur ${SITE}/pakketten. "Welk pakket past bij jullie, Basic of Pro?" Noem nu de prijs met het terugverdienen: twee huisbezoeken minder en je hebt het terug. "Je begint met 14 dagen gratis, zonder betaalgegevens. Zal ik je account meteen met je opzetten?"`,
   "",
   "# Na het gesprek",
   "- In het CRM: Proef gestart, of Gesprek gepland als hij nog wil nadenken.",

@@ -34,7 +34,7 @@ const WHATSAPP_OPENINGS = {
   A: `Hallo 👋 werken jullie met offerteplatforms?
 Ik ben Tom van moverAI. Bij een aanvraag via een platform wint vaak wie als eerste een offerte stuurt. Met mijn AI-software stuur je de klant meteen een linkje: hij maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Zonder voorinspectie, dus ook minder uren en brandstof.
 Mag ik je een linkje naar de demo sturen? Duurt een minuut.`,
-  B: `Hallo 👋 wat kosten bezoeken aan huis jou?
+  B: `Hallo 👋 wat kosten huisbezoeken jou?
 Ik ben Tom van moverAI. Met mijn AI-software maakt je klant zelf een paar foto's per kamer en krijgt hij d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Zonder voorinspectie, dus minder uren en brandstof.
 Zal ik je de rekenhulp sturen? Kost 10 seconden.`,
 };

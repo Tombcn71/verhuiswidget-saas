@@ -6,9 +6,9 @@ import { VisitCalculator } from "@/app/_components/visit-calculator";
 import { PlanDemoButton } from "@/app/_components/plan-demo-button";
 
 export const metadata: Metadata = {
-  title: "Wat kosten bezoeken aan huis jou?",
+  title: "Wat kosten huisbezoeken jou?",
   description:
-    "Schuif naar hoeveel bezoeken aan huis je per week doet en zie wat ze je per maand kosten aan uren en brandstof.",
+    "Schuif naar hoeveel huisbezoeken je per week doet en zie wat ze je per maand kosten aan uren en brandstof.",
 };
 
 /** Losse rekenhulp: om via WhatsApp of een advertentie te delen. Doel: een demogesprek plannen. */
@@ -20,7 +20,7 @@ export default function CalculatorPage() {
       <main className="flex-1 bg-muted py-16">
         <div className="mx-auto w-full max-w-3xl px-6">
           <h1 className="text-center text-4xl font-bold tracking-tight">
-            Wat kosten bezoeken aan huis <span className="text-primary">jou</span>?
+            Wat kosten huisbezoeken <span className="text-primary">jou</span>?
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-center text-muted-foreground">
             Schuif naar hoeveel bezoeken je per week doet.
@@ -32,7 +32,7 @@ export default function CalculatorPage() {
             <p className="text-lg font-semibold">Benieuwd hoeveel jij daarvan kunt besparen?</p>
             <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
               Met moverAI maakt je klant zelf een paar foto&apos;s per kamer en heeft hij binnen een
-              minuut jouw offerte. Zonder bezoek aan huis.
+              minuut jouw offerte. Zonder huisbezoek.
             </p>
             <PlanDemoButton href={calendlyUrl} from="rekenhulp" className="mt-6" />
             <p className="mt-3 text-sm text-muted-foreground">5 minuten · vrijblijvend</p>

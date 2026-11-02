@@ -153,7 +153,7 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
         {abStats.some((x) => x.sent > 0) && (
           <div
             className="flex items-center gap-3 rounded-lg border bg-background px-4 py-2 text-sm font-medium"
-            title="A = offerteplatforms, B = kosten bezoeken aan huis"
+            title="A = offerteplatforms, B = kosten huisbezoeken"
           >
             {abStats.map((x) => (
               <span key={x.v}>

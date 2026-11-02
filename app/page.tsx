@@ -1,6 +1,7 @@
 import Image from "next/image";
 import NextLink from "next/link";
 import heroImage from "@/public/hero.jpg";
+import tomImage from "@/public/tom.jpg";
 import { SiteHeader } from "@/app/_components/site-header";
 import { SiteFooter } from "@/app/_components/site-footer";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
@@ -28,7 +29,7 @@ const features = [
   {
     Icon: Timer,
     title: "Minder personeelsuren",
-    body: "Geen bezoek aan huis meer nodig. Je mensen blijven aan het werk: op de wagen of op kantoor.",
+    body: "Geen huisbezoek meer nodig. Je mensen blijven aan het werk: op de wagen of op kantoor.",
   },
   {
     Icon: Fuel,
@@ -64,7 +65,7 @@ const SOLUTION_BLURB: Record<string, string> = {
 
 // Voor en na: herkenbaar voor elke verhuizer.
 const WITHOUT = [
-  "Een bezoek aan huis plannen, vaak pas over een paar dagen",
+  "Een huisbezoek plannen, vaak pas over een paar dagen",
   "Rijden, parkeren en 1,5 uur rondlopen",
   "Daarna nog de offerte uitwerken, binnen 24 uur",
   "De klant heeft intussen een ander gekozen",
@@ -215,7 +216,7 @@ export default function HomePage() {
         <section className="py-20">
           <div className="mx-auto w-full max-w-3xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Wat kosten bezoeken aan huis <span className="text-primary">jou</span>?
+              Wat kosten huisbezoeken <span className="text-primary">jou</span>?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-center text-muted-foreground">
               Schuif naar hoeveel bezoeken je per week doet.
@@ -288,9 +289,11 @@ export default function HomePage() {
         {/* Persoonlijk */}
         <section className="py-20">
           <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-6 text-center sm:flex-row sm:text-left">
-            <div className="flex size-24 shrink-0 items-center justify-center rounded-full bg-brand-600 text-3xl font-bold text-white">
-              T
-            </div>
+            <Image
+              src={tomImage}
+              alt="Tom, oprichter van moverAI"
+              className="size-28 shrink-0 rounded-full object-cover shadow-lg"
+            />
             <div>
               <p className="text-lg">
                 &ldquo;Ik ben Tom, oprichter van moverAI. Ik bouw het samen met verhuizers, zodat het

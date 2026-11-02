@@ -16,10 +16,10 @@ const KNOPPEN = [
 ];
 
 /**
- * "Je eigen web app": een telefoon met moverAI op het beginscherm (Onlink en Onspot).
- * De twee keuzes lichten om en om op; zonder animatie (reduced motion) staat alles stil.
+ * Telefoon met moverAI als web app: het startscherm met Onlink en Onspot. De twee keuzes
+ * lichten om en om op; zonder animatie (reduced motion) staat alles stil.
  */
-export function AppShowcase() {
+export function AppPhone() {
   const ref = useRef<HTMLDivElement>(null);
   const [actief, setActief] = useState<number | null>(null);
 
@@ -48,6 +48,45 @@ export function AppShowcase() {
   }, []);
 
   return (
+    <div ref={ref}>
+      <div className="relative mx-auto aspect-9/16 w-full max-w-[17rem] overflow-hidden rounded-[2.75rem] border-[10px] border-slate-900 bg-white text-slate-900 shadow-xl dark:border-slate-700">
+        {/* Camera-eiland */}
+        <span className="absolute top-2 left-1/2 z-20 h-5 w-20 -translate-x-1/2 rounded-full bg-slate-900 dark:bg-slate-700" />
+        <div className="flex h-full flex-col px-4 pt-10 pb-4">
+          <p className="flex items-center justify-center gap-1.5 text-sm font-bold">
+            <Truck className="size-4 text-brand-600" /> Jouw Verhuisbedrijf
+          </p>
+          <div className="my-auto space-y-3">
+            {KNOPPEN.map((k, i) => (
+              <div
+                key={k.titel}
+                className={`flex flex-col items-center gap-1 rounded-2xl border-2 px-3 py-4 text-center transition duration-300 ${
+                  actief === i ? "scale-[0.97] border-brand-600 bg-brand-50" : "border-slate-200"
+                }`}
+              >
+                <span className="flex size-10 items-center justify-center rounded-xl bg-brand-600 text-white">
+                  <k.Icon className="size-5" />
+                </span>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                  {k.manier}
+                </span>
+                <span className="text-sm font-bold">{k.titel}</span>
+                <span className="text-[10px] text-slate-500">{k.tekst}</span>
+              </div>
+            ))}
+          </div>
+          <p className="flex items-center justify-center gap-1 text-[11px] text-slate-500">
+            <LayoutDashboard className="size-3.5" /> Naar dashboard
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Sectie "Je eigen web app" (homepage, Onlink, Onspot). */
+export function AppShowcase() {
+  return (
     <section id="webapp" className="scroll-mt-20 py-20">
       <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 lg:grid-cols-2 lg:gap-16">
         <div>
@@ -72,40 +111,7 @@ export function AppShowcase() {
             ))}
           </ul>
         </div>
-
-        <div ref={ref}>
-          <div className="relative mx-auto aspect-9/16 w-full max-w-[17rem] overflow-hidden rounded-[2.75rem] border-[10px] border-slate-900 bg-white text-slate-900 shadow-xl dark:border-slate-700">
-            {/* Camera-eiland */}
-            <span className="absolute top-2 left-1/2 z-20 h-5 w-20 -translate-x-1/2 rounded-full bg-slate-900 dark:bg-slate-700" />
-            <div className="flex h-full flex-col px-4 pt-10 pb-4">
-              <p className="flex items-center justify-center gap-1.5 text-sm font-bold">
-                <Truck className="size-4 text-brand-600" /> Jouw Verhuisbedrijf
-              </p>
-              <div className="my-auto space-y-3">
-                {KNOPPEN.map((k, i) => (
-                  <div
-                    key={k.titel}
-                    className={`flex flex-col items-center gap-1 rounded-2xl border-2 px-3 py-4 text-center transition duration-300 ${
-                      actief === i ? "scale-[0.97] border-brand-600 bg-brand-50" : "border-slate-200"
-                    }`}
-                  >
-                    <span className="flex size-10 items-center justify-center rounded-xl bg-brand-600 text-white">
-                      <k.Icon className="size-5" />
-                    </span>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                      {k.manier}
-                    </span>
-                    <span className="text-sm font-bold">{k.titel}</span>
-                    <span className="text-[10px] text-slate-500">{k.tekst}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="flex items-center justify-center gap-1 text-[11px] text-slate-500">
-                <LayoutDashboard className="size-3.5" /> Naar dashboard
-              </p>
-            </div>
-          </div>
-        </div>
+        <AppPhone />
       </div>
     </section>
   );
