@@ -42,7 +42,7 @@ const REELS = {
     header: <>Aanvraag via een offerteplatform? <span className="text-brand-600">Binnen 1 minuut jouw offerte.</span></>,
     // Korte belofte voor het beginscherm (max. 5 à 6 woorden).
     intro: <>Als eerste bij <span className="text-brand-600">offerteplatforms.</span></>,
-    visual: <LinkVisual />,
+    visual: <LinkVisual stickers />,
   },
   onsite: {
     // Startscherm in de demovideo: onderdeel en de volledige kop.
@@ -50,7 +50,7 @@ const REELS = {
     header: <>De moverAI-widget op je website. <span className="text-brand-600">Offertes, ook &apos;s avonds en in het weekend.</span></>,
     // Korte belofte voor het beginscherm (max. 5 à 6 woorden).
     intro: <>moverAI op <span className="text-brand-600">je website.</span></>,
-    visual: <WebsiteVisual />,
+    visual: <WebsiteVisual stickers />,
   },
   rekenhulp: {
     // Startscherm in de demovideo: onderdeel en de volledige kop.
@@ -72,7 +72,7 @@ const REELS = {
     intro: <>Offerte <span className="text-brand-600">ter&nbsp;plekke.</span></>,
     visual: (
       <div className="mx-auto w-[17rem] origin-center scale-[1.3]">
-        <SpotVisual />
+        <SpotVisual stickers />
       </div>
     ),
   },

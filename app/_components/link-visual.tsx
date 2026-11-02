@@ -26,7 +26,7 @@ const T_END = 120;
  * het linkje, en je klant heeft binnen een minuut je offerte. Speelt alleen als
  * hij in beeld is; zonder animatie (reduced motion) staat de offerte er meteen.
  */
-export function LinkVisual() {
+export function LinkVisual({ stickers = false }: { stickers?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const [t, setT] = useState(0);
 
@@ -58,9 +58,9 @@ export function LinkVisual() {
   const sent = t >= T_REPLY + 38;
 
   return (
-    <div ref={ref} className="relative pt-5">
-      <Sticker text={STICKERS[step]} />
-      <div className="rounded-2xl border border-border bg-background p-5 pt-7 shadow-xl">
+    <div ref={ref} className={stickers ? "relative pt-5" : ""}>
+      {stickers && <Sticker text={STICKERS[step]} />}
+      <div className={`rounded-2xl border border-border bg-background p-5 shadow-xl ${stickers ? "pt-7" : ""}`}>
       <div className="min-h-64 text-slate-800 dark:text-slate-100">
         {step === 0 && (
           <div>

@@ -19,7 +19,7 @@ const T_END = 90;
  * minuut" en het venster opent over de site. Speelt alleen als hij in beeld is;
  * zonder animatie (reduced motion) staat het venster meteen open.
  */
-export function WebsiteVisual() {
+export function WebsiteVisual({ stickers = false }: { stickers?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const [t, setT] = useState(0);
 
@@ -52,10 +52,12 @@ export function WebsiteVisual() {
   const pointer = atButton ? "translate(0, 0)" : t >= 4 && t < T_MOVE ? "translate(115px, 0px)" : "translate(160px, 45px)";
 
   return (
-    <div ref={ref} className="relative pt-5">
-      <Sticker
-        text={open ? "moverAI opent in jouw huisstijl" : atButton ? "Klikt op Offerte in 1 minuut" : "Bezoeker op jouw website"}
-      />
+    <div ref={ref} className={stickers ? "relative pt-5" : ""}>
+      {stickers && (
+        <Sticker
+          text={open ? "moverAI opent in jouw huisstijl" : atButton ? "Klikt op Offerte in 1 minuut" : "Bezoeker op jouw website"}
+        />
+      )}
       <div className="overflow-hidden rounded-2xl border border-border bg-background shadow-xl">
       <div className="flex items-center gap-1.5 border-b border-border bg-muted px-4 py-2.5">
         <span className="size-2.5 rounded-full bg-red-400" />

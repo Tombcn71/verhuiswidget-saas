@@ -1,5 +1,5 @@
 /**
- * Stickertekst bovenop een animatie (zoals in een reel): zegt kort wat er nu gebeurt.
+ * Stickertekst bovenop een animatie, alleen voor de reels: zegt kort wat er nu gebeurt.
  * Plaats hem in een `relative pt-5` wrapper; bij een nieuwe tekst springt hij opnieuw in beeld.
  */
 export function Sticker({ text }: { text: string }) {
