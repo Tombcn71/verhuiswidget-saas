@@ -12,7 +12,7 @@ import { LinkVisual } from "@/app/_components/link-visual";
 import { WebsiteVisual } from "@/app/_components/website-visual";
 import { SpotVisual } from "@/app/_components/spot-visual";
 import { VisitCalculator } from "@/app/_components/visit-calculator";
-import { PlanDemoButton } from "@/app/_components/plan-demo-button";
+import { PlanDemoButton, warmCalendly } from "@/app/_components/plan-demo-button";
 
 // `fill`: de visual krijgt de hele ruimte (de laatste dia: foto in het midden, knop onderin).
 type Slide = { fill?: boolean; title: React.ReactNode; text?: string; visual: React.ReactNode };
@@ -147,6 +147,9 @@ export function Slides({ calendlyUrl }: { calendlyUrl: string | null }) {
     },
     [all.length],
   );
+
+  // De agenda op de laatste dia alvast laden, zodat hij meteen opent.
+  useEffect(() => warmCalendly(calendlyUrl), [calendlyUrl]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

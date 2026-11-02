@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Tag } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -45,7 +45,7 @@ export function MobileMenu({
     }, 300);
   };
 
-  const solutions = [...SOLUTIONS, { href: "/pakketten", name: "Pakketten", sub: "Basic, Pro, Op maat", Icon: Tag }];
+  const solutions = SOLUTIONS;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

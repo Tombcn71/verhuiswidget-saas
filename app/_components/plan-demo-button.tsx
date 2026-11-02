@@ -5,32 +5,81 @@ import { track } from "@vercel/analytics";
 import { cn } from "@/lib/utils";
 import { CONTACT_EMAIL } from "@/lib/plans";
 
-declare global {
-  interface Window {
-    Calendly?: { initPopupWidget: (opts: { url: string }) => void };
-  }
-}
-
 /**
- * Laadt de Calendly-pop-up één keer per pagina en telt geplande afspraken in Vercel Analytics.
- * Laadt hij niet (adblocker, geen netwerk), dan opent de knop gewoon de Calendly-link.
+ * Calendly in een eigen pop-up over de site (site erachter geblurd). De agenda wordt één keer
+ * onzichtbaar geladen zodra de pagina rustig is; bij de klik tonen we precies dat venster, zodat
+ * hij meteen open staat in plaats van na seconden laden.
  */
-function loadCalendly() {
-  if (document.getElementById("calendly-widget")) return;
-  const css = document.createElement("link");
-  css.rel = "stylesheet";
-  css.href = "https://assets.calendly.com/assets/external/widget.css";
-  document.head.appendChild(css);
-  const js = document.createElement("script");
-  js.id = "calendly-widget";
-  js.src = "https://assets.calendly.com/assets/external/widget.js";
-  js.async = true;
-  document.head.appendChild(js);
-  window.addEventListener("message", (e) => {
+// Verborgen met opacity in plaats van visibility/display: dan pauzeert de browser het laden niet.
+let modal: HTMLDivElement | null = null;
+
+function buildModal(href: string) {
+  if (modal) return modal;
+  const url = new URL(href);
+  url.searchParams.set("embed_domain", location.host);
+  url.searchParams.set("embed_type", "Inline");
+  url.searchParams.set("hide_gdpr_banner", "1"); // geen cookiemelding van Calendly
+
+  const m = document.createElement("div");
+  m.style.cssText =
+    "position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;" +
+    "background:rgb(15 23 42 / .35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" +
+    "opacity:0;pointer-events:none;transition:opacity .2s";
+  const box = document.createElement("div");
+  box.style.cssText =
+    "position:relative;width:100%;height:100%;max-width:1000px;max-height:min(720px,100dvh);" +
+    "background:#fff;overflow:hidden;border-radius:" +
+    (innerWidth >= 640 ? "16px" : "0");
+  const frame = document.createElement("iframe");
+  frame.src = url.toString();
+  frame.title = "Plan een adviesgesprek";
+  frame.style.cssText = "width:100%;height:100%;border:0";
+  const close = document.createElement("button");
+  close.type = "button";
+  close.setAttribute("aria-label", "Sluiten");
+  close.textContent = "×";
+  close.style.cssText =
+    "position:absolute;top:8px;left:8px;width:40px;height:40px;border-radius:9999px;border:0;" +
+    "background:rgb(15 23 42 / .75);color:#fff;font-size:26px;line-height:1;cursor:pointer";
+
+  const hide = () => {
+    m.style.opacity = "0";
+    m.style.pointerEvents = "none";
+    document.body.style.overflow = "";
+  };
+  close.onclick = hide;
+  m.onclick = (e) => {
+    if (e.target === m) hide();
+  };
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape") hide();
+  });
+  addEventListener("message", (e) => {
     if (e.origin === "https://calendly.com" && e.data?.event === "calendly.event_scheduled") {
       track("Afspraak gepland");
     }
   });
+
+  box.append(frame, close);
+  m.append(box);
+  document.body.append(m);
+  modal = m;
+  return m;
+}
+
+function openModal(href: string) {
+  const m = buildModal(href);
+  m.style.pointerEvents = "auto";
+  m.style.opacity = "1";
+  document.body.style.overflow = "hidden";
+}
+
+/** Laadt de agenda alvast onzichtbaar zodra de pagina rustig is (ook vanuit de presentatie). */
+export function warmCalendly(href: string | null) {
+  if (!href) return;
+  const warm = () => setTimeout(() => buildModal(href), 1500);
+  if (document.readyState === "complete") warm();
+  else addEventListener("load", warm, { once: true });
 }
 
 /**
@@ -49,9 +98,7 @@ export function PlanDemoButton({
   className?: string;
   children?: React.ReactNode;
 }) {
-  useEffect(() => {
-    if (href) loadCalendly();
-  }, [href]);
+  useEffect(() => warmCalendly(href), [href]);
 
   return (
     <a
@@ -60,16 +107,9 @@ export function PlanDemoButton({
       rel="noopener"
       onClick={(e) => {
         track("Demo inplannen", { from });
-        if (href && window.Calendly) {
+        if (href) {
           e.preventDefault();
-          window.Calendly.initPopupWidget({ url: href });
-          // Site erachter blurren (via de stijl zelf: de CSS-build laat backdrop-filter weg).
-          const bg = document.querySelector<HTMLElement>(".calendly-close-overlay");
-          if (bg) {
-            bg.style.backgroundColor = "rgb(15 23 42 / 0.35)";
-            bg.style.backdropFilter = "blur(8px)";
-            bg.style.setProperty("-webkit-backdrop-filter", "blur(8px)");
-          }
+          openModal(href);
         }
       }}
       className={cn(

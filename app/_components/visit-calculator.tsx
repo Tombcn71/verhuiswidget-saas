@@ -6,7 +6,7 @@ import { Clock, Fuel, Wallet } from "lucide-react";
 // Aannames, ook onder de rekenhulp vermeld.
 const HOURS_PER_VISIT = 1.5;
 const HOURLY_RATE = 45;
-const KM_PER_VISIT = 20;
+const KM_PER_VISIT = 10;
 const FUEL_PER_KM = 0.25;
 const WEEKS_PER_MONTH = 4.33;
 
@@ -71,7 +71,7 @@ export function VisitCalculator({ autoplay = false, compact = false }: { autopla
       </div>
 
       <p className="mt-4 text-sm leading-relaxed text-slate-600">
-        Per bezoek: {HOURS_PER_VISIT.toLocaleString("nl-NL")} uur à €{HOURLY_RATE} en {KM_PER_VISIT} km heen en terug à €
+        Per bezoek: {HOURS_PER_VISIT.toLocaleString("nl-NL")} uur à €{HOURLY_RATE} en {KM_PER_VISIT} km brandstof à €
         {FUEL_PER_KM.toLocaleString("nl-NL", { minimumFractionDigits: 2 })} per km. Ook bij klanten die niet boeken.
       </p>
     </div>

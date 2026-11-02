@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Tag } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { SOLUTIONS } from "./solutions";
 
-/** Desktopmenu "Oplossingen": Onlink, Onsite, Onspot en Pakketten. */
+/** Desktopmenu "Oplossingen": Onlink, Onsite en Onspot. */
 export function SolutionsMenu() {
   const [open, setOpen] = useState(false);
-  const items = [...SOLUTIONS, { href: "/pakketten", name: "Pakketten", sub: "Basic, Pro of Op maat", Icon: Tag }];
+  const items = SOLUTIONS;
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>

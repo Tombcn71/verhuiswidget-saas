@@ -11,6 +11,7 @@ import { PlanDemoButton } from "@/app/_components/plan-demo-button";
 import { HeroTimer } from "@/app/_components/hero-timer";
 import { VisitCalculator } from "@/app/_components/visit-calculator";
 import { SOLUTIONS } from "@/app/_components/solutions";
+import { PricingCards, TrialCard } from "@/app/_components/pricing-cards";
 import { ArrowRight, Check, Keyboard, Star, X } from "lucide-react";
 import {
   Timer,
@@ -302,6 +303,29 @@ export default function HomePage() {
               </p>
               <PlanDemoButton href={calendlyUrl} from="home tom" className="mt-5" />
             </div>
+          </div>
+        </section>
+
+        {/* Pakketten */}
+        <section id="pakketten" className="scroll-mt-20 border-t border-border bg-muted py-20">
+          <div className="mx-auto w-full max-w-5xl px-6">
+            <h2 className="text-center text-3xl font-bold tracking-tight">
+              Probeer mover<span className="text-primary">AI</span> 14 dagen gratis
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
+              Alle functies, geen betaalgegevens nodig en er wordt niets automatisch afgeschreven.
+              Bevalt het? Dan kies je daarna pas een pakket.
+            </p>
+            <TrialCard primaryButton="bg-brand-600 text-white shadow-sm transition hover:bg-brand-700" calendlyUrl={calendlyUrl} />
+            <h3 className="mt-16 text-center text-xl font-semibold tracking-tight">
+              Na je proefperiode: kies het pakket dat bij je past
+            </h3>
+            <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
+              Met Basic geef je al 100 klanten per maand binnen een minuut jouw offerte, zonder
+              huisbezoek. Twee huisbezoeken minder en je hebt het al terugverdiend. Elke extra klus is
+              winst.
+            </p>
+            <PricingCards demo={{ href: calendlyUrl }} />
           </div>
         </section>
 

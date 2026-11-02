@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/theme";
 /** Secties op de homepage; met "/" ervoor, zodat ze ook vanaf de andere pagina's werken. */
 export const NAV_LINKS = [
   { href: "/#voordelen", label: "Voordelen" },
+  { href: "/#pakketten", label: "Pakketten" },
   { href: "/#faq", label: "FAQ" },
 ];
 

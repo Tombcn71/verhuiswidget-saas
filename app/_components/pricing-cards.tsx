@@ -74,7 +74,7 @@ export function TrialCard({
         {[
           "14 dagen alle functies",
           "Upload een oude factuur en je tarieven staan klaar",
-          "Persoonlijke hulp bij het instellen, via WhatsApp",
+          "Persoonlijke hulp bij het instellen",
         ].map((text) => (
           <li key={text} className="flex gap-2.5">
             <CheckIcon />
@@ -92,16 +92,13 @@ export function TrialCard({
         >
           Start je gratis proefperiode
         </Link>
-        {calendlyUrl && (
-          <a
-            href={calendlyUrl}
-            target="_blank"
-            rel="noopener"
-            className="w-full rounded-full border border-border bg-background px-6 py-3 text-center font-semibold shadow-sm transition hover:bg-muted sm:w-auto"
-          >
-            Plan een vrijblijvend adviesgesprek
-          </a>
-        )}
+        <PlanDemoButton
+          href={calendlyUrl}
+          from="proefperiode"
+          className="w-full border border-border bg-background text-foreground hover:bg-muted sm:w-auto"
+        >
+          Plan een vrijblijvend adviesgesprek
+        </PlanDemoButton>
       </div>
       {calendlyUrl && (
         <p className="mt-2 text-xs text-muted-foreground">
