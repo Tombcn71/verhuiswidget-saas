@@ -3,7 +3,7 @@ import { Slides } from "./slides";
 
 export const metadata: Metadata = {
   title: "moverAI in 1 minuut",
-  description: "AI-software voor verhuizers: offerte in 1 minuut, zonder huisbezoek.",
+  description: "AI-software voor verhuizers: offerte in 1 minuut, zonder voorinspectie.",
   robots: { index: false, follow: false },
 };
 

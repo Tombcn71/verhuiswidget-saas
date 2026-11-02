@@ -50,7 +50,7 @@ export default function OnlinkPage() {
           },
           {
             Icon: House,
-            title: "Geen huisbezoek",
+            title: "Geen voorinspectie",
             text: "Je klant maakt zelf de foto's. Dat scheelt uren en brandstof, ook bij klanten die niet boeken.",
           },
           {

@@ -19,7 +19,7 @@ export default function PackagesPage() {
           <h1 className="text-center text-4xl font-bold tracking-tight">Pakketten</h1>
           <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
             Met Basic geef je al 100 klanten per maand binnen een minuut jouw offerte, zonder langs te
-            gaan. Twee huisbezoeken minder en je hebt het al terugverdiend. Elke extra klus is
+            gaan. Twee voorinspecties minder en je hebt het al terugverdiend. Elke extra klus is
             winst. In een adviesgesprek van 15 minuten laat ik zien welk pakket bij je past.
           </p>
           <PricingCards demo={{ href: calendlyUrl }} />

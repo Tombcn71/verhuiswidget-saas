@@ -24,7 +24,7 @@ function slides(calendlyUrl: string | null): Slide[] {
     {
       title: (
         <>
-          Offerte in 1 minuut. <span className={B}>Zonder huisbezoek.</span>
+          Offerte in 1 minuut. <span className={B}>Zonder voorinspectie.</span>
         </>
       ),
       text: "Je klant scant zijn inboedel en krijgt direct jouw offerte.",
@@ -38,10 +38,10 @@ function slides(calendlyUrl: string | null): Slide[] {
     {
       title: (
         <>
-          Wat kosten huisbezoeken <span className={B}>jou</span>?
+          Wat kosten voorinspecties <span className={B}>jou</span>?
         </>
       ),
-      text: "Schuif naar je bezoeken per week.",
+      text: "Schuif naar je voorinspecties per week.",
       visual: <VisitCalculator compact />,
     },
     {

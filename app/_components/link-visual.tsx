@@ -5,7 +5,7 @@ import { Check, FileText, Inbox, Mail } from "lucide-react";
 import { Sticker } from "./sticker";
 
 const REPLY =
-  "Hoi! Bedankt voor je aanvraag. Via deze link scan je je kamers met je telefoon, en binnen een minuut heb je onze offerte in je mailbox: moverai.nl/offerte/jouw-bedrijf\nEen huisbezoek is niet nodig.";
+  "Hoi! Bedankt voor je aanvraag. Via deze link scan je je kamers met je telefoon, en binnen een minuut heb je onze offerte in je mailbox: moverai.nl/offerte/jouw-bedrijf\nEen voorinspectie is niet nodig.";
 const LINK = "moverai.nl/offerte/jouw-bedrijf";
 const STEPS = ["Aanvraag", "Linkje", "Offerte"];
 const STICKERS = ["Aanvraag via een offerteplatform", "Jij stuurt met één klik je linkje", "Binnen 1 minuut jouw offerte"];
@@ -58,7 +58,7 @@ export function LinkVisual({ stickers = false }: { stickers?: boolean }) {
   const sent = t >= T_REPLY + 38;
 
   return (
-    <div ref={ref} className={stickers ? "relative pt-5" : ""}>
+    <div ref={ref} className={stickers ? "relative pt-8" : ""}>
       {stickers && <Sticker text={STICKERS[step]} />}
       <div className={`rounded-2xl border border-border bg-background p-5 shadow-xl ${stickers ? "pt-7" : ""}`}>
       <div className="min-h-64 text-slate-800 dark:text-slate-100">

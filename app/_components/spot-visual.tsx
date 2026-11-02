@@ -113,7 +113,7 @@ export function SpotVisual({ stickers = false }: { stickers?: boolean }) {
                 : "Offerte ter plekke versturen";
 
   return (
-    <div ref={ref} className={stickers ? "relative pt-5" : ""}>
+    <div ref={ref} className={stickers ? "relative pt-8" : ""}>
       {stickers && <Sticker text={sticker} />}
     <div
       className="relative mx-auto aspect-9/16 w-full max-w-[17rem] overflow-hidden rounded-[2.75rem] border-[10px] border-slate-900 bg-white text-slate-900 shadow-xl dark:border-slate-700"

@@ -52,7 +52,7 @@ export function WebsiteVisual({ stickers = false }: { stickers?: boolean }) {
   const pointer = atButton ? "translate(0, 0)" : t >= 4 && t < T_MOVE ? "translate(115px, 0px)" : "translate(160px, 45px)";
 
   return (
-    <div ref={ref} className={stickers ? "relative pt-5" : ""}>
+    <div ref={ref} className={stickers ? "relative pt-8" : ""}>
       {stickers && (
         <Sticker
           text={open ? "moverAI opent in jouw huisstijl" : atButton ? "Klikt op Offerte in 1 minuut" : "Bezoeker op jouw website"}

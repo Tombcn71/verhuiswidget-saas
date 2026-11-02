@@ -16,7 +16,7 @@ const euro = (n: number) => `€${Math.round(n).toLocaleString("nl-NL")}`;
 const AUTOPLAY = [1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2];
 
 /**
- * "Wat kosten huisbezoeken jou?": één schuifje, direct de kosten per maand.
+ * "Wat kosten voorinspecties jou?": één schuifje, direct de kosten per maand.
  * Met `autoplay` beweegt het schuifje vanzelf (voor de reel). `compact` (presentatie): uren en
  * brandstof naast elkaar en de kosten breed eronder, zodat hij minder hoog is.
  */
@@ -40,7 +40,7 @@ export function VisitCalculator({ autoplay = false, compact = false }: { autopla
   return (
     <div className={`rounded-2xl border border-border bg-background shadow-sm ${compact ? "p-5" : "p-6 sm:p-8"}`}>
       <label htmlFor="bezoeken" className="flex items-baseline justify-between gap-4 font-semibold">
-        Huisbezoeken per week
+        Voorinspecties per week
         <span className="text-3xl font-bold text-brand-600 tabular-nums">{perWeek}</span>
       </label>
       <input
@@ -71,7 +71,7 @@ export function VisitCalculator({ autoplay = false, compact = false }: { autopla
       </div>
 
       <p className="mt-4 text-sm leading-relaxed text-slate-600">
-        Per bezoek: {HOURS_PER_VISIT.toLocaleString("nl-NL")} uur à €{HOURLY_RATE} en {KM_PER_VISIT} km brandstof à €
+        Per voorinspectie: {HOURS_PER_VISIT.toLocaleString("nl-NL")} uur à €{HOURLY_RATE} en {KM_PER_VISIT} km brandstof à €
         {FUEL_PER_KM.toLocaleString("nl-NL", { minimumFractionDigits: 2 })} per km. Ook bij klanten die niet boeken.
       </p>
     </div>

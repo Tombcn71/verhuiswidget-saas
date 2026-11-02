@@ -55,9 +55,9 @@ const REELS = {
   rekenhulp: {
     // Startscherm in de demovideo: onderdeel en de volledige kop.
     label: "Rekenhulp",
-    header: <>Wat kosten huisbezoeken <span className="text-brand-600">jou</span>?</>,
+    header: <>Wat kosten voorinspecties <span className="text-brand-600">jou</span>?</>,
     // Korte belofte voor het beginscherm (max. 5 à 6 woorden).
-    intro: <>Wat kost een <span className="text-brand-600">huisbezoek?</span></>,
+    intro: <>Wat kost een <span className="text-brand-600">voorinspectie?</span></>,
     visual: (
       <div className="origin-center">
         <VisitCalculator autoplay />

@@ -30,7 +30,7 @@ const features = [
   {
     Icon: Timer,
     title: "Minder personeelsuren",
-    body: "Geen huisbezoek meer nodig. Je mensen blijven aan het werk: op de wagen of op kantoor.",
+    body: "Geen voorinspectie meer nodig. Je mensen blijven aan het werk: op de wagen of op kantoor.",
   },
   {
     Icon: Fuel,
@@ -66,7 +66,7 @@ const SOLUTION_BLURB: Record<string, string> = {
 
 // Voor en na: herkenbaar voor elke verhuizer.
 const WITHOUT = [
-  "Een huisbezoek plannen, vaak pas over een paar dagen",
+  "Een voorinspectie plannen, vaak pas over een paar dagen",
   "Rijden, parkeren en 1,5 uur rondlopen",
   "Daarna nog de offerte uitwerken, binnen 24 uur",
   "De klant heeft intussen een ander gekozen",
@@ -217,10 +217,10 @@ export default function HomePage() {
         <section className="py-20">
           <div className="mx-auto w-full max-w-3xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight">
-              Wat kosten huisbezoeken <span className="text-primary">jou</span>?
+              Wat kosten voorinspecties <span className="text-primary">jou</span>?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-center text-muted-foreground">
-              Schuif naar hoeveel bezoeken je per week doet.
+              Schuif naar hoeveel voorinspecties je per week doet.
             </p>
             <div className="mt-10">
               <VisitCalculator />
@@ -322,7 +322,7 @@ export default function HomePage() {
             </h3>
             <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
               Met Basic geef je al 100 klanten per maand binnen een minuut jouw offerte, zonder
-              huisbezoek. Twee huisbezoeken minder en je hebt het al terugverdiend. Elke extra klus is
+              voorinspectie. Twee voorinspecties minder en je hebt het al terugverdiend. Elke extra klus is
               winst.
             </p>
             <PricingCards demo={{ href: calendlyUrl }} />
