@@ -22,7 +22,7 @@ export type SolutionContent = {
 
 /**
  * Landingspagina voor één manier van gebruik (Onlink, Onsite, Onspot). Alles
- * stuurt naar één doel: een demogesprek van 5 minuten.
+ * stuurt naar één doel: een adviesgesprek van 5 minuten.
  */
 export function SolutionPage({ c }: { c: SolutionContent }) {
   const calendlyUrl = process.env.CALENDLY_URL ?? null;

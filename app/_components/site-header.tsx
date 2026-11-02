@@ -15,7 +15,7 @@ export const NAV_LINKS = [
 
 /**
  * Navigatie van de site (shadcn). Desktop: Oplossingen en links in het midden,
- * "Plan een demogesprek" rechts. Telefoon: hamburger met uitschuifpaneel (Sheet).
+ * "Plan een adviesgesprek" rechts. Telefoon: hamburger met uitschuifpaneel (Sheet).
  */
 export async function SiteHeader() {
   const { userId } = await auth();

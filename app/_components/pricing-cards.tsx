@@ -136,8 +136,8 @@ const euro = (cents: number) =>
 
 /**
  * Prijskaarten met de schakelaar Maandelijks / Jaarlijks. Met `demo` (pagina
- * Pakketten) geen bedragen: die noemt Tom in het demogesprek; elke kaart krijgt
- * dan een knop "Plan een demogesprek".
+ * Pakketten) geen bedragen: die noemt Tom in het adviesgesprek; elke kaart krijgt
+ * dan een knop "Plan een adviesgesprek".
  */
 export function PricingCards({ demo }: { demo?: { href: string | null } } = {}) {
   const [interval, setInterval] = useState<BillingInterval>("month");
@@ -222,7 +222,7 @@ export function PricingCards({ demo }: { demo?: { href: string | null } } = {}) 
                 </p>
                 </>
                 ) : (
-                  <p className="mt-5 text-sm font-semibold text-brand-700">Prijs in het demogesprek</p>
+                  <p className="mt-5 text-sm font-semibold text-brand-700">Prijs in het adviesgesprek</p>
                 )}
                 <ul className="mt-6 flex-1 space-y-3 text-sm text-muted-foreground">
                   {planFeatures(plan).map((f) => (

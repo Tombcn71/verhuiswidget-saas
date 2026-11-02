@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** Presentatie om als link via WhatsApp te sturen; de laatste dia plant een demogesprek. */
+/** Presentatie om als link via WhatsApp te sturen; de laatste dia plant een adviesgesprek. */
 export default function PresentationPage() {
   return <Slides calendlyUrl={process.env.CALENDLY_URL ?? null} />;
 }
