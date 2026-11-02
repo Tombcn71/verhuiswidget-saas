@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 
 /**
  * Pagina's die altijd licht blijven: wat de klanten van een verhuizer zien
- * (widget, demo-widget, boekingspagina) hoort bij de huisstijl van de verhuizer.
+ * (widget, demo-widget, boekingspagina) hoort bij de huisstijl van de verhuizer. De presentatie
+ * en de reels zijn ontworpen op wit.
  */
-const LIGHT_ONLY = /^\/(widget|demo|boeken)(\/|$)/;
+const LIGHT_ONLY = /^\/(widget|demo|boeken|presentatie|reel)(\/|$)/;
 
 /**
  * Elk bezoek begint zoals het systeem staat (licht/donker); er wordt niets
