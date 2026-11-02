@@ -24,7 +24,7 @@ export default function OnspotPage() {
           </>
         ),
         intro:
-          "Sta je bij de klant, of bij een groot pand zoals een kantoor of ontruiming? Open moverAI in de browser op je telefoon, scan de ruimtes en heb de offerte ter plekke klaar.",
+          "Sta je bij de klant voor een verhuizing, of bij een groot pand zoals een kantoor? Open moverAI op je telefoon, scan de inboedel per ruimte en heb de offerte ter plekke klaar.",
         visual: <SpotVisual />,
         extra: <AppShowcase />,
         steps: [
