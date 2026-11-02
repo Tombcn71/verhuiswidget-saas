@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { track } from "@vercel/analytics";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -27,7 +27,7 @@ function slides(calendlyUrl: string | null): Slide[] {
           Offerte in 1 minuut. <span className={B}>Zonder huisbezoek.</span>
         </>
       ),
-      text: "Je klant scant zijn inboedel met zijn telefoon en krijgt direct een offerte met jouw tarieven.",
+      text: "Je klant scant zijn inboedel en krijgt direct jouw offerte.",
       visual: (
         <div className="relative mx-auto aspect-4/5 w-full overflow-hidden rounded-2xl shadow-xl ring-1 ring-border">
           <Image src={heroImage} alt="" fill priority sizes="28rem" className="object-cover object-[25%_50%]" />
@@ -41,7 +41,7 @@ function slides(calendlyUrl: string | null): Slide[] {
           Wat kosten huisbezoeken <span className={B}>jou</span>?
         </>
       ),
-      text: "Schuif naar hoeveel bezoeken je per week doet.",
+      text: "Schuif naar je bezoeken per week.",
       visual: <VisitCalculator />,
     },
     {
@@ -50,7 +50,7 @@ function slides(calendlyUrl: string | null): Slide[] {
           Aanvraag via een offerteplatform? <span className={B}>Als eerste met een offerte.</span>
         </>
       ),
-      text: "Stuur je klant met één klik je linkje. Binnen een minuut heeft hij jouw offerte.",
+      text: "Stuur je klant met één klik je linkje.",
       visual: <LinkVisual />,
     },
     {
@@ -59,7 +59,7 @@ function slides(calendlyUrl: string | null): Slide[] {
           Je website haalt aanvragen binnen. <span className={B}>Ook &apos;s avonds.</span>
         </>
       ),
-      text: "Een knop op je eigen site, in jouw huisstijl. Bezoekers hebben meteen je offerte.",
+      text: "Een knop op je eigen site, in jouw huisstijl.",
       visual: <WebsiteVisual />,
     },
     {
@@ -68,7 +68,7 @@ function slides(calendlyUrl: string | null): Slide[] {
           Zelf bij de klant? <span className={B}>Scan ter plekke.</span>
         </>
       ),
-      text: "Scan de kamers met je eigen telefoon. De AI telt het volume en je verstuurt de offerte ter plekke.",
+      text: "Scan de kamers en verstuur de offerte ter plekke.",
       visual: <SpotVisual />,
     },
     {
@@ -80,8 +80,8 @@ function slides(calendlyUrl: string | null): Slide[] {
       fill: true,
       visual: (
         <div className="flex h-full flex-col text-center">
-          <div className="mt-14 mb-auto">
-            <Image src={tomImage} alt="Tom, oprichter van moverAI" className="mx-auto size-32 rounded-full object-cover shadow-lg" />
+          <div className="my-auto">
+            <Image src={tomImage} alt="Tom, oprichter van moverAI" className="mx-auto size-28 rounded-full object-cover shadow-lg" />
             <p className="mx-auto mt-4 max-w-xs text-lg text-muted-foreground">
               Hallo 👋 ik ben Tom,
               <br />
@@ -98,6 +98,36 @@ function slides(calendlyUrl: string | null): Slide[] {
       ),
     },
   ];
+}
+
+/**
+ * Verkleint de inhoud zodat hij in de beschikbare hoogte past; zo hoeft er op geen enkele
+ * telefoon gescrold te worden.
+ */
+function Fit({ children }: { children: React.ReactNode }) {
+  const outer = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const o = outer.current;
+    const n = inner.current;
+    if (!o || !n) return;
+    const update = () => setScale(Math.min(1, o.clientHeight / n.offsetHeight));
+    const ro = new ResizeObserver(update);
+    ro.observe(o);
+    ro.observe(n);
+    update();
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={outer} className="flex h-full items-center justify-center">
+      <div ref={inner} className="w-full shrink-0" style={{ transform: `scale(${scale})` }}>
+        {children}
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -130,7 +160,7 @@ export function Slides({ calendlyUrl }: { calendlyUrl: string | null }) {
   const s = all[i];
   return (
     <div
-      className="flex min-h-dvh flex-col bg-white text-foreground"
+      className="flex h-dvh flex-col overflow-hidden bg-white text-foreground"
       onTouchStart={(e) => (touchX.current = e.touches[0].clientX)}
       onTouchEnd={(e) => {
         if (touchX.current === null) return;
@@ -139,22 +169,20 @@ export function Slides({ calendlyUrl }: { calendlyUrl: string | null }) {
         touchX.current = null;
       }}
     >
-      <header className="flex justify-center pt-6">
+      <header className="flex shrink-0 justify-center pt-4">
         <Logo className="text-lg" />
       </header>
 
       <main
         key={i}
-        className="mx-auto flex w-full max-w-md flex-1 flex-col px-6 pt-8 animate-in fade-in duration-300"
+        className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col px-6 pt-5 animate-in fade-in duration-300"
       >
-        <h1 className="text-center text-balance text-3xl leading-tight font-bold tracking-tight">{s.title}</h1>
-        {s.text && <p className="mt-3 text-center text-balance text-lg text-muted-foreground">{s.text}</p>}
-        <div className={`flex flex-1 justify-center py-8 ${s.fill ? "items-stretch" : "items-center"}`}>
-          <div className="w-full text-left">{s.visual}</div>
-        </div>
+        <h1 className="text-center text-balance text-2xl leading-tight font-bold tracking-tight">{s.title}</h1>
+        {s.text && <p className="mt-2 text-center text-balance text-muted-foreground">{s.text}</p>}
+        <div className="min-h-0 flex-1 py-5 text-left">{s.fill ? s.visual : <Fit>{s.visual}</Fit>}</div>
       </main>
 
-      <footer className="mx-auto flex w-full max-w-md items-center justify-between px-6 pb-8">
+      <footer className="mx-auto flex w-full max-w-md shrink-0 items-center justify-between px-6 pb-5">
         <button
           type="button"
           onClick={() => go(i - 1)}
