@@ -42,7 +42,7 @@ function slides(calendlyUrl: string | null): Slide[] {
         </>
       ),
       text: "Schuif naar je bezoeken per week.",
-      visual: <VisitCalculator />,
+      visual: <VisitCalculator compact />,
     },
     {
       title: (
