@@ -18,8 +18,8 @@ export default function OnsitePage() {
         Icon: Globe,
         title: (
           <>
-            Je website haalt aanvragen binnen.{" "}
-            <span className="text-brand-600">Ook &apos;s avonds en in het weekend.</span>
+            De moverAI-widget op je website.{" "}
+            <span className="text-brand-600">Offertes, ook &apos;s avonds en in het weekend.</span>
           </>
         ),
         intro:

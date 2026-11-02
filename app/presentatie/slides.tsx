@@ -56,7 +56,7 @@ function slides(calendlyUrl: string | null): Slide[] {
     {
       title: (
         <>
-          Je website haalt aanvragen binnen. <span className={B}>Ook &apos;s avonds.</span>
+          De moverAI-widget op je website. <span className={B}>Offertes, ook &apos;s avonds.</span>
         </>
       ),
       text: "Een knop op je eigen site, in jouw huisstijl.",

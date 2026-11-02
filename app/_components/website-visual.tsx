@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, Camera, ImageIcon, MousePointer2, Sparkles, Truck, X } from "lucide-react";
 import moversPhoto from "@/public/onsite-verhuizers.jpg";
+import { Sticker } from "./sticker";
 
 // Tijdlijn in stappen van 100 ms: pijl verschijnt, gaat naar de knop, klikt,
 // het venster staat open, sluit weer.
@@ -51,7 +52,11 @@ export function WebsiteVisual() {
   const pointer = atButton ? "translate(0, 0)" : t >= 4 && t < T_MOVE ? "translate(115px, 0px)" : "translate(160px, 45px)";
 
   return (
-    <div ref={ref} className="overflow-hidden rounded-2xl border border-border bg-background shadow-xl">
+    <div ref={ref} className="relative pt-5">
+      <Sticker
+        text={open ? "moverAI opent in jouw huisstijl" : atButton ? "Klikt op Offerte in 1 minuut" : "Bezoeker op jouw website"}
+      />
+      <div className="overflow-hidden rounded-2xl border border-border bg-background shadow-xl">
       <div className="flex items-center gap-1.5 border-b border-border bg-muted px-4 py-2.5">
         <span className="size-2.5 rounded-full bg-red-400" />
         <span className="size-2.5 rounded-full bg-amber-400" />
@@ -144,6 +149,7 @@ export function WebsiteVisual() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

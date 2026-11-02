@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, FileText, Inbox, Mail } from "lucide-react";
+import { Sticker } from "./sticker";
 
 const REPLY =
   "Hoi! Bedankt voor je aanvraag. Via deze link scan je je kamers met je telefoon, en binnen een minuut heb je onze offerte in je mailbox: moverai.nl/offerte/jouw-bedrijf\nEen huisbezoek is niet nodig.";
 const LINK = "moverai.nl/offerte/jouw-bedrijf";
 const STEPS = ["Aanvraag", "Linkje", "Offerte"];
+const STICKERS = ["Aanvraag via een offerteplatform", "Jij stuurt met één klik je linkje", "Binnen 1 minuut jouw offerte"];
 // Oudere, gelezen mails onder de nieuwe aanvraag: maakt de inbox echt.
 const INBOX = [
   { from: "Familie de Vries", subject: "Vraag over opslag in december", when: "09:12" },
@@ -56,7 +58,9 @@ export function LinkVisual() {
   const sent = t >= T_REPLY + 38;
 
   return (
-    <div ref={ref} className="rounded-2xl border border-border bg-background p-5 shadow-xl">
+    <div ref={ref} className="relative pt-5">
+      <Sticker text={STICKERS[step]} />
+      <div className="rounded-2xl border border-border bg-background p-5 pt-7 shadow-xl">
       <div className="min-h-64 text-slate-800 dark:text-slate-100">
         {step === 0 && (
           <div>
@@ -146,6 +150,7 @@ export function LinkVisual() {
           </li>
         ))}
       </ol>
+      </div>
     </div>
   );
 }

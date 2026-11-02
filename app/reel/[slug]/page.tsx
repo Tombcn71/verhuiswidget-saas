@@ -47,9 +47,9 @@ const REELS = {
   onsite: {
     // Startscherm in de demovideo: onderdeel en de volledige kop.
     label: "Onsite · Op je website",
-    header: <>Je website haalt aanvragen binnen. <span className="text-brand-600">Ook &apos;s avonds en in het weekend.</span></>,
+    header: <>De moverAI-widget op je website. <span className="text-brand-600">Offertes, ook &apos;s avonds en in het weekend.</span></>,
     // Korte belofte voor het beginscherm (max. 5 à 6 woorden).
-    intro: <>Je website werkt <span className="text-brand-600">24/7.</span></>,
+    intro: <>moverAI op <span className="text-brand-600">je website.</span></>,
     visual: <WebsiteVisual />,
   },
   rekenhulp: {

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, Camera, Check, ImageIcon, Minus, Plus, Send, Sparkles } from "lucide-react";
 import woonkamer from "@/public/voorbeeldwoningen/appartement/woonkamer.jpg";
+import { Sticker } from "./sticker";
 import slaapkamer from "@/public/voorbeeldwoningen/appartement/slaapkamer.jpg";
 import keuken from "@/public/voorbeeldwoningen/appartement/keuken.jpg";
 
@@ -96,9 +97,25 @@ export function SpotVisual() {
   const plusDone = t >= 101;
   const sent = t >= 141;
 
+  const sticker =
+    screen === 0
+      ? "Bij de klant: open moverAI"
+      : screen === 1
+        ? "Foto's per kamer"
+        : screen === 2
+          ? "Alle kamers gescand"
+          : screen === 5
+            ? "AI herkent de inboedel"
+            : screen === 3
+              ? "Check de lijst, pas aan met +"
+              : sent
+                ? "Verstuurd, terwijl je er nog staat"
+                : "Offerte ter plekke versturen";
+
   return (
+    <div ref={ref} className="relative pt-5">
+      <Sticker text={sticker} />
     <div
-      ref={ref}
       className="relative mx-auto aspect-9/16 w-full max-w-[17rem] overflow-hidden rounded-[2.75rem] border-[10px] border-slate-900 bg-white text-slate-900 shadow-xl dark:border-slate-700"
     >
       {/* Camera-eiland */}
@@ -279,6 +296,7 @@ export function SpotVisual() {
         } ${tapping ? "scale-75 bg-slate-900/50" : "scale-100"}`}
         style={{ left: tap.left, top: tap.top }}
       />
+    </div>
     </div>
   );
 }
