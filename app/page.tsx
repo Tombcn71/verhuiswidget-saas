@@ -5,6 +5,7 @@ import { SiteHeader } from "@/app/_components/site-header";
 import { SiteFooter } from "@/app/_components/site-footer";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
 import { PlatformShowcase } from "@/app/_components/platform-showcase";
+import { AppShowcase } from "@/app/_components/app-showcase";
 import { PlanDemoButton } from "@/app/_components/plan-demo-button";
 import { HeroTimer } from "@/app/_components/hero-timer";
 import { VisitCalculator } from "@/app/_components/visit-calculator";
@@ -255,6 +256,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <AppShowcase />
 
         <PlatformShowcase />
 
