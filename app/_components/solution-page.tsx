@@ -22,7 +22,7 @@ export type SolutionContent = {
 
 /**
  * Landingspagina voor één manier van gebruik (Onlink, Onsite, Onspot). Alles
- * stuurt naar één doel: een adviesgesprek van 5 minuten.
+ * stuurt naar één doel: een adviesgesprek van 15 minuten.
  */
 export function SolutionPage({ c }: { c: SolutionContent }) {
   const calendlyUrl = process.env.CALENDLY_URL ?? null;
@@ -43,7 +43,7 @@ export function SolutionPage({ c }: { c: SolutionContent }) {
             <p className="mt-6 text-lg text-muted-foreground">{c.intro}</p>
             <div className="mt-8">
               <PlanDemoButton href={calendlyUrl} from={`${from} kop`} className="w-full sm:w-auto" />
-              <p className="mt-3 text-sm text-muted-foreground">5 minuten · vrijblijvend</p>
+              <p className="mt-3 text-sm text-muted-foreground">15 minuten · vrijblijvend</p>
             </div>
           </div>
           <div className="mx-auto w-full max-w-md lg:max-w-none">{c.visual}</div>
@@ -117,7 +117,7 @@ export function SolutionPage({ c }: { c: SolutionContent }) {
           <div className="mx-auto w-full max-w-3xl px-6 text-center text-white">
             <h2 className="text-3xl font-bold tracking-tight">Zien hoe het voor jou werkt?</h2>
             <p className="mt-3">
-              In 5 minuten laat ik zien hoe je klant binnen een minuut jouw offerte krijgt, met jouw
+              In 15 minuten laat ik zien hoe je klant binnen een minuut jouw offerte krijgt, met jouw
               tarieven.
             </p>
             <PlanDemoButton

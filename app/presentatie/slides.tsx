@@ -85,14 +85,14 @@ function slides(calendlyUrl: string | null): Slide[] {
             <p className="mx-auto mt-4 max-w-xs text-lg text-muted-foreground">
               Hallo 👋 ik ben Tom,
               <br />
-              in 5 minuten loop ik
+              in 15 minuten loop ik
               <br />
               alles met je door.
             </p>
           </div>
           <div>
             <PlanDemoButton href={calendlyUrl} from="presentatie" className="px-8 py-4 text-lg" />
-            <p className="mt-3 text-sm text-muted-foreground">5 minuten · vrijblijvend</p>
+            <p className="mt-3 text-sm text-muted-foreground">15 minuten · vrijblijvend</p>
           </div>
         </div>
       ),

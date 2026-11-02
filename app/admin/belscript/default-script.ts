@@ -107,7 +107,7 @@ const SITE = "https://www.moverai.nl";
 
 /** Demogesprek via WhatsApp-bellen: de site is de demo, de verhuizer klikt zelf mee. */
 export const DEFAULT_DEMO_SCRIPT = [
-  "Demogesprek van 5 à 10 minuten via WhatsApp-bellen. Geen scherm delen: je stuurt de links in de chat, hij klikt zelf mee, jij vertelt.",
+  "Adviesgesprek van 15 minuten via WhatsApp-bellen. Geen scherm delen: je stuurt de links in de chat, hij klikt zelf mee, jij vertelt.",
   "",
   "# Voorbereiding",
   "- Open het bedrijf in het CRM: daar staat zijn eigen demolink.",

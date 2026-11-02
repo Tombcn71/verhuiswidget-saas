@@ -35,7 +35,7 @@ export default function CalculatorPage() {
               minuut jouw offerte. Zonder huisbezoek.
             </p>
             <PlanDemoButton href={calendlyUrl} from="rekenhulp" className="mt-6" />
-            <p className="mt-3 text-sm text-muted-foreground">5 minuten · vrijblijvend</p>
+            <p className="mt-3 text-sm text-muted-foreground">15 minuten · vrijblijvend</p>
           </div>
         </div>
       </main>

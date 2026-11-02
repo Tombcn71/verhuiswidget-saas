@@ -156,7 +156,7 @@ export default function HomePage() {
               </p>
               <div className="mt-8">
                 <PlanDemoButton href={calendlyUrl} from="home kop" className="w-full sm:w-auto" />
-                <p className="mt-3 text-sm text-muted-foreground">5 minuten · vrijblijvend</p>
+                <p className="mt-3 text-sm text-muted-foreground">15 minuten · vrijblijvend</p>
               </div>
             </div>
 
@@ -297,7 +297,7 @@ export default function HomePage() {
             <div>
               <p className="text-lg">
                 &ldquo;Ik ben Tom, oprichter van moverAI. Ik bouw het samen met verhuizers, zodat het
-                past bij hoe jullie werken. In een adviesgesprek van 5 minuten laat ik zien wat het voor jouw
+                past bij hoe jullie werken. In een adviesgesprek van 15 minuten laat ik zien wat het voor jouw
                 bedrijf doet.&rdquo;
               </p>
               <PlanDemoButton href={calendlyUrl} from="home tom" className="mt-5" />
@@ -340,7 +340,7 @@ export default function HomePage() {
               Klaar om te besparen op uren en brandstof?
             </h2>
             <p className="mt-3">
-              In 5 minuten laat ik zien hoe je klant binnen een minuut jouw offerte krijgt, met jouw
+              In 15 minuten laat ik zien hoe je klant binnen een minuut jouw offerte krijgt, met jouw
               tarieven. Jij rijdt alleen nog voor klussen die doorgaan.
             </p>
             <PlanDemoButton

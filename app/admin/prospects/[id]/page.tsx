@@ -33,10 +33,10 @@ import { WhatsappMessages } from "./whatsapp-card";
 const WHATSAPP_OPENINGS = {
   A: `Hallo 👋 werken jullie met offerteplatforms?
 Ik ben Tom van moverAI. Bij een aanvraag via een platform wint vaak wie als eerste een offerte stuurt. Met mijn AI-software stuur je de klant meteen een linkje: hij maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Zonder voorinspectie, dus ook minder uren en brandstof.
-Mag ik je een linkje naar de demo sturen? Duurt een minuut.`,
+Mag ik je een korte presentatie sturen? Duurt een minuut.`,
   B: `Hallo 👋 wat kosten huisbezoeken jou?
 Ik ben Tom van moverAI. Met mijn AI-software maakt je klant zelf een paar foto's per kamer en krijgt hij d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Zonder voorinspectie, dus minder uren en brandstof.
-Zal ik je de rekenhulp sturen? Kost 10 seconden.`,
+Mag ik je een korte presentatie sturen? Duurt een minuut.`,
 };
 
 function Field({
@@ -213,8 +213,8 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
                 website={p.whatsapp ? p.website : null}
                 openings={WHATSAPP_OPENINGS}
                 replies={{
-                  A: `Top! Hier is hij: ${demoLinkFor(p)}\nVragen? App me gewoon.\n\nGroet, Tom`,
-                  B: `Top! Hier is hij: ${appUrl()}/rekenhulp\nSchuif naar hoeveel bezoeken je per week doet. Daarna kun je meteen een demogesprek van 5 minuten plannen.\n\nGroet, Tom`,
+                  A: `Top! Hier is hij: ${appUrl()}/presentatie\nSwipen of op de pijltjes tikken. Vragen? App me gewoon.\n\nGroet, Tom`,
+                  B: `Top! Hier is hij: ${appUrl()}/presentatie\nOp de tweede dia zie je wat huisbezoeken jou kosten. Vragen? App me gewoon.\n\nGroet, Tom`,
                 }}
                 // Geappt vóór de vergelijking van A en B: verder met het vervolg van A.
                 sentVariant={

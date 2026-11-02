@@ -94,8 +94,8 @@ export function WhatsappMessages({
         </>
       )}
 
-      <p className="text-sm font-medium">Demo gedaan</p>
-      <CopyBlock multiline code="Hoi! Ik zag dat je de demo hebt gedaan. Wat vond je ervan?" />
+      <p className="text-sm font-medium">Na een dag geen reactie</p>
+      <CopyBlock multiline code="Hoi! Heb je de presentatie al kunnen bekijken? Ben benieuwd wat je ervan vindt." />
     </>
   );
 }
