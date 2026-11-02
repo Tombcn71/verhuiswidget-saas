@@ -26,18 +26,11 @@ import { ContactButtons } from "../../contact-buttons";
 import { WhatsappMessages } from "./whatsapp-card";
 
 /**
- * Openingsberichten voor WhatsApp (zonder bedrijfsnaam: je appt een persoon). De
- * eerste regel moet in de melding passen (ca. 45 tekens): een vraag over hún werk.
- * A en B worden om de beurt gestuurd om te zien welke vaker antwoord krijgt.
+ * Openingsbericht voor WhatsApp: kort en zakelijk. Eerder geappte bedrijven kunnen nog op
+ * B staan; die krijgen hetzelfde bericht en vervolg.
  */
-const WHATSAPP_OPENINGS = {
-  A: `Hallo 👋 werken jullie met offerteplatforms?
-Ik ben Tom van moverAI. Bij een aanvraag via een platform wint vaak wie als eerste een offerte stuurt. Met mijn AI-software stuur je de klant meteen een linkje: hij maakt een paar foto's per kamer en krijgt d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Zonder voorinspectie, dus ook minder uren en brandstof.
-Mag ik je een korte presentatie sturen? Duurt een minuut.`,
-  B: `Hallo 👋 wat kosten huisbezoeken jou?
-Ik ben Tom van moverAI. Met mijn AI-software maakt je klant zelf een paar foto's per kamer en krijgt hij d.m.v. AI-analyse binnen een minuut een offerte met jouw tarieven. Zonder voorinspectie, dus minder uren en brandstof.
-Mag ik je een korte presentatie sturen? Duurt een minuut.`,
-};
+const WHATSAPP_OPENING = "Goedendag, ik ben Tom van moverAI. Met mijn AI-software voor verhuizers win je meer klussen en bespaar je uren en brandstof. Mag ik een korte presentatie sturen?";
+const WHATSAPP_OPENINGS = { A: WHATSAPP_OPENING, B: WHATSAPP_OPENING };
 
 function Field({
   label,
@@ -213,8 +206,8 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
                 website={p.whatsapp ? p.website : null}
                 openings={WHATSAPP_OPENINGS}
                 replies={{
-                  A: `Top! Hier is hij: ${appUrl()}/presentatie\nSwipen of op de pijltjes tikken. Vragen? App me gewoon.\n\nGroet, Tom`,
-                  B: `Top! Hier is hij: ${appUrl()}/presentatie\nOp de tweede dia zie je wat huisbezoeken jou kosten. Vragen? App me gewoon.\n\nGroet, Tom`,
+                  A: `Dank je! ${appUrl()}/presentatie`,
+                  B: `Dank je! ${appUrl()}/presentatie`,
                 }}
                 // Geappt vóór de vergelijking van A en B: verder met het vervolg van A.
                 sentVariant={

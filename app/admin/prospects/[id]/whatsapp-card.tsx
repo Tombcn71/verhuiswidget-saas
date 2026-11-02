@@ -7,8 +7,8 @@ import type { WhatsappVariant } from "@/lib/prospects";
 import { whatsappAction } from "../../actions";
 
 const VARIANT_LABEL: Record<WhatsappVariant, string> = {
-  A: "Opening A · offerteplatforms",
-  B: "Opening B · kosten bezoeken",
+  A: "Opening",
+  B: "Opening (oude B)",
 };
 
 /**
@@ -34,7 +34,7 @@ export function WhatsappMessages({
   sentVariant: WhatsappVariant | null;
   replied: boolean;
 }) {
-  const variants: WhatsappVariant[] = sentVariant ? [sentVariant] : ["A", "B"];
+  const variants: WhatsappVariant[] = sentVariant ? [sentVariant] : ["A"];
 
   return (
     <>
@@ -44,9 +44,6 @@ export function WhatsappMessages({
             <ExternalLink /> Open hun website
           </a>
         </Button>
-      )}
-      {!sentVariant && (
-        <p className="text-sm text-muted-foreground">Gebruik A en B om de beurt, dan zie je welke beter werkt.</p>
       )}
 
       {variants.map((v) => {
@@ -65,7 +62,7 @@ export function WhatsappMessages({
                   rel="noopener"
                   onClick={sentOpening}
                 >
-                  <MessageCircle /> Open WhatsApp met opening {v}
+                  <MessageCircle /> Open WhatsApp met opening
                 </a>
               </Button>
             )}
