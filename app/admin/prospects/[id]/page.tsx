@@ -96,7 +96,7 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">
             {p.companyName}
-            <CopyName name={p.companyName} />
+            <CopyName id={p.id} name={p.companyName} />
           </h1>
           <StageBadge stage={p.stage} />
         </div>

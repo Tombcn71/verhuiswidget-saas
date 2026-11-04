@@ -287,7 +287,7 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
               </TableHeader>
               <TableBody>
                 {shown.map((p) => (
-                  <TableRow key={p.id}>
+                  <TableRow key={p.id} className="has-data-last-copied:bg-amber-100 dark:has-data-last-copied:bg-amber-500/20">
                     <TableCell className="pl-6">
                       <Link
                         href={`/admin/prospects/${p.id}`}
@@ -295,7 +295,7 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
                       >
                         {p.companyName}
                       </Link>
-                      <CopyName name={p.companyName} />
+                      <CopyName id={p.id} name={p.companyName} />
                       {p.whatsapp && (
                         <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 align-middle text-xs font-medium text-emerald-700">
                           <MessageCircle className="size-3" /> WhatsApp
