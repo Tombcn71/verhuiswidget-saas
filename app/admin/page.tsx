@@ -31,6 +31,7 @@ import { ImportForm } from "./import-form";
 import { FetchForm } from "./fetch-form";
 import { CheckSitesButton } from "./check-sites-button";
 import { ContactButtons } from "./contact-buttons";
+import { CopyName } from "./copy-name";
 import { StageBadge } from "./stage-badge";
 
 /** Wat het bedrijf met de demolink deed (automatisch bijgehouden). */
@@ -294,6 +295,7 @@ export default async function CrmPage({ searchParams }: PageProps<"/admin">) {
                       >
                         {p.companyName}
                       </Link>
+                      <CopyName name={p.companyName} />
                       {p.whatsapp && (
                         <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 align-middle text-xs font-medium text-emerald-700">
                           <MessageCircle className="size-3" /> WhatsApp

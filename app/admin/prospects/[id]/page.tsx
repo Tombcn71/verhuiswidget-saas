@@ -23,6 +23,7 @@ import { CopyBlock } from "@/app/dashboard/embed/copy-block";
 import { deleteAction, updateAction } from "../../actions";
 import { StageBadge } from "../../stage-badge";
 import { ContactButtons } from "../../contact-buttons";
+import { CopyName } from "../../copy-name";
 import { WhatsappMessages } from "./whatsapp-card";
 
 /**
@@ -93,7 +94,10 @@ export default async function ProspectPage({ params }: PageProps<"/admin/prospec
       </Button>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">{p.companyName}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {p.companyName}
+            <CopyName name={p.companyName} />
+          </h1>
           <StageBadge stage={p.stage} />
         </div>
         <ContactButtons

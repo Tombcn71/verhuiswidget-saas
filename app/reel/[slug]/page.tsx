@@ -159,11 +159,10 @@ function EndCard() {
   return (
     <div className="flex h-[960px] w-[540px] flex-col items-center justify-center gap-6 bg-linear-to-b from-brand-50 to-white px-10 text-center text-slate-900">
       <Logo className="text-4xl" />
-      <p className="mt-6 text-[2.6rem] leading-tight font-bold tracking-tight">
+      <p className="text-[2.6rem] leading-tight font-bold tracking-tight">
         Plan een <span className="text-brand-600">demogesprek</span>
       </p>
-      <p className="text-xl text-slate-600">15 minuten · vrijblijvend</p>
-      <p className="mt-4 rounded-full bg-brand-600 px-8 py-3 text-2xl font-semibold text-white">moverai.nl</p>
+      <p className="rounded-full bg-brand-600 px-8 py-3 text-2xl font-semibold text-white">moverai.nl</p>
     </div>
   );
 }
