@@ -16,6 +16,9 @@ export function SiteFooter() {
           <Link href="/pakketten" className="hover:text-foreground">
             Pakketten
           </Link>
+          <Link href="/blog" className="hover:text-foreground">
+            Blog
+          </Link>
         </nav>
       </div>
     </footer>
