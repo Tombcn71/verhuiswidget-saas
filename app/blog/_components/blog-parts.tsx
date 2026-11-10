@@ -44,6 +44,8 @@ export function Author() {
       <p className="text-muted-foreground">
         <span className="font-semibold text-foreground">Tom van Reijn</span>, oprichter moverAI
         <br />
+        Ik help verhuisbedrijven meer klussen winnen en uren en brandstof besparen.
+        <br />
         <time dateTime="2026-11-05">5 november 2026</time>
       </p>
     </div>

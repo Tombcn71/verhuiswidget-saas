@@ -6,6 +6,7 @@ import { VisitCalculator } from "@/app/_components/visit-calculator";
 import { PlanDemoButton } from "@/app/_components/plan-demo-button";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/rekenhulp" },
   title: "Wat kosten voorinspecties jou?",
   description:
     "Schuif naar hoeveel voorinspecties je per week doet en zie wat ze je per maand kosten aan uren en brandstof.",

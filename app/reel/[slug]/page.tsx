@@ -85,6 +85,7 @@ const REELS = {
 export default async function ReelPage({ params, searchParams }: PageProps<"/reel/[slug]">) {
   const { slug } = await params;
   if (slug === "einde") return <EndCard />;
+  if (slug === "stappen") return <StappenCard scherm={Number((await searchParams).scherm ?? 1)} />;
   const reel = REELS[slug as keyof typeof REELS];
   if (!reel) notFound();
   // ?intro=1: het beginscherm (ca. 2 s) dat voor de animatie komt.
@@ -118,6 +119,43 @@ function IntroCard({ text }: { text: React.ReactNode }) {
       <div className="flex flex-1 flex-col items-center justify-center">
         <p className="text-[1.9rem] leading-tight font-bold text-slate-700">AI-software voor verhuizers</p>
         <h1 className="mt-6 text-[3.6rem] leading-[1.05] font-extrabold tracking-tight">{text}</h1>
+      </div>
+    </div>
+  );
+}
+
+/** Reel "AI invoeren in 3 stappen": vier schermen tekst, zelfde opmaak als het beginscherm. */
+const STAPPEN = [
+  { top: "AI in je verhuisbedrijf?", accent: "Tijd, training, kosten?" },
+  { top: "Niet bij moverAI.", accent: "Zo makkelijk begin je:" },
+  { top: "Upload een oude factuur.", accent: "De AI haalt je tarieven eruit." },
+  {
+    top: <>Test met <span className="text-brand-600">Onspot</span> naast je eigen voorinspectie.</>,
+    accent: "Stel bij tot je prijs klopt.",
+  },
+  { top: "Klopt je prijs?", accent: "Klaar voor klussen winnen en tijd besparen." },
+];
+
+function StappenCard({ scherm }: { scherm: number }) {
+  // Scherm 6: het eindscherm.
+  if (scherm === 6) {
+    return (
+      <div className="flex h-[960px] w-[540px] flex-col items-center justify-center gap-6 bg-white px-10 text-center text-slate-900">
+        <Logo className="text-4xl" />
+        <p className="text-[2.6rem] leading-tight font-bold tracking-tight">
+          Plan een <span className="text-brand-600">adviesgesprek</span>
+        </p>
+        <p className="rounded-full bg-brand-600 px-8 py-3 text-2xl font-semibold text-white">moverai.nl</p>
+      </div>
+    );
+  }
+  const s = STAPPEN[scherm - 1] ?? STAPPEN[0];
+  return (
+    <div className="flex h-[960px] w-[540px] flex-col items-center bg-white px-10 py-[160px] text-center text-slate-900">
+      <Logo className="text-4xl" />
+      <div className="flex flex-1 flex-col items-center justify-center">
+        <h1 className="text-[3rem] leading-[1.08] font-extrabold tracking-tight">{s.top}</h1>
+        <p className="mt-6 text-[3rem] leading-[1.08] font-extrabold tracking-tight text-brand-600">{s.accent}</p>
       </div>
     </div>
   );

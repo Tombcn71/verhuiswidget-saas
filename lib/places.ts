@@ -29,6 +29,9 @@ const FIELD_MASK = [
   "nextPageToken",
 ].join(",");
 
+/** Waar we op zoeken; per plaats, bijvoorbeeld "kozijnen in Utrecht". */
+export const ZOEKTERM = "kozijnen";
+
 export class PlacesConfigError extends Error {}
 
 type ApiPlace = {
@@ -59,7 +62,7 @@ export async function searchMovers(
       "X-Goog-FieldMask": FIELD_MASK,
     },
     body: JSON.stringify({
-      textQuery: `verhuisbedrijf in ${city}`,
+      textQuery: `${ZOEKTERM} in ${city}`,
       languageCode: "nl",
       regionCode: "NL",
       pageSize: 20,

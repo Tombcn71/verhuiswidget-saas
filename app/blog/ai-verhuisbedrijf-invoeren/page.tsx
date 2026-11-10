@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import heroImage from "@/public/blog-ai-verhuisbedrijf.jpg";
+import { FOUNDER_LINKEDIN } from "@/lib/site";
 import { SiteHeader } from "@/app/_components/site-header";
 import { SiteFooter } from "@/app/_components/site-footer";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
@@ -12,6 +13,7 @@ const DESCRIPTION =
   "AI invoeren in je verhuisbedrijf hoeft geen maanden te duren. Zo begin je in 3 stappen, zonder implementatiekosten, in 14 dagen gratis proeftijd.";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/blog/ai-verhuisbedrijf-invoeren" },
   title: "Hoe voer je AI in je verhuisbedrijf in? In 3 stappen",
   description: DESCRIPTION,
   openGraph: { title: TITLE, description: DESCRIPTION, type: "article", images: [heroImage.src] },
@@ -59,7 +61,12 @@ const JSON_LD = [
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: "2026-11-05",
-    author: { "@type": "Person", name: "Tom van Reijn", jobTitle: "Oprichter moverAI" },
+    author: {
+      "@type": "Person",
+      name: "Tom van Reijn",
+      jobTitle: "Oprichter moverAI",
+      sameAs: [FOUNDER_LINKEDIN],
+    },
     publisher: { "@type": "Organization", name: "moverAI" },
   },
   {

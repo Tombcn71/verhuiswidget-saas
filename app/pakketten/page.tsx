@@ -5,6 +5,7 @@ import { WhatsAppButton } from "@/app/_components/whatsapp-button";
 import { PricingCards } from "@/app/_components/pricing-cards";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/pakketten" },
   title: "Pakketten",
   description: "Basic, Pro of Op maat. In een adviesgesprek van 15 minuten zie je welk pakket bij je past.",
 };

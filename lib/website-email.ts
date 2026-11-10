@@ -9,7 +9,16 @@ const IGNORE = /\.(png|jpe?g|gif|svg|webp)$|@(example|sentry|wixpress|domain|ema
 // Chatlink met nummer: wa.me/316…, api.whatsapp.com/send?phone=316…
 const WA_NUMBER = /(?:wa\.me\/|whatsapp\.com\/send\/?\?phone=|whatsapp:\/\/send\/?\?phone=)\+?(\d[\d\s-]{7,16}\d)/i;
 
-export type SiteScan = { email: string | null; whatsapp: string | null };
+// Een online offerteroute: calculator/configurator of een offerte- of prijsformulier.
+const CALCULATOR = /prijs\s?calculator|kozijn\s?configurator|configurator|calculator|bereken\s+(uw|je|jouw|de)?\s*(prijs|kozijn|offerte)|prijs\s+berekenen|stel\s+(uw|je|jouw)\s+kozijn|prijsindicatie\s+(berekenen|aanvragen)/i;
+
+export type SiteScan = { email: string | null; whatsapp: string | null; calculator: boolean };
+
+/** Calculator of configurator, of een formulier waar offerte of prijs bij staat. */
+function heeftOnlineOfferte(html: string): boolean {
+  if (CALCULATOR.test(html)) return true;
+  return /<form[\s\S]{0,4000}?(offerte|prijs)/i.test(html) && /name=["']?(breedte|hoogte|afmeting)/i.test(html);
+}
 
 async function fetchHtml(url: string): Promise<string | null> {
   try {
@@ -53,22 +62,23 @@ export async function scanWebsite(website: string): Promise<SiteScan> {
   try {
     base = new URL(/^https?:\/\//i.test(website) ? website : `https://${website}`);
   } catch {
-    return { email: null, whatsapp: null };
+    return { email: null, whatsapp: null, calculator: false };
   }
+  let calculator = false;
   let email: string | null = null;
   let whatsapp: string | null = null;
-  for (const path of ["", "/contact", "/contact/", "/over-ons"]) {
+  for (const path of ["", "/contact", "/offerte", "/offerte-aanvragen", "/prijzen", "/configurator"]) {
     const html = await fetchHtml(new URL(path || base.pathname, base).toString());
     if (!html) continue;
+    if (heeftOnlineOfferte(html)) calculator = true;
     email ??= pickEmail(html, base.hostname);
     const wa = pickWhatsapp(html);
     // Een nummer gaat voor "ja".
     if (wa && (!whatsapp || whatsapp === "ja")) whatsapp = wa;
-    if (email && whatsapp && whatsapp !== "ja") break;
-    // Homepage en contactpagina zijn genoeg voor WhatsApp; verder alleen voor het e-mailadres.
-    if (email && path) break;
+    // Zodra er een calculator is gevonden hoeven we niet verder te zoeken.
+    if (calculator) break;
   }
-  return { email, whatsapp };
+  return { email, whatsapp, calculator };
 }
 
 /** Voor een lijst websites, max. `concurrency` tegelijk. */
@@ -76,7 +86,7 @@ export async function scanWebsites(
   websites: (string | null)[],
   concurrency = 5,
 ): Promise<SiteScan[]> {
-  const out: SiteScan[] = websites.map(() => ({ email: null, whatsapp: null }));
+  const out: SiteScan[] = websites.map(() => ({ email: null, whatsapp: null, calculator: false }));
   let next = 0;
   await Promise.all(
     Array.from({ length: concurrency }, async () => {

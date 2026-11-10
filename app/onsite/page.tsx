@@ -4,6 +4,7 @@ import { SolutionPage } from "@/app/_components/solution-page";
 import { WebsiteVisual } from "@/app/_components/website-visual";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/onsite" },
   title: "Onsite: offertes op je website",
   description:
     "Een knop op je eigen website: je bezoeker maakt foto's per kamer en heeft binnen een minuut jouw offerte. Ook 's avonds en in het weekend.",

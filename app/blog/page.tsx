@@ -7,6 +7,7 @@ import { SiteFooter } from "@/app/_components/site-footer";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/blog" },
   title: "Blog",
   description: "Artikelen over AI, offertes en voorinspecties voor verhuisbedrijven.",
 };

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FOUNDER_LINKEDIN } from "@/lib/site";
 import { SiteHeader } from "@/app/_components/site-header";
 import { SiteFooter } from "@/app/_components/site-footer";
 import { WhatsAppButton } from "@/app/_components/whatsapp-button";
@@ -10,6 +11,7 @@ const DESCRIPTION =
   "Sneller offertes op offerteplatforms, minder voorinspecties, minder brandstof en meer Google-reviews. Dit zijn de 6 voordelen van AI voor je verhuisbedrijf.";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/blog/voordelen-ai-verhuisbedrijf" },
   title: "Voordelen van AI voor een verhuisbedrijf: 6 op een rij",
   description: DESCRIPTION,
   openGraph: { title: TITLE, description: DESCRIPTION, type: "article" },
@@ -49,7 +51,12 @@ const JSON_LD = [
     headline: TITLE,
     description: DESCRIPTION,
     datePublished: "2026-11-05",
-    author: { "@type": "Person", name: "Tom van Reijn", jobTitle: "Oprichter moverAI" },
+    author: {
+      "@type": "Person",
+      name: "Tom van Reijn",
+      jobTitle: "Oprichter moverAI",
+      sameAs: [FOUNDER_LINKEDIN],
+    },
     publisher: { "@type": "Organization", name: "moverAI" },
   },
   {

@@ -151,16 +151,16 @@ export async function fetchProspectsAction(_prev: FetchState, formData: FormData
         status: "error",
         message: r.done
           ? city
-            ? `Geen nieuwe verhuisbedrijven meer gevonden in ${city}.`
+            ? `Geen nieuwe kozijnenbedrijven meer gevonden in ${city}.`
             : "Alle plaatsen in de lijst zijn doorzocht."
-          : "Geen nieuwe bedrijven met WhatsApp gevonden; probeer het nog eens of kies een plaats.",
+          : "Geen nieuwe bedrijven zonder calculator gevonden; probeer het nog eens of kies een plaats.",
       };
     }
     return {
       status: "success",
-      message: `${r.added} nieuwe ${r.added === 1 ? "verhuisbedrijf" : "verhuisbedrijven"} toegevoegd (${r.cities.join(", ")}).${
+      message: `${r.added} nieuwe ${r.added === 1 ? "kozijnenbedrijf" : "kozijnenbedrijven"} toegevoegd (${r.cities.join(", ")}).${
         r.skipped ? ` ${r.skipped} overgeslagen (stonden er al in).` : ""
-      }${r.noWhatsapp ? ` ${r.noWhatsapp} zonder WhatsApp overgeslagen.` : ""}`,
+      }${r.noWhatsapp ? ` ${r.noWhatsapp} met calculator overgeslagen.` : ""}`,
     };
   } catch (err) {
     return {

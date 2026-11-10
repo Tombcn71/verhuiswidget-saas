@@ -3,6 +3,7 @@ import { Widget } from "@/app/widget/[companyId]/widget";
 import { DEMO_COMPANY_PUBLIC } from "@/lib/demo";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/demo" },
   title: { absolute: "Probeer moverAI in 1 minuut" },
   description: "Maak foto's van een kamer en zie hoe de AI de meubels herkent en direct een offerte maakt.",
 };

@@ -7,6 +7,7 @@ import { nlNL } from "@clerk/localizations";
 import { shadcn } from "@clerk/themes";
 import "./globals.css";
 import { THEME_SCRIPT } from "@/components/theme";
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,12 +15,12 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "moverAI — Bespaar uren en brandstof met AI voor verhuizers",
+    default: SITE_TITLE,
     template: "%s · moverAI",
   },
-  description:
-    "White-label AI-widget voor verhuis- en ontruimingsbedrijven. Klanten uploaden foto's, de AI berekent het volume en de prijs, jij ontvangt een complete offerteaanvraag.",
+  description: SITE_DESCRIPTION,
   // Op het iPhone-startscherm: schermvullend, met de naam moverAI onder het icoon.
   appleWebApp: { capable: true, title: "moverAI", statusBarStyle: "default" },
 };

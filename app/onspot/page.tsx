@@ -5,6 +5,7 @@ import { SpotVisual } from "@/app/_components/spot-visual";
 import { AppShowcase } from "@/app/_components/app-showcase";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/onspot" },
   title: "Onspot: scannen op locatie",
   description:
     "Scan de ruimtes met je telefoon, zie de m³ direct oplopen en heb de offerte ter plekke klaar. Ook voor grote panden en ontruimingen.",

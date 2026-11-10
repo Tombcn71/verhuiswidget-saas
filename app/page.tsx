@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import NextLink from "next/link";
 import heroImage from "@/public/hero.jpg";
+import { FOUNDER_LINKEDIN, SITE_CATEGORY, SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 import tomImage from "@/public/tom.jpg";
 import { SiteHeader } from "@/app/_components/site-header";
 import { SiteFooter } from "@/app/_components/site-footer";
@@ -121,6 +123,46 @@ const faqs = [
   },
 ];
 
+export const metadata: Metadata = {
+  title: { absolute: SITE_TITLE },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: "moverAI",
+    locale: "nl_NL",
+    type: "website",
+    images: [heroImage.src],
+  },
+};
+
+// Wie moverAI is en wat het doet: voor zoekmachines en AI-zoekdiensten.
+const companyJsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "moverAI",
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon`,
+    description: SITE_DESCRIPTION,
+    founder: { "@type": "Person", name: "Tom van Reijn", sameAs: [FOUNDER_LINKEDIN] },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "moverAI",
+    url: SITE_URL,
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: SITE_CATEGORY,
+    operatingSystem: "Web",
+    description: SITE_DESCRIPTION,
+    inLanguage: "nl",
+    audience: { "@type": "BusinessAudience", audienceType: "Verhuisbedrijven" },
+  },
+];
+
 // Zodat Google de vragen als FAQ kan tonen.
 const faqJsonLd = {
   "@context": "https://schema.org",
@@ -145,7 +187,7 @@ export default function HomePage() {
             <div className="text-center lg:text-left">
               <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
                 <Sparkles className="h-3.5 w-3.5" />
-                AI-software voor verhuizers
+                {SITE_CATEGORY}
               </p>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
                 Win meer klussen.{" "}
@@ -353,7 +395,7 @@ export default function HomePage() {
           </div>
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+            dangerouslySetInnerHTML={{ __html: JSON.stringify([...companyJsonLd, faqJsonLd]) }}
           />
         </section>
 

@@ -6,6 +6,7 @@ import { PlatformShowcase } from "@/app/_components/platform-showcase";
 import { AppShowcase } from "@/app/_components/app-showcase";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/onlink" },
   title: "Onlink: offerte via een linkje",
   description:
     "Aanvraag via een offerteplatform, telefoon of WhatsApp? Stuur je klant een linkje en binnen een minuut heeft hij jouw offerte.",

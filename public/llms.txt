@@ -1,0 +1,34 @@
+# moverAI
+
+> moverAI is AI-software voor verhuisbedrijven in Nederland. De klant maakt een paar foto's per kamer, de AI herkent de inboedel en berekent het aantal m³, en binnen een minuut staat er een offerte klaar met de naam en tarieven van het verhuisbedrijf, zonder voorinspectie.
+
+moverAI is software voor verhuisbedrijven die offertes willen maken zonder voor elke aanvraag naar de klant te rijden. Het is opgericht door Tom van Reijn. moverAI werkt in de browser en als web app op de telefoon, zonder installatie of app store.
+
+## Functies
+
+- [Onlink](https://www.moverai.nl/onlink): offerte via een linkje, voor aanvragen via offerteplatforms, de telefoon of WhatsApp. Het verhuisbedrijf stuurt de klant een linkje en de klant heeft binnen een minuut een offerte.
+- [Onsite](https://www.moverai.nl/onsite): een knop op de eigen website van het verhuisbedrijf, geplaatst met 1 regel code. Bezoekers krijgen ook 's avonds en in het weekend binnen een minuut een offerte, in de huisstijl van het bedrijf.
+- [Onspot](https://www.moverai.nl/onspot): voor een verhuizer die zelf bij de klant staat. Die maakt foto's per ruimte met de telefoon en heeft de offerte ter plekke klaar.
+
+## Wat een verhuisbedrijf ermee doet
+
+- Als eerste reageren op aanvragen via offerteplatforms
+- Personeelsuren en brandstof besparen, omdat een voorinspectie niet meer nodig is
+- Vooraf het aantal m³ weten, om de juiste wagen en ploeg in te plannen
+- Offertes maken zonder handmatig tellen of Excel, met de eigen tarieven
+- Tarieven overnemen uit een oude factuur of offerte; de factuur zelf wordt niet bewaard
+- Foto's en een inventarislijst ontvangen bij elke aanvraag
+- Automatisch een herinnering sturen bij openstaande offertes en na de verhuizing om een review vragen
+
+## Proberen
+
+- De proefperiode duurt 14 dagen en is gratis, met persoonlijke ondersteuning.
+- Er zijn geen implementatiekosten.
+- [Pakketten](https://www.moverai.nl/pakketten): overzicht van de pakketten.
+- [Demo](https://www.moverai.nl/demo): probeer in 1 minuut hoe de AI een offerte maakt.
+- [Kostencalculator](https://www.moverai.nl/rekenhulp): reken uit wat voorinspecties een verhuisbedrijf kosten.
+
+## Artikelen
+
+- [Hoe voer je AI in je verhuisbedrijf in?](https://www.moverai.nl/blog/ai-verhuisbedrijf-invoeren): in 3 stappen, zonder je werkwijze om te gooien.
+- [Wat zijn de voordelen van AI voor een verhuisbedrijf?](https://www.moverai.nl/blog/voordelen-ai-verhuisbedrijf): 6 voordelen op een rij.

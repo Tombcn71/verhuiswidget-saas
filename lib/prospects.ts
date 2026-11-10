@@ -293,7 +293,7 @@ export async function markDemoBooked(slug: string): Promise<void> {
 // --- Nieuwe verhuisbedrijven ophalen via Google Places ----------------------
 
 type PlacesCursor = { cityIndex: number; pageToken: string | null };
-const CURSOR_KEY = "places_cursor";
+const CURSOR_KEY = "places_cursor_kozijnen"; // aparte teller: begint weer bij Amsterdam
 
 async function readCursor(): Promise<PlacesCursor> {
   const [row] = await db.select().from(adminState).where(eq(adminState.key, CURSOR_KEY)).limit(1);
@@ -350,7 +350,7 @@ export async function fetchNewProspects(input: {
     cities.add(city);
     const { places, nextPageToken } = await searchMovers(city, cursor.pageToken);
 
-    // Alleen bedrijven met WhatsApp op hun website: die benadert Tom via WhatsApp.
+    // Alleen kozijnenbedrijven zonder calculator of offerteformulier: die belt Tom.
     const fresh = places.filter((p) => {
       const ph = phoneKey(p.phone);
       const dup = placeIds.has(p.placeId) || names.has(nameKey(p.name)) || (ph && phones.has(ph));
@@ -361,7 +361,8 @@ export async function fetchNewProspects(input: {
 
     for (const [i, p] of fresh.entries()) {
       if (toInsert.length >= input.count) break;
-      if (!scans[i].whatsapp) {
+      // Wie al een calculator of offerteformulier heeft, slaan we over.
+      if (scans[i].calculator) {
         noWhatsapp++;
         continue;
       }
